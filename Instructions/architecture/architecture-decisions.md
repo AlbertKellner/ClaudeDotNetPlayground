@@ -138,6 +138,24 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - AOT e `InvariantGlobalization` mantidos (DA-009 permanece ativo).
 - DA-004 atualizado implicitamente: "C# (.NET)" agora significa .NET 10.
 
+### DA-013 — Autenticação: JWT Bearer Token com filtro de ação
+**Data**: 2026-03-15
+**Status**: Ativo
+**Decisão**: A autenticação é implementada via JWT HS256 usando `System.IdentityModel.Tokens.Jwt`. A validação é feita por um `IAsyncActionFilter` (`AuthenticateFilter`) ativado pelo atributo `[Authenticate]` (implementado como `TypeFilterAttribute`). O enriquecimento de logs com `UserId` e `UserName` é realizado dentro do filtro, de forma transparente para Features e endpoints. Toda a infraestrutura de segurança reside em `Infra/Security/`.
+**Motivação**: RN-002 e RN-003 exigem autenticação por Bearer Token. O padrão de filtro de ação espelha o padrão de enriquecimento já estabelecido pelo `CorrelationIdMiddleware` (DA-011) e preserva a transparência para as Features.
+**Alternativas consideradas**:
+- `Microsoft.AspNetCore.Authentication.JwtBearer` com middleware global — descartado: acoplamento maior e não alinha com o padrão de decorador explícito por endpoint solicitado.
+- Middleware customizado com exclusão de rotas — descartado: menos expressivo e mais frágil que o atributo explícito.
+**Trade-offs**:
+- `JwtSecurityTokenHandler` usa reflection, gerando potenciais avisos AOT (conhecido, igual ao trade-off do MVC em DA-009).
+- `dotnet build` e `dotnet run` funcionam normalmente; avisos só em `dotnet publish --aot`.
+**Consequências**:
+- `Infra/Security/` criada com: `ITokenService`, `AuthenticatedUser`, `TokenService`, `AuthenticateFilter`, `AuthenticateAttribute`.
+- Controllers protegidos usam `[Authenticate]` na classe — nenhuma lógica de auth no corpo do endpoint.
+- `UserId` e `UserName` enriquecidos automaticamente no Serilog LogContext para toda requisição autenticada.
+- JWT secret configurado via `appsettings.json` (`Jwt:Secret`).
+- Token expira em 1 hora. Claims: `"id"` (int) e `"userName"` (string).
+
 ---
 
 ## Decisões Pendentes
@@ -187,3 +205,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-15 | DA-004 atualizada: referência ao mecanismo HTTP movida para DA-008. DA-008 criada: Controllers com Actions substituem Minimal API | Instrução do usuário |
 | 2026-03-15 | DA-009 criada: Native AOT obrigatório; trade-off com Controllers MVC registrado | Instrução do usuário |
 | 2026-03-15 | DA-010 criada: IExceptionHandler com Problem Details como handler centralizado de exceções | P010, PAD-008 |
+| 2026-03-15 | DA-013 criada: JWT Bearer Token com AuthenticateFilter/AuthenticateAttribute; Infra/Security/ criada | RN-002, RN-003 |

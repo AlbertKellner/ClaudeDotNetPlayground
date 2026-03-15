@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog.AspNetCore" Version="*" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="*" />
   </ItemGroup>
 
 </Project>
