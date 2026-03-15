@@ -96,6 +96,21 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - `dotnet publish` pode emitir avisos AOT relacionados ao MVC; esses avisos são conhecidos e registrados aqui.
 - Ver P014 para o princípio de engenharia correspondente.
 
+### DA-010 — Tratamento de Exceções: IExceptionHandler com Problem Details
+**Data**: 2026-03-15
+**Status**: Ativo
+**Decisão**: O tratamento centralizado de exceções não tratadas é feito via `IExceptionHandler` (ASP.NET Core 8), registrado em `Shared/Middleware/GlobalExceptionHandler.cs`. Respostas de erro seguem o formato Problem Details (RFC 7807 / RFC 9110).
+**Motivação**: P010 proíbe `try-catch` genérico espalhado. `IExceptionHandler` é a abordagem oficial do ASP.NET Core 8 para handlers centralizados, compatível com AOT e com o sistema de Problem Details nativo do framework.
+**Alternativas consideradas**:
+- Middleware customizado (`IMiddleware`) — descartado: `IExceptionHandler` oferece integração mais limpa com `AddProblemDetails()` e é a API recomendada no .NET 8.
+- `UseExceptionHandler(path)` com endpoint separado — descartado: mais complexo e menos expressivo.
+**Trade-offs**: nenhum significativo; `IExceptionHandler` é totalmente compatível com AOT e com Controllers MVC.
+**Consequências**:
+- `GlobalExceptionHandler` reside em `Shared/Middleware/` — não em Features.
+- `Program.cs` registra `AddExceptionHandler<GlobalExceptionHandler>()`, `AddProblemDetails()` e `app.UseExceptionHandler()`.
+- Todo erro não tratado retorna HTTP 500 com body em `application/problem+json`.
+- `try-catch` genérico fora de Repositories continua proibido (DA-006, P010).
+
 ---
 
 ## Decisões Pendentes
@@ -142,3 +157,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-15 | DA-004 a DA-007 criadas: stack C#/.NET/Minimal API, Vertical Slice, SRP estrutural, linguagem do agente | Instruções do usuário |
 | 2026-03-15 | DA-004 atualizada: referência ao mecanismo HTTP movida para DA-008. DA-008 criada: Controllers com Actions substituem Minimal API | Instrução do usuário |
 | 2026-03-15 | DA-009 criada: Native AOT obrigatório; trade-off com Controllers MVC registrado | Instrução do usuário |
+| 2026-03-15 | DA-010 criada: IExceptionHandler com Problem Details como handler centralizado de exceções | P010, PAD-008 |
