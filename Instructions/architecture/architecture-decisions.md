@@ -82,6 +82,20 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 **Decisão**: Código sempre em inglês. Respostas ao usuário sempre em português. Toda execução de tarefa deve incluir resumo em português das mudanças e justificativa técnica.
 **Motivação**: Manter consistência técnica do código com padrões internacionais, enquanto a comunicação com o usuário permanece acessível em português.
 
+### DA-009 — Compilação AOT (Native AOT)
+**Data**: 2026-03-15
+**Status**: Ativo
+**Decisão**: Todos os projetos devem ser configurados com `<PublishAot>true</PublishAot>` e `<InvariantGlobalization>true</InvariantGlobalization>`. Todo código novo deve ser AOT-compatível.
+**Motivação**: Reduzir tempo de startup, consumo de memória e tamanho do binário publicado; alinhar com práticas modernas de deployment de serviços .NET.
+**Alternativas consideradas**: ReadyToRun — descartada por não oferecer os mesmos ganhos de startup e footprint que Native AOT.
+**Trade-offs**:
+- Controllers MVC (DA-008) usam reflection para roteamento e model binding, gerando avisos de incompatibilidade AOT durante `dotnet publish`. `dotnet build` e `dotnet run` continuam funcionando normalmente com JIT.
+- Migração futura para Minimal API com source generators eliminaria esses avisos, mas DA-008 permanece ativo até decisão explícita do usuário.
+**Consequências**:
+- Todo código novo deve evitar reflection dinâmica não anotada.
+- `dotnet publish` pode emitir avisos AOT relacionados ao MVC; esses avisos são conhecidos e registrados aqui.
+- Ver P014 para o princípio de engenharia correspondente.
+
 ---
 
 ## Decisões Pendentes
@@ -127,3 +141,4 @@ Ao adicionar uma nova decisão:
 | Bootstrap | DA-001, DA-002, DA-003 criadas | — |
 | 2026-03-15 | DA-004 a DA-007 criadas: stack C#/.NET/Minimal API, Vertical Slice, SRP estrutural, linguagem do agente | Instruções do usuário |
 | 2026-03-15 | DA-004 atualizada: referência ao mecanismo HTTP movida para DA-008. DA-008 criada: Controllers com Actions substituem Minimal API | Instrução do usuário |
+| 2026-03-15 | DA-009 criada: Native AOT obrigatório; trade-off com Controllers MVC registrado | Instrução do usuário |

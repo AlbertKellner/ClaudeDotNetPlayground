@@ -147,6 +147,23 @@ Critério: aplicação sobe sem erro e `/health` retorna `Healthy`.
 
 Se qualquer critério falhar, corrigir o código e repetir a sequência integralmente antes de commitar.
 
+### P014 — Compilação AOT (Ahead-of-Time)
+Todo projeto deve ser configurado para publicação com Native AOT (`<PublishAot>true</PublishAot>`).
+
+```xml
+<PropertyGroup>
+  <PublishAot>true</PublishAot>
+  <InvariantGlobalization>true</InvariantGlobalization>
+</PropertyGroup>
+```
+
+**Implicações obrigatórias**:
+- Todo código novo deve ser AOT-compatível: sem reflection dinâmica não anotada, sem `Assembly.Load`, sem `dynamic`.
+- `dotnet build` e `dotnet run` continuam usando JIT — AOT só é ativado em `dotnet publish`.
+- Controllers MVC (DA-008) usam reflection e **não são totalmente compatíveis com Native AOT**; essa limitação está registrada em DA-009.
+
+*Referência: DA-009*
+
 ### P013 — HealthCheck Obrigatório
 Toda aplicação deve expor um endpoint de HealthCheck em `/health`.
 O HealthCheck deve responder `Healthy` com HTTP 200 quando a aplicação estiver em operação normal.
@@ -209,3 +226,4 @@ O endpoint `/health` é a verificação canônica de disponibilidade da aplicaç
 | Bootstrap | Princípios genéricos criados (P001–P005) | — |
 | 2026-03-15 | Princípios P006–P012 adicionados: linguagem, namespace, var, SRP, tratamento de erros, formatação, workflow | Instruções do usuário |
 | 2026-03-15 | P012 atualizado: pré-commit inclui execução e verificação de HealthCheck; P013 adicionado: HealthCheck obrigatório em /health | Instrução do usuário |
+| 2026-03-15 | P014 adicionado: compilação AOT obrigatória; trade-off com Controllers registrado em DA-009 | Instrução do usuário |
