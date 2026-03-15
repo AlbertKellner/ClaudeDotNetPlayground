@@ -78,9 +78,25 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 
 ### DA-007 — Linguagem e Comunicação do Agente
 **Data**: 2026-03-15
+**Status**: Ativo (expandido por DA-014)
+**Decisão**: Código sempre em inglês. Respostas ao usuário sempre em português. Toda execução de tarefa deve incluir resumo em português das mudanças e justificativa técnica. Pull requests (título, descrição e corpo) sempre em português brasileiro.
+**Motivação**: Manter consistência técnica do código com padrões internacionais, enquanto a comunicação com o usuário e a documentação de mudanças permanecem acessíveis em português.
+**Ver**: DA-014 para o mecanismo de enforcement de idioma em PRs.
+
+### DA-014 — Idioma de Pull Requests: Português Brasileiro Obrigatório
+**Data**: 2026-03-15
 **Status**: Ativo
-**Decisão**: Código sempre em inglês. Respostas ao usuário sempre em português. Toda execução de tarefa deve incluir resumo em português das mudanças e justificativa técnica.
-**Motivação**: Manter consistência técnica do código com padrões internacionais, enquanto a comunicação com o usuário permanece acessível em português.
+**Decisão**: Todo conteúdo de pull request — título, descrição e seções do corpo — deve ser escrito em português brasileiro. O repositório expõe um template de PR em português para guiar colaboradores e um workflow de CI valida que título e corpo foram preenchidos.
+**Motivação**: Manter consistência com P006 (linguagem e comunicação) e garantir que mudanças de código sejam documentadas de forma compreensível para o time. Pull requests são artefatos de comunicação; a regra de idioma se aplica a eles da mesma forma que se aplica às respostas do agente.
+**Alternativas consideradas**: Validação semântica automática de idioma via API externa — descartada por introduzir dependência externa e complexidade desproporcional ao benefício. Ausência de validação — descartada: regra sem enforcement técnico tende a ser ignorada.
+**Trade-offs**: A validação automatizada é estrutural (título e corpo não vazios, mínimo de caracteres), não semântica. Conteúdo redigido em outro idioma não seria bloqueado automaticamente pelo workflow — a regra é reforçada por governança, template e revisão humana.
+**Consequências**:
+- `.github/pull_request_template.md` criado com estrutura de seções em português.
+- `.github/workflows/pr-language-check.yml` criado: valida que título (≥ 5 chars) e corpo (≥ 20 chars) do PR não estão vazios.
+- P006 registra este princípio como regra obrigatória.
+- DA-007 atualizado para referenciar PRs explicitamente.
+
+---
 
 ### DA-009 — Compilação AOT (Native AOT)
 **Data**: 2026-03-15
@@ -206,3 +222,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-15 | DA-009 criada: Native AOT obrigatório; trade-off com Controllers MVC registrado | Instrução do usuário |
 | 2026-03-15 | DA-010 criada: IExceptionHandler com Problem Details como handler centralizado de exceções | P010, PAD-008 |
 | 2026-03-15 | DA-013 criada: JWT Bearer Token com AuthenticateFilter/AuthenticateAttribute; Infra/Security/ criada | RN-002, RN-003 |
+| 2026-03-15 | DA-007 atualizado: PRs explicitamente incluídos na regra de idioma. DA-014 criada: template de PR em português + workflow de validação | P006, instrução do usuário |

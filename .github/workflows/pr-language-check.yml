@@ -1,0 +1,38 @@
+name: Validação de PR
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+jobs:
+  validate-pr-language:
+    name: Validar idioma do PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validar título e descrição do PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const body = context.payload.pull_request.body;
+
+            const errors = [];
+
+            if (!title || title.trim().length < 5) {
+              errors.push('❌ O título do PR está vazio ou muito curto. Escreva um título descritivo em português brasileiro.');
+            }
+
+            if (!body || body.trim().length < 20) {
+              errors.push('❌ A descrição do PR está vazia ou muito curta. Preencha o template em português brasileiro.');
+            }
+
+            if (errors.length > 0) {
+              core.setFailed(errors.join('\n'));
+            } else {
+              console.log('✅ Título e descrição do PR foram preenchidos.');
+            }
