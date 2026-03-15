@@ -17,6 +17,20 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 ├── open-questions.md                   # Dúvidas e ambiguidades abertas
 ├── assumptions-log.md                  # Premissas ativas
 │
+├── wiki/                               # Arquivos-fonte da GitHub Wiki (fonte canônica)
+│   ├── Home.md
+│   ├── Project-Setup.md
+│   ├── Architecture.md
+│   ├── Feature-Health.md
+│   ├── Feature-UserLogin.md
+│   ├── Feature-TestGet.md
+│   ├── Infra-Correlation-ID.md
+│   ├── Infra-Authentication.md
+│   ├── Infra-Exception-Handling.md
+│   ├── Business-Rules.md
+│   ├── CI-CD.md
+│   └── _Sidebar.md
+│
 ├── .claude/
 │   ├── rules/                          # Comportamento operacional do assistente
 │   │   ├── ambiguity-handling.md
@@ -72,9 +86,11 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
     ├── decisions/                      # ADRs e decisões registradas
     │   ├── README.md
     │   └── adr-template.md
-    └── snippets/                       # Snippets normativos canônicos
-        ├── README.md
-        └── canonical-snippets.md
+    ├── snippets/                       # Snippets normativos canônicos
+    │   ├── README.md
+    │   └── canonical-snippets.md
+    └── wiki/                           # Governança da GitHub Wiki
+        └── wiki-governance.md
 ```
 
 ---
@@ -190,3 +206,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-15 | Shared/Middleware/ criada: GlobalExceptionHandler registrado | DA-010, PAD-008 |
 | 2026-03-15 | Infra/ criada com subpastas Correlation/, ExceptionHandling/, Middlewares/; Shared/Middleware/ removida; GlobalExceptionHandler movido para Infra/ExceptionHandling/ | DA-011 |
 | 2026-03-15 | Infra/Security/ criada com ITokenService, AuthenticatedUser, TokenService, AuthenticateFilter, AuthenticateAttribute | DA-013 |
+| 2026-03-15 | wiki/ criada na raiz: 12 arquivos-fonte da GitHub Wiki; Instructions/wiki/ criada com wiki-governance.md | Instrução do usuário |
