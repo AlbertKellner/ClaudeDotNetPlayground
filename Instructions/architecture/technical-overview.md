@@ -16,7 +16,7 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Persistência | A definir por Feature | — |
 | Mensageria | A definir | — |
 | Containerização | A definir | — |
-| CI/CD | GitHub Actions — workflows: build (Native AOT), run, healthcheck, pr-language-check | — |
+| CI/CD | GitHub Actions — workflows: build (Native AOT), run, healthcheck, pr-language-check, wiki-publish | — |
 | Observabilidade (logging) | Serilog — Console estruturado + enrichment por request | DA-011, DP-004 parcial |
 | Observabilidade (tracing) | A definir | DP-004 |
 | Observabilidade (métricas) | A definir | DP-004 |
