@@ -27,8 +27,18 @@ Cada regra segue a estrutura:
 
 ## Regras Ativas
 
-> **Estado atual**: nenhuma regra de negócio específica do domínio foi definida ainda.
-> Regras serão adicionadas aqui à medida que forem introduzidas pelo usuário.
+### RN-001 — Endpoint de verificação de disponibilidade da aplicação
+**Enunciado**: A aplicação deve expor um endpoint de verificação de disponibilidade que retorna a string "funcionando".
+**Condição**: Quando uma requisição GET é recebida no endpoint de teste.
+**Ação**: O sistema retorna HTTP 200 com o corpo contendo a string `"funcionando"`.
+**Exceções**: Nenhuma.
+**Dependências**: Nenhuma.
+**BDD relacionado**: Nenhum no momento.
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
 
 ### Template de Regra de Negócio
 
@@ -74,3 +84,4 @@ Cada regra segue a estrutura:
 | Data | Mudança | Referência |
 |---|---|---|
 | Bootstrap | Estrutura criada sem regras específicas | — |
+| 2026-03-15 | RN-001 criada: endpoint TestGet retorna "funcionando" | Instrução do usuário |
