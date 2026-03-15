@@ -10,11 +10,11 @@ public sealed class GlobalExceptionHandler(IProblemDetailsService problemDetails
         Exception exception,
         CancellationToken cancellationToken)
     {
-        logger.LogError(exception, "Unhandled exception occurred");
+        logger.LogError(exception, "[GlobalExceptionHandler][TryHandleAsync] Capturar e tratar exceção não tratada. ExceptionMessage={ExceptionMessage}", exception.Message);
 
         httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
 
-        return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+        var result = await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = httpContext,
             Exception = exception,
@@ -25,5 +25,9 @@ public sealed class GlobalExceptionHandler(IProblemDetailsService problemDetails
                 Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1"
             }
         });
+
+        logger.LogError("[GlobalExceptionHandler][TryHandleAsync] Retornar Problem Details 500. Resultado={Resultado}", result);
+
+        return result;
     }
 }

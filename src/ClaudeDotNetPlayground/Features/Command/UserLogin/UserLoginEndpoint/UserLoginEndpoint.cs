@@ -9,13 +9,14 @@ public sealed class UserLoginEndpoint(UserLoginUseCase useCase, ILogger<UserLogi
     [HttpPost]
     public IActionResult Post([FromBody] UserLoginInput input)
     {
-        logger.LogInformation("UserLogin request received for user {UserName}", input.UserName);
+        logger.LogInformation("[UserLoginEndpoint][Post] Processar requisição POST /login. UserName={UserName}", input.UserName);
 
         var result = useCase.Execute(input);
 
         if (result is null)
         {
-            logger.LogWarning("UserLogin failed: invalid credentials for user {UserName}", input.UserName);
+            logger.LogWarning("[UserLoginEndpoint][Post] Retornar 401 - credenciais inválidas. UserName={UserName}", input.UserName);
+
             return Problem(
                 detail: "Invalid username or password.",
                 statusCode: StatusCodes.Status401Unauthorized,
@@ -24,7 +25,8 @@ public sealed class UserLoginEndpoint(UserLoginUseCase useCase, ILogger<UserLogi
             );
         }
 
-        logger.LogInformation("UserLogin succeeded for user {UserName}", input.UserName);
+        logger.LogInformation("[UserLoginEndpoint][Post] Retornar resposta do endpoint com autenticação bem-sucedida. UserName={UserName}", input.UserName);
+
         return Ok(result);
     }
 }

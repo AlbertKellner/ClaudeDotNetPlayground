@@ -17,7 +17,7 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Mensageria | A definir | — |
 | Containerização | A definir | — |
 | CI/CD | GitHub Actions — workflows: build (Native AOT), run, healthcheck, pr-language-check, wiki-publish | — |
-| Observabilidade (logging) | Serilog — Console estruturado + enrichment por request | DA-011, DP-004 parcial |
+| Observabilidade (logging) | Serilog — Console colorido (AnsiConsoleTheme.Code) + storytelling por classe/método + enrichment por request | DA-011, DA-015, DP-004 parcial |
 | Observabilidade (tracing) | A definir | DP-004 |
 | Observabilidade (métricas) | A definir | DP-004 |
 
@@ -95,6 +95,7 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | Pacote | Versão | Uso |
 |---|---|---|
 | `Serilog.AspNetCore` | latest | Logging estruturado com enrichment por request via LogContext |
+| `Serilog.Sinks.Console` | latest | Console sink com suporte a temas ANSI coloridos (AnsiConsoleTheme.Code) | DA-015 |
 | `System.IdentityModel.Tokens.Jwt` | latest | Geração e validação de JWT HS256 para Bearer Token | DA-013 |
 
 ---
@@ -132,3 +133,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-15 | Infra/Security/ criada: ITokenService, AuthenticatedUser, TokenService, AuthenticateFilter, AuthenticateAttribute; JWT Bearer Token adicionado; enriquecimento de logs com UserId e UserName | DA-013, RN-002, RN-003 |
 | 2026-03-15 | CI/CD definido: GitHub Actions com três workflows encadeados via workflow_run — build (Native AOT), run e healthcheck | — |
 | 2026-03-15 | CI/CD expandido: workflow pr-language-check adicionado — valida título e corpo de PRs; template de PR em português criado | DA-014 |
+| 2026-03-15 | Padrões de logging definidos: formato `[Classe][Método]`, storytelling, console colorido ANSI, template com timestamp/correlationId/userName, isolamento visual, testes de log | DA-015, SNP-001 |
