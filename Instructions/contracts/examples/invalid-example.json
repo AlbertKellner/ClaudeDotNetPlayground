@@ -1,0 +1,11 @@
+{
+  "_comentario": "Exemplo de payload INVÁLIDO para o schema em schemas/example.schema.json. PLACEHOLDER genérico.",
+  "_motivos_de_invalidade": [
+    "Campo 'nome' está ausente (é obrigatório)",
+    "Campo 'status' tem valor 'Inexistente' que não está no enum permitido",
+    "Campo 'campoNaoPermitido' não existe no schema (additionalProperties: false)"
+  ],
+  "id": "REC-INVALIDO",
+  "status": "Inexistente",
+  "campoNaoPermitido": "este campo viola additionalProperties: false"
+}

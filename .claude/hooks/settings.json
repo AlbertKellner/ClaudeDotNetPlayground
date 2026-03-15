@@ -1,0 +1,46 @@
+{
+  "_comentario": "Configuração de hooks para Claude Code neste repositório.",
+  "_nota": "Este arquivo é um placeholder. Ajuste os hooks e permissões conforme a stack e necessidades reais do projeto.",
+  "_referencia": "Consulte .claude/hooks/README.md para entender o propósito de cada hook.",
+
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Read(**)",
+      "Glob(**)"
+    ],
+    "deny": []
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "_descricao": "Lembrete de governança antes de escrever arquivos de implementação",
+        "_proposito": "Reforça que a governança deve ser consultada antes de implementar",
+        "_status": "placeholder - adaptar quando stack for conhecida",
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/governance-first-reminder.sh 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "_descricao": "Detector de mudanças em governança após escrita de arquivos",
+        "_proposito": "Avisa quando arquivos de governança foram modificados",
+        "_status": "placeholder - adaptar quando stack for conhecida",
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/governance-change-detector.sh 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

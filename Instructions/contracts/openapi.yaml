@@ -1,0 +1,264 @@
+openapi: "3.1.0"
+
+# =============================================================================
+# ATENÇÃO: Este é um arquivo PLACEHOLDER genérico.
+# Substitua pelo contrato real da API quando o domínio e stack forem definidos.
+# Toda alteração neste arquivo deve seguir a política em README.md.
+# =============================================================================
+
+info:
+  title: "API do Repositório — Placeholder"
+  version: "0.0.0"
+  description: |
+    **Este contrato é um placeholder genérico criado durante o bootstrap do sistema de governança.**
+
+    Quando o domínio e a stack do repositório forem definidos:
+    1. Substitua este contrato pela especificação real da API
+    2. Remova este aviso
+    3. Referencie as regras de negócio relevantes nos comentários
+    4. Atualize os cenários BDD correspondentes
+    5. Registre a decisão de versionamento em Instructions/decisions/
+
+    Regras de negócio relacionadas: (a definir)
+    BDD relacionado: (a definir)
+
+  contact:
+    name: "Equipe do Repositório"
+
+servers:
+  - url: "http://localhost:8080"
+    description: "Ambiente de desenvolvimento (placeholder)"
+  - url: "https://api.exemplo.com"
+    description: "Ambiente de produção (placeholder)"
+
+tags:
+  - name: "recursos"
+    description: "Operações sobre recursos do domínio (placeholder)"
+
+paths:
+  /recursos:
+    get:
+      summary: "Lista recursos"
+      description: |
+        Retorna a lista de recursos disponíveis.
+        Placeholder — substituir pela operação real quando o domínio for definido.
+      operationId: "listarRecursos"
+      tags: ["recursos"]
+      parameters:
+        - name: "status"
+          in: "query"
+          description: "Filtrar por status"
+          required: false
+          schema:
+            type: "string"
+        - name: "pagina"
+          in: "query"
+          description: "Número da página (paginação)"
+          required: false
+          schema:
+            type: "integer"
+            minimum: 1
+            default: 1
+      responses:
+        "200":
+          description: "Lista de recursos retornada com sucesso"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListaDeRecursos"
+        "401":
+          description: "Não autenticado"
+        "403":
+          description: "Sem permissão"
+
+    post:
+      summary: "Cria um novo recurso"
+      description: |
+        Cria um novo recurso no sistema.
+        Placeholder — substituir pela operação real quando o domínio for definido.
+      operationId: "criarRecurso"
+      tags: ["recursos"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecursoInput"
+            examples:
+              exemplo-valido:
+                $ref: "#/components/examples/RecursoInputValido"
+      responses:
+        "201":
+          description: "Recurso criado com sucesso"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recurso"
+        "400":
+          description: "Dados inválidos"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErroDeValidacao"
+        "401":
+          description: "Não autenticado"
+        "403":
+          description: "Sem permissão"
+        "409":
+          description: "Conflito — recurso já existe"
+
+  /recursos/{id}:
+    get:
+      summary: "Busca recurso por ID"
+      operationId: "buscarRecursoPorId"
+      tags: ["recursos"]
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Recurso encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recurso"
+        "404":
+          description: "Recurso não encontrado"
+        "401":
+          description: "Não autenticado"
+
+    put:
+      summary: "Atualiza recurso"
+      operationId: "atualizarRecurso"
+      tags: ["recursos"]
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecursoInput"
+      responses:
+        "200":
+          description: "Recurso atualizado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recurso"
+        "400":
+          description: "Dados inválidos"
+        "404":
+          description: "Recurso não encontrado"
+
+    delete:
+      summary: "Remove recurso"
+      operationId: "removerRecurso"
+      tags: ["recursos"]
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "204":
+          description: "Recurso removido com sucesso"
+        "404":
+          description: "Recurso não encontrado"
+        "409":
+          description: "Recurso não pode ser removido (dependentes existentes)"
+
+components:
+  schemas:
+    Recurso:
+      type: "object"
+      description: "Representação de um recurso do domínio (placeholder)"
+      required:
+        - id
+        - nome
+        - status
+        - criadoEm
+      properties:
+        id:
+          type: "string"
+          description: "Identificador único do recurso"
+          example: "REC-001"
+        nome:
+          type: "string"
+          description: "Nome do recurso"
+          example: "Recurso Exemplo"
+        status:
+          type: "string"
+          description: "Status atual do recurso"
+          enum: ["Ativo", "Suspenso", "Encerrado"]
+          example: "Ativo"
+        criadoEm:
+          type: "string"
+          format: "date-time"
+          description: "Data e hora de criação"
+
+    RecursoInput:
+      type: "object"
+      description: "Dados para criação ou atualização de recurso"
+      required:
+        - nome
+      properties:
+        nome:
+          type: "string"
+          description: "Nome do recurso"
+          minLength: 1
+          maxLength: 255
+
+    ListaDeRecursos:
+      type: "object"
+      properties:
+        itens:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Recurso"
+        total:
+          type: "integer"
+          description: "Total de itens"
+        pagina:
+          type: "integer"
+          description: "Página atual"
+
+    ErroDeValidacao:
+      type: "object"
+      properties:
+        mensagem:
+          type: "string"
+          description: "Descrição do erro"
+        campos:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              campo:
+                type: "string"
+              erro:
+                type: "string"
+
+  examples:
+    RecursoInputValido:
+      summary: "Exemplo de input válido"
+      value:
+        nome: "Recurso Exemplo"
+
+  securitySchemes:
+    bearerAuth:
+      type: "http"
+      scheme: "bearer"
+      bearerFormat: "JWT"
+      description: "Autenticação via JWT (placeholder)"
+
+security:
+  - bearerAuth: []
