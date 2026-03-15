@@ -16,7 +16,7 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Persistência | A definir por Feature | — |
 | Mensageria | A definir | — |
 | Containerização | A definir | — |
-| CI/CD | A definir | — |
+| CI/CD | GitHub Actions — workflows: build (Native AOT), run, healthcheck | — |
 | Observabilidade (logging) | Serilog — Console estruturado + enrichment por request | DA-011, DP-004 parcial |
 | Observabilidade (tracing) | A definir | DP-004 |
 | Observabilidade (métricas) | A definir | DP-004 |
@@ -130,3 +130,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-15 | GlobalExceptionHandler adicionado: handler centralizado de exceções em Shared/Middleware/ | DA-010, PAD-008 |
 | 2026-03-15 | Runtime atualizado para .NET 10; Serilog adicionado; Infra/ criada; CorrelationIdMiddleware adicionado; GlobalExceptionHandler movido para Infra/ExceptionHandling/; DP-004 parcialmente resolvida | DA-011, DA-012 |
 | 2026-03-15 | Infra/Security/ criada: ITokenService, AuthenticatedUser, TokenService, AuthenticateFilter, AuthenticateAttribute; JWT Bearer Token adicionado; enriquecimento de logs com UserId e UserName | DA-013, RN-002, RN-003 |
+| 2026-03-15 | CI/CD definido: GitHub Actions com três workflows encadeados via workflow_run — build (Native AOT), run e healthcheck | — |
