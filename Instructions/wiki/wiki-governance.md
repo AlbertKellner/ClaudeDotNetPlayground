@@ -152,12 +152,11 @@ Isso inclui:
 
 - A pasta `wiki/` no repositório principal é a **fonte canônica** das páginas da Wiki
 - Todas as alterações de conteúdo são feitas na pasta `wiki/` como parte do fluxo normal de desenvolvimento
-- Após commit no branch de desenvolvimento, publicar no GitHub Wiki:
-  ```bash
-  git clone {wiki-repo-url} /tmp/wiki-repo
-  cp wiki/*.md /tmp/wiki-repo/
-  cd /tmp/wiki-repo && git add . && git commit -m "[mensagem]" && git push
-  ```
+- A publicação na GitHub Wiki é **automática** via o workflow `.github/workflows/wiki-publish.yml`:
+  - Disparado automaticamente a cada push para `main`/`master` que altere arquivos em `wiki/`
+  - Clona o repositório wiki com o `GITHUB_TOKEN`, copia os arquivos e faz push
+  - Só cria commit se houver mudanças efetivas
+- Para forçar uma publicação sem alterar arquivos de wiki, usar o gatilho manual (`workflow_dispatch`) do workflow `Publicar Wiki` na aba Actions do GitHub
 
 ---
 
@@ -181,3 +180,4 @@ Toda a documentação da Wiki deve ser escrita em **português brasileiro**.
 | Data | Mudança | Referência |
 |------|---------|-----------|
 | 2026-03-15 | Criado: governança inicial da GitHub Wiki | Instrução do usuário |
+| 2026-03-15 | Publicação alterada para automática via wiki-publish.yml | Instrução do usuário |
