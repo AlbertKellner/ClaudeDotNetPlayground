@@ -125,8 +125,14 @@ src/
     │    │    └── GuidV7.cs                    # Geração (Guid.CreateVersion7) e validação de GUID v7 (uso interno de Infra)
     │    ├── ExceptionHandling/
     │    │    └── GlobalExceptionHandler.cs   # Handler centralizado de exceções (IExceptionHandler + Problem Details RFC 7807)
-    │    └── Middlewares/
-    │         └── CorrelationIdMiddleware.cs   # Garante GUID v7 por request; enriquece Serilog LogContext; opaco para Features
+    │    ├── Middlewares/
+    │    │    └── CorrelationIdMiddleware.cs   # Garante GUID v7 por request; enriquece Serilog LogContext; opaco para Features
+    │    └── Security/
+    │         ├── ITokenService.cs             # Contrato de geração e validação de JWT
+    │         ├── AuthenticatedUser.cs         # Modelo do usuário autenticado (Id, UserName)
+    │         ├── TokenService.cs              # Implementação JWT HS256
+    │         ├── AuthenticateFilter.cs        # IAsyncActionFilter: valida Bearer Token; enriquece LogContext com UserId e UserName
+    │         └── AuthenticateAttribute.cs     # TypeFilterAttribute: decorador [Authenticate] para Controllers
     │
     └── Shared/
          ├── <Abstrações e interfaces genéricas reutilizáveis entre Slices>
@@ -183,3 +189,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-15 | Estrutura de implementação definida: Features/Query, Features/Command, Shared | DA-004, DA-005 |
 | 2026-03-15 | Shared/Middleware/ criada: GlobalExceptionHandler registrado | DA-010, PAD-008 |
 | 2026-03-15 | Infra/ criada com subpastas Correlation/, ExceptionHandling/, Middlewares/; Shared/Middleware/ removida; GlobalExceptionHandler movido para Infra/ExceptionHandling/ | DA-011 |
+| 2026-03-15 | Infra/Security/ criada com ITokenService, AuthenticatedUser, TokenService, AuthenticateFilter, AuthenticateAttribute | DA-013 |

@@ -40,6 +40,32 @@ Cada regra segue a estrutura:
 
 ---
 
+### RN-002 — Autenticação de usuário via login com credenciais
+**Enunciado**: A aplicação deve expor um endpoint de login que valida as credenciais do usuário e retorna um Bearer Token JWT quando as credenciais são válidas.
+**Condição**: Quando uma requisição POST é recebida no endpoint de login com `userName` e `password`.
+**Ação**: O sistema valida as credenciais contra a lista de usuários registrada. Se válidas, retorna HTTP 200 com um JWT contendo as propriedades `id` e `userName` do usuário. Se inválidas, retorna HTTP 401 com corpo em formato Problem Details.
+**Exceções**: O endpoint de login em si não exige autenticação.
+**Dependências**: Nenhuma.
+**BDD relacionado**: Nenhum no momento.
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
+### RN-003 — Proteção de endpoints por Bearer Token
+**Enunciado**: Toda requisição a endpoints da aplicação, exceto o endpoint de login, deve apresentar um Bearer Token JWT válido no header `Authorization`.
+**Condição**: Quando uma requisição é recebida em qualquer endpoint que não seja o de login.
+**Ação**: O sistema valida o Bearer Token. Se válido, a requisição prossegue normalmente e as propriedades `id` e `userName` do token são enriquecidas automaticamente nos logs da requisição. Se inválido ou ausente, o sistema retorna HTTP 401 com corpo em formato Problem Details.
+**Exceções**: Endpoint de login (`POST /login`). Endpoint de health check (`GET /health`).
+**Dependências**: RN-002.
+**BDD relacionado**: Nenhum no momento.
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
 ### Template de Regra de Negócio
 
 ```markdown
@@ -85,3 +111,5 @@ Cada regra segue a estrutura:
 |---|---|---|
 | Bootstrap | Estrutura criada sem regras específicas | — |
 | 2026-03-15 | RN-001 criada: endpoint TestGet retorna "funcionando" | Instrução do usuário |
+| 2026-03-15 | RN-002 criada: endpoint de login com JWT retornando id e userName | Instrução do usuário |
+| 2026-03-15 | RN-003 criada: proteção de endpoints por Bearer Token com enriquecimento de logs | Instrução do usuário |

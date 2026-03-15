@@ -48,6 +48,11 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 | Exception Handler | `Infra/ExceptionHandling/GlobalExceptionHandler.cs` | Handler centralizado de exceções; retorna Problem Details (RFC 7807) |
 | Correlation ID Middleware | `Infra/Middlewares/CorrelationIdMiddleware.cs` | Garante GUID v7 por request; enriquece logs via Serilog LogContext; completamente opaco para Features |
 | GuidV7 | `Infra/Correlation/GuidV7.cs` | Utilitário de geração e validação de GUID v7 (uso interno da Infra) |
+| ITokenService | `Infra/Security/ITokenService.cs` | Contrato de geração e validação de JWT Bearer Token |
+| AuthenticatedUser | `Infra/Security/AuthenticatedUser.cs` | Modelo de usuário autenticado extraído do token (Id, UserName) |
+| TokenService | `Infra/Security/TokenService.cs` | Implementação JWT HS256: geração e validação de Bearer Token |
+| AuthenticateFilter | `Infra/Security/AuthenticateFilter.cs` | IAsyncActionFilter: valida Bearer Token, retorna 401 se inválido, enriquece logs com UserId e UserName |
+| AuthenticateAttribute | `Infra/Security/AuthenticateAttribute.cs` | TypeFilterAttribute: decorador aplicado nos Controllers para ativar AuthenticateFilter via DI |
 
 ---
 
@@ -59,6 +64,7 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 - **Infra**: Componentes de infraestrutura transversal (middlewares, exception handling, utilitários de infra). Features não dependem de Infra diretamente.
 - Slices **não se comunicam diretamente entre si**. Lógica compartilhada vai para `Shared/`.
 - **Correlation ID é opaco para Features e Endpoints** — enriquecido automaticamente pelo middleware no Serilog LogContext.
+- **UserId e UserName são opacos para Features e Endpoints** — enriquecidos automaticamente pelo `AuthenticateFilter` no Serilog LogContext quando o token é válido. Endpoints apenas aplicam `[Authenticate]`; nenhuma lógica de autenticação é visível nas Features.
 
 ---
 
@@ -69,12 +75,15 @@ Request HTTP
     └── CorrelationIdMiddleware (Infra/Middlewares — garante GUID v7; abre LogContext com CorrelationId)
             └── GlobalExceptionHandler (Infra/ExceptionHandling — captura exceções não tratadas)
                     └── Controller / Action (pasta Endpoint)
-                            └── UseCase
-                                    └── Repository (via Interface)
-                                            └── Banco de dados / serviço externo
+                            ├── [sem Authenticate] POST /login → UserLoginEndpoint → UserLoginUseCase → ITokenService
+                            └── [com Authenticate] outros endpoints → AuthenticateFilter (valida JWT; enriquece LogContext)
+                                    └── UseCase
+                                            └── Repository (via Interface)
+                                                    └── Banco de dados / serviço externo
 
 Serilog Enrichment (transversal):
     └── Todo log event dentro do using-scope do CorrelationIdMiddleware recebe { CorrelationId: <guid-v7> }
+    └── Todo log event dentro do using-scope do AuthenticateFilter (endpoints protegidos) recebe { UserId: <int>, UserName: <string> }
 ```
 
 O Controller não contém lógica de negócio — apenas orquestra request/response, define status codes e escreve logs relevantes.
@@ -86,6 +95,7 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | Pacote | Versão | Uso |
 |---|---|---|
 | `Serilog.AspNetCore` | latest | Logging estruturado com enrichment por request via LogContext |
+| `System.IdentityModel.Tokens.Jwt` | latest | Geração e validação de JWT HS256 para Bearer Token | DA-013 |
 
 ---
 
@@ -119,3 +129,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-15 | Framework HTTP atualizado: Minimal API substituída por Controllers com Actions | DA-008 |
 | 2026-03-15 | GlobalExceptionHandler adicionado: handler centralizado de exceções em Shared/Middleware/ | DA-010, PAD-008 |
 | 2026-03-15 | Runtime atualizado para .NET 10; Serilog adicionado; Infra/ criada; CorrelationIdMiddleware adicionado; GlobalExceptionHandler movido para Infra/ExceptionHandling/; DP-004 parcialmente resolvida | DA-011, DA-012 |
+| 2026-03-15 | Infra/Security/ criada: ITokenService, AuthenticatedUser, TokenService, AuthenticateFilter, AuthenticateAttribute; JWT Bearer Token adicionado; enriquecimento de logs com UserId e UserName | DA-013, RN-002, RN-003 |
