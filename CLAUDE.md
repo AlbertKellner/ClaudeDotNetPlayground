@@ -72,6 +72,7 @@ Para toda mensagem do usuário, siga internamente esta sequência:
 @Instructions/glossary/ubiquitous-language.md
 @Instructions/snippets/README.md
 @Instructions/snippets/canonical-snippets.md
+@Instructions/wiki/wiki-governance.md
 @open-questions.md
 @assumptions-log.md
 

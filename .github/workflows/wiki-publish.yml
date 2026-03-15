@@ -1,0 +1,41 @@
+name: Publicar Wiki
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'wiki/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Publicar arquivos na GitHub Wiki
+        run: |
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git /tmp/wiki-repo
+
+          cp wiki/*.md /tmp/wiki-repo/
+
+          cd /tmp/wiki-repo
+
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+
+          git add .
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma mudança na Wiki. Nada a publicar."
+          else
+            git commit -m "docs: atualiza Wiki a partir de wiki/ em ${{ github.sha }}"
+            git push
+          fi
