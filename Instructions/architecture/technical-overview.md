@@ -42,6 +42,7 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 | Models (Input/Output/Entity) | `Features/<tipo>/<Feature>/<Feature>Models/` | Contratos de entrada, saída e entidades de domínio por Slice |
 | Interfaces | `Features/<tipo>/<Feature>/<Feature>Interfaces/` | Contratos para repositórios e integrações externos ao UseCase |
 | Shared | `Shared/` | Abstrações, utilitários, clientes e helpers reutilizáveis entre Slices |
+| Exception Handler | `Shared/Middleware/GlobalExceptionHandler.cs` | Handler centralizado de exceções; retorna Problem Details (RFC 7807) |
 
 ---
 
@@ -58,10 +59,11 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 
 ```
 Request HTTP
-    └── Controller / Action (pasta Endpoint)
-            └── UseCase
-                    └── Repository (via Interface)
-                            └── Banco de dados / serviço externo
+    └── GlobalExceptionHandler (Shared/Middleware — captura exceções não tratadas)
+            └── Controller / Action (pasta Endpoint)
+                    └── UseCase
+                            └── Repository (via Interface)
+                                    └── Banco de dados / serviço externo
 ```
 
 O Controller não contém lógica de negócio — apenas orquestra request/response, define status codes e escreve logs relevantes.
@@ -102,3 +104,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | Bootstrap | Estrutura inicial criada | — |
 | 2026-03-15 | Stack, arquitetura e componentes definidos | DA-004, DA-005 |
 | 2026-03-15 | Framework HTTP atualizado: Minimal API substituída por Controllers com Actions | DA-008 |
+| 2026-03-15 | GlobalExceptionHandler adicionado: handler centralizado de exceções em Shared/Middleware/ | DA-010, PAD-008 |

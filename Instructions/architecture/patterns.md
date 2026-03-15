@@ -201,6 +201,39 @@ public record TodoItemInsertInput
 
 ---
 
+### PAD-008 — Tratamento Centralizado de Exceções via IExceptionHandler
+
+**Contexto**: Tratamento de exceções não tratadas em qualquer ponto da aplicação.
+
+**Problema**: `try-catch` genérico espalhado em Endpoints e UseCases viola SRP (P010, DA-006) e esconde a origem real dos erros, dificultando diagnóstico e manutenção.
+
+**Solução**: Implementar `IExceptionHandler` (ASP.NET Core 8) como handler centralizado, registrado em `Shared/Middleware/`. O handler:
+- Captura toda exceção não tratada que escape da pipeline.
+- Loga o erro com contexto completo via `ILogger`.
+- Retorna resposta padronizada em formato **Problem Details** (RFC 7807 / RFC 9110).
+- Não contém lógica de negócio — responsabilidade exclusiva de captura e formatação de erro.
+
+**Estrutura**:
+```
+Shared/
+└── Middleware/
+    └── GlobalExceptionHandler.cs
+```
+
+**Registro em `Program.cs`**:
+```csharp
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+// ...
+app.UseExceptionHandler();
+```
+
+**Exceções permitidas**: `try-catch` específicos em Repositories para exceções de infraestrutura (ex: violação de constraint, timeout de conexão) continuam permitidos conforme PAD-005.
+
+*Referência: P010, DA-006, DA-010*
+
+---
+
 ## Anti-Padrões Conhecidos
 
 | Anti-Padrão | Por Que Evitar | Alternativa |
@@ -233,3 +266,4 @@ public record TodoItemInsertInput
 | Bootstrap | Estrutura criada sem padrões específicos | — |
 | 2026-03-15 | PAD-001 a PAD-007 criados: Vertical Slice, Command/Query, Minimal API, UseCase, Repository, Validação, Shared | Instruções do usuário |
 | 2026-03-15 | PAD-003 atualizado: Minimal API substituída por Controller com Action; anti-padrão adicionado | DA-008 |
+| 2026-03-15 | PAD-008 criado: tratamento centralizado de exceções via IExceptionHandler em Shared/Middleware/ | DA-010, P010 |

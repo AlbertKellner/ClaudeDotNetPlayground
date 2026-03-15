@@ -121,6 +121,8 @@ src/
     │                       └── <NomeDaFeature>.sql
     │
     └── Shared/
+         ├── Middleware/
+         │    └── GlobalExceptionHandler.cs   # Handler centralizado de exceções (IExceptionHandler)
          ├── <Abstrações e interfaces genéricas>
          ├── <Utilitários e helpers>
          ├── <Clientes de serviços externos>
@@ -173,3 +175,4 @@ Qualquer adição à estrutura de governança deve:
 |---|---|---|
 | Bootstrap | Estrutura inicial de governança criada | — |
 | 2026-03-15 | Estrutura de implementação definida: Features/Query, Features/Command, Shared | DA-004, DA-005 |
+| 2026-03-15 | Shared/Middleware/ criada: GlobalExceptionHandler registrado | DA-010, PAD-008 |
