@@ -129,18 +129,36 @@ catch (Exception ex)
 - Não alterar indentação ou espaçamento de código que não foi modificado.
 - Ao formatar arquivos `.csproj`, respeitar os níveis de indentação existentes dos itens e subitens.
 
-### P012 — Workflow Obrigatório de Validação
-Após criar ou alterar qualquer código, executar obrigatoriamente:
+### P012 — Workflow Obrigatório de Validação Pré-Commit
+Antes de qualquer commit, executar obrigatoriamente esta sequência e só prosseguir quando todos os critérios forem satisfeitos:
 
+1. **Build limpo**
 ```bash
-dotnet build src/DotNetPlayground.sln
+dotnet build
+```
+Critério: zero erros de compilação.
+
+2. **Execução e HealthCheck**
+```bash
+dotnet run &
+curl http://localhost:5000/health
+```
+Critério: aplicação sobe sem erro e `/health` retorna `Healthy`.
+
+Se qualquer critério falhar, corrigir o código e repetir a sequência integralmente antes de commitar.
+
+### P013 — HealthCheck Obrigatório
+Toda aplicação deve expor um endpoint de HealthCheck em `/health`.
+O HealthCheck deve responder `Healthy` com HTTP 200 quando a aplicação estiver em operação normal.
+
+```csharp
+// Program.cs
+builder.Services.AddHealthChecks();
+// ...
+app.MapHealthChecks("/health");
 ```
 
-Confirmar que:
-- Tudo compila sem erros.
-- Todos os testes estão passando.
-
-Corrigir todos os erros antes de concluir a tarefa.
+O endpoint `/health` é a verificação canônica de disponibilidade da aplicação e deve ser o critério de aceitação antes de qualquer commit (ver P012).
 
 ---
 
@@ -160,7 +178,8 @@ Corrigir todos os erros antes de concluir a tarefa.
 
 ## Práticas de Qualidade
 
-- Compilação limpa (`dotnet build`) obrigatória antes de concluir qualquer tarefa.
+- Compilação limpa (`dotnet build`) obrigatória antes de qualquer commit.
+- `/health` retornando `Healthy` obrigatório antes de qualquer commit.
 - Testes passando obrigatoriamente antes de concluir qualquer tarefa.
 - Código sempre em inglês.
 - Respostas ao usuário sempre em português com resumo e justificativa técnica.
@@ -189,3 +208,4 @@ Corrigir todos os erros antes de concluir a tarefa.
 |---|---|---|
 | Bootstrap | Princípios genéricos criados (P001–P005) | — |
 | 2026-03-15 | Princípios P006–P012 adicionados: linguagem, namespace, var, SRP, tratamento de erros, formatação, workflow | Instruções do usuário |
+| 2026-03-15 | P012 atualizado: pré-commit inclui execução e verificação de HealthCheck; P013 adicionado: HealthCheck obrigatório em /health | Instrução do usuário |
