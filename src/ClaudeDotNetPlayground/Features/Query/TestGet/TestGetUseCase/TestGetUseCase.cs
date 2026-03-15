@@ -1,4 +1,4 @@
-namespace ClaudeDotNetPlayground.Features.Query.TestGet.TestGetUseCase;
+namespace ClaudeDotNetPlayground.Features.Query.TestGet;
 
 public class TestGetUseCase
 {

@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using UseCase = ClaudeDotNetPlayground.Features.Query.TestGet.TestGetUseCase.TestGetUseCase;
 
-namespace ClaudeDotNetPlayground.Features.Query.TestGet.TestGetEndpoint;
+namespace ClaudeDotNetPlayground.Features.Query.TestGet;
 
 [ApiController]
 [Route("test")]
-public class TestGetEndpoint(UseCase useCase, ILogger<TestGetEndpoint> logger) : ControllerBase
+public class TestGetEndpoint(TestGetUseCase useCase, ILogger<TestGetEndpoint> logger) : ControllerBase
 {
     [HttpGet]
     public IActionResult Get()
