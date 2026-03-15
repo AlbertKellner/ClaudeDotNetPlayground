@@ -4,61 +4,84 @@
 
 Este arquivo descreve a visão arquitetural de alto nível deste repositório. É o ponto de entrada para entender a estrutura técnica do projeto, como os componentes se relacionam e quais decisões fundamentais já foram tomadas.
 
-**Estado atual**: bootstrap inicial — a stack tecnológica e a arquitetura específica ainda serão definidas nas próximas interações.
-
 ---
 
 ## Stack Tecnológica
 
-> **Pendente de definição.** A stack será registrada aqui à medida que as decisões forem tomadas.
-
 | Camada | Tecnologia | Decisão |
 |---|---|---|
-| Linguagem principal | — | A definir |
-| Framework principal | — | A definir |
-| Persistência | — | A definir |
-| Mensageria | — | A definir |
-| Containerização | — | A definir |
-| CI/CD | — | A definir |
-| Observabilidade | — | A definir |
+| Linguagem principal | C# (.NET) | DA-004 |
+| Framework principal | ASP.NET Core — Minimal API | DA-004 |
+| Persistência | A definir por Feature | — |
+| Mensageria | A definir | — |
+| Containerização | A definir | — |
+| CI/CD | A definir | — |
+| Observabilidade | A definir | — |
 
 ---
 
 ## Estilo Arquitetural
 
-> **Pendente de definição.** O estilo arquitetural será registrado aqui quando for estabelecido.
+O projeto adota **Vertical Slice Architecture** com segregação explícita de operações de leitura (**Query**) e escrita (**Command**).
 
-Exemplos de estilos a serem definidos: monolito modular, microsserviços, event-driven, CQRS, hexagonal, clean architecture, etc.
+Cada funcionalidade é implementada como uma Slice vertical isolada, contendo todos os artefatos necessários (endpoint, use case, repository, models, interfaces, scripts SQL) dentro da sua própria pasta, sob `Features/Query` ou `Features/Command`.
+
+Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` global). Toda lógica especializada por funcionalidade reside dentro da Slice correspondente. Lógica genuinamente compartilhada entre Slices reside em `Shared/`.
+
+*Referência: DA-004, DA-005 — `Instructions/architecture/architecture-decisions.md`*
 
 ---
 
 ## Componentes Principais
 
-> **Pendente de definição.** Os componentes serão registrados aqui à medida que forem definidos.
+| Componente | Localização | Responsabilidade |
+|---|---|---|
+| Endpoints (Minimal API) | `Features/<tipo>/<Feature>/<Feature>Endpoint/` | Orquestração de request/response, logging de fluxo |
+| Use Cases | `Features/<tipo>/<Feature>/<Feature>UseCase/` | Orquestração da lógica de negócio da Slice |
+| Repositories | `Features/<tipo>/<Feature>/<Feature>Repository/` | Acesso a dados; materialização de objetos de domínio |
+| Models (Input/Output/Entity) | `Features/<tipo>/<Feature>/<Feature>Models/` | Contratos de entrada, saída e entidades de domínio por Slice |
+| Interfaces | `Features/<tipo>/<Feature>/<Feature>Interfaces/` | Contratos para repositórios e integrações externos ao UseCase |
+| Shared | `Shared/` | Abstrações, utilitários, clientes e helpers reutilizáveis entre Slices |
 
 ---
 
 ## Fronteiras e Responsabilidades
 
-> **Pendente de definição.** As fronteiras entre módulos, serviços e bounded contexts serão definidas aqui.
+- **Features/Query**: Slices de leitura — não alteram estado.
+- **Features/Command**: Slices de escrita — alteram estado.
+- **Shared**: Recursos reutilizáveis sem lógica especializada para uma única Slice.
+- Slices **não se comunicam diretamente entre si**. Lógica compartilhada vai para `Shared/`.
 
 ---
 
 ## Fluxos Principais de Alto Nível
 
-> **Pendente de definição.** Os fluxos de dados e de controle de alto nível serão descritos aqui.
+```
+Request HTTP
+    └── Endpoint (Minimal API)
+            └── UseCase
+                    └── Repository (via Interface)
+                            └── Banco de dados / serviço externo
+```
+
+O Endpoint não contém lógica de negócio — apenas orquestra request/response, define status codes e escreve logs relevantes.
 
 ---
 
 ## Dependências Externas
 
-> **Pendente de definição.** Dependências externas (APIs de terceiros, serviços gerenciados, etc.) serão listadas aqui.
+> **Pendente de definição.** Dependências externas serão listadas aqui à medida que forem introduzidas.
 
 ---
 
 ## Restrições Técnicas Conhecidas
 
-> **Pendente de definição.** Restrições técnicas do ambiente ou negócio serão registradas aqui.
+- Todo código deve compilar sem erros (`dotnet build`) antes de qualquer commit.
+- Todos os testes devem passar sem erros antes de qualquer commit.
+- Slices não podem depender de outras Slices diretamente.
+- `Shared/` não pode depender de Features.
+- Lógica de negócio não pode estar em Endpoints nem em Repositories.
+- Validação de payload deve estar no objeto `Input` de cada Slice (em `<Feature>Models/`), não em repositórios ou componentes de persistência.
 
 ---
 
@@ -67,6 +90,7 @@ Exemplos de estilos a serem definidos: monolito modular, microsserviços, event-
 - `Instructions/architecture/engineering-principles.md` — princípios que guiam as decisões
 - `Instructions/architecture/patterns.md` — padrões adotados
 - `Instructions/architecture/architecture-decisions.md` — decisões registradas
+- `Instructions/architecture/folder-structure.md` — estrutura de pastas
 - `Instructions/business/domain-model.md` — modelo de domínio relacionado
 
 ---
@@ -76,3 +100,4 @@ Exemplos de estilos a serem definidos: monolito modular, microsserviços, event-
 | Data | Mudança | Referência |
 |---|---|---|
 | Bootstrap | Estrutura inicial criada | — |
+| 2026-03-15 | Stack, arquitetura e componentes definidos | DA-004, DA-005 |

@@ -40,7 +40,7 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   │   ├── resolve-ambiguity/
 │   │   └── review-alignment/
 │   │
-│   └── hooks/                          # Scripts de enforcement (placeholders)
+│   └── hooks/                          # Scripts de enforcement
 │
 └── Instructions/
     ├── operating-model.md              # Modelo operacional consolidado
@@ -81,24 +81,70 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 
 ## Estrutura de Implementação
 
-> **Pendente de definição.** A estrutura de pastas do código e artefatos de implementação será definida aqui quando a stack e arquitetura forem estabelecidas.
+A estrutura de implementação do projeto segue **Vertical Slice Architecture** com segregação **Command/Query**.
 
 ```
-# Exemplo genérico — substituir pela estrutura real quando a stack for definida
-/
-└── [pasta-do-projeto]/
-    └── [a definir conforme stack e estilo arquitetural]
+src/
+└── <NomeDoProjeto>/
+    ├── Features/
+    │   ├── Query/
+    │   │   └── <NomeDaFeature>/
+    │   │        ├── <NomeDaFeature>Endpoint/
+    │   │        │    └── <NomeDaFeature>Endpoint.cs
+    │   │        ├── <NomeDaFeature>UseCase/
+    │   │        │    └── <NomeDaFeature>UseCase.cs
+    │   │        ├── <NomeDaFeature>Interfaces/
+    │   │        │    └── I<NomeDaFeature>Repository.cs
+    │   │        ├── <NomeDaFeature>Models/
+    │   │        │    ├── <NomeDaFeature>Output.cs
+    │   │        │    └── <NomeDaFeature>Entity.cs    (quando aplicável)
+    │   │        └── <NomeDaFeature>Repository/
+    │   │             ├── <NomeDaFeature>Repository.cs
+    │   │             └── Scripts/
+    │   │                  └── <NomeDaFeature>.sql
+    │   │
+    │   └── Command/
+    │        └── <NomeDaFeature>/
+    │             ├── <NomeDaFeature>Endpoint/
+    │             │    └── <NomeDaFeature>Endpoint.cs
+    │             ├── <NomeDaFeature>UseCase/
+    │             │    └── <NomeDaFeature>UseCase.cs
+    │             ├── <NomeDaFeature>Interfaces/
+    │             │    └── I<NomeDaFeature>Repository.cs
+    │             ├── <NomeDaFeature>Models/
+    │             │    ├── <NomeDaFeature>Input.cs
+    │             │    ├── <NomeDaFeature>Output.cs   (quando aplicável)
+    │             │    └── <NomeDaFeature>Entity.cs   (quando aplicável)
+    │             └── <NomeDaFeature>Repository/
+    │                  ├── <NomeDaFeature>Repository.cs
+    │                  └── Scripts/
+    │                       └── <NomeDaFeature>.sql
+    │
+    └── Shared/
+         ├── <Abstrações e interfaces genéricas>
+         ├── <Utilitários e helpers>
+         ├── <Clientes de serviços externos>
+         └── <Configurações de infraestrutura compartilhada>
 ```
+
+### Regras de existência condicional
+
+- **Não criar pastas vazias** — toda pasta deve conter ao menos um arquivo com uso real.
+- **Não criar arquivos sem uso real** — scripts SQL, interfaces e models só existem quando necessários para a Slice.
+- `<NomeDaFeature>Input.cs` existe apenas em Commands (ou em Queries que recebem parâmetros de busca complexos).
+- `<NomeDaFeature>Output.cs` existe apenas quando há retorno estruturado.
+- `<NomeDaFeature>Entity.cs` existe apenas quando a Slice materializa objetos de domínio tipados.
+- `Scripts/` e `<NomeDaFeature>.sql` existem apenas quando a Slice acessa banco de dados via SQL.
 
 ---
 
 ## Regras para Criação de Novas Pastas
 
-1. Toda nova pasta de implementação deve ser registrada neste arquivo com seu propósito
-2. Não criar pastas sem justificativa explícita
-3. Não criar pastas com apenas um arquivo quando múltiplos são improvávels
-4. Não duplicar estrutura quando há local existente apropriado
-5. Mudanças significativas de estrutura devem ser registradas como ADR
+1. Toda nova pasta de implementação deve ser registrada neste arquivo com seu propósito.
+2. Não criar pastas sem justificativa explícita.
+3. Não criar subpastas para conter apenas um arquivo quando múltiplos são improváveis.
+4. Não duplicar estrutura quando há local existente apropriado.
+5. Mudanças significativas de estrutura devem ser registradas como ADR.
 
 ---
 
@@ -106,9 +152,9 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 
 A estrutura de governança em `.claude/` e `Instructions/` é **imutável** sem instrução explícita.
 Qualquer adição à estrutura de governança deve:
-1. Ser solicitada explicitamente pelo usuário
-2. Ser registrada neste arquivo
-3. Ser refletida nos imports de `CLAUDE.md`
+1. Ser solicitada explicitamente pelo usuário.
+2. Ser registrada neste arquivo.
+3. Ser refletida nos imports de `CLAUDE.md`.
 
 ---
 
@@ -116,6 +162,7 @@ Qualquer adição à estrutura de governança deve:
 
 - `Instructions/architecture/technical-overview.md` — visão geral que reflete esta estrutura
 - `Instructions/architecture/patterns.md` — padrões que determinam a organização
+- `Instructions/architecture/naming-conventions.md` — nomenclatura de pastas e arquivos
 - `.claude/rules/folder-governance.md` — regras de governança de estrutura
 
 ---
@@ -125,3 +172,4 @@ Qualquer adição à estrutura de governança deve:
 | Data | Mudança | Referência |
 |---|---|---|
 | Bootstrap | Estrutura inicial de governança criada | — |
+| 2026-03-15 | Estrutura de implementação definida: Features/Query, Features/Command, Shared | DA-004, DA-005 |
