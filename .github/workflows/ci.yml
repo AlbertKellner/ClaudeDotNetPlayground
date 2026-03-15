@@ -1,0 +1,181 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Native AOT toolchain
+        run: sudo apt-get install -y clang zlib1g-dev
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj
+
+      - name: Build (Native AOT publish)
+        run: |
+          dotnet publish src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj \
+            -c Release \
+            -r linux-x64 \
+            --self-contained
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-app
+          path: src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/ClaudeDotNetPlayground
+          if-no-files-found: error
+
+  run:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: published-app
+          path: ./app
+
+      - name: Run application and verify startup
+        run: |
+          chmod +x ./app/ClaudeDotNetPlayground
+
+          ASPNETCORE_URLS=http://localhost:5000 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
+          APP_PID=$!
+
+          echo "Application started with PID $APP_PID"
+          echo "Waiting for application to be ready..."
+
+          STARTED=false
+          for i in $(seq 1 30); do
+            sleep 2
+
+            if ! kill -0 $APP_PID 2>/dev/null; then
+              echo ""
+              echo "❌ Application process exited unexpectedly after $((i * 2))s"
+              echo ""
+              echo "=== Application Output ==="
+              cat run.log
+              exit 1
+            fi
+
+            if curl -sf http://localhost:5000/health > /dev/null 2>&1; then
+              STARTED=true
+              break
+            fi
+
+            echo "  Attempt $i/30 — not ready yet..."
+          done
+
+          if [ "$STARTED" = "false" ]; then
+            echo ""
+            echo "❌ Application failed to start within 60 seconds"
+            echo ""
+            echo "=== Application Output ==="
+            cat run.log
+            kill $APP_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ Application started successfully"
+          kill $APP_PID 2>/dev/null || true
+
+  healthcheck:
+    needs: run
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: published-app
+          path: ./app
+
+      - name: Start application and wait for readiness
+        run: |
+          chmod +x ./app/ClaudeDotNetPlayground
+
+          ASPNETCORE_URLS=http://localhost:5000 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
+          APP_PID=$!
+          echo "APP_PID=$APP_PID" >> $GITHUB_ENV
+
+          echo "Application started with PID $APP_PID"
+          echo "Waiting for application to be ready..."
+
+          STARTED=false
+          for i in $(seq 1 30); do
+            sleep 2
+
+            if ! kill -0 $APP_PID 2>/dev/null; then
+              echo ""
+              echo "❌ Application process exited unexpectedly after $((i * 2))s"
+              echo ""
+              echo "=== Application Output ==="
+              cat run.log
+              exit 1
+            fi
+
+            if curl -sf http://localhost:5000/health > /dev/null 2>&1; then
+              STARTED=true
+              break
+            fi
+
+            echo "  Attempt $i/30 — not ready yet..."
+          done
+
+          if [ "$STARTED" = "false" ]; then
+            echo ""
+            echo "❌ Application failed to start within 60 seconds"
+            echo ""
+            echo "=== Application Output ==="
+            cat run.log
+            kill $APP_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          echo "Application is ready"
+
+      - name: Call health check endpoint
+        run: |
+          echo "Calling GET http://localhost:5000/health ..."
+          echo ""
+
+          HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" http://localhost:5000/health)
+          RESPONSE=$(cat /tmp/health_response.txt)
+
+          echo "=== Health Check Result ==="
+          echo "Status: $HTTP_STATUS"
+          echo "Body:   $RESPONSE"
+          echo ""
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Health check passed — application is healthy"
+          else
+            echo "❌ Health check failed — application returned HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+      - name: Stop application
+        if: always()
+        run: kill $APP_PID 2>/dev/null || true
