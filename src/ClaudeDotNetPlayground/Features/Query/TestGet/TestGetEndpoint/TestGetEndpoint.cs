@@ -6,7 +6,7 @@ namespace ClaudeDotNetPlayground.Features.Query.TestGet;
 [ApiController]
 [Route("test")]
 [Authenticate]
-public class TestGetEndpoint(TestGetUseCase useCase, ILogger<TestGetEndpoint> logger) : ControllerBase
+public sealed class TestGetEndpoint(TestGetUseCase useCase, ILogger<TestGetEndpoint> logger) : ControllerBase
 {
     [HttpGet]
     public IActionResult Get()

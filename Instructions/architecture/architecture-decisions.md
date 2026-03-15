@@ -122,7 +122,7 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - `UseExceptionHandler(path)` com endpoint separado — descartado: mais complexo e menos expressivo.
 **Trade-offs**: nenhum significativo; `IExceptionHandler` é totalmente compatível com AOT e com Controllers MVC.
 **Consequências**:
-- `GlobalExceptionHandler` reside em `Shared/Middleware/` — não em Features.
+- `GlobalExceptionHandler` reside em `Infra/ExceptionHandling/` — não em Features.
 - `Program.cs` registra `AddExceptionHandler<GlobalExceptionHandler>()`, `AddProblemDetails()` e `app.UseExceptionHandler()`.
 - Todo erro não tratado retorna HTTP 500 com body em `application/problem+json`.
 - `try-catch` genérico fora de Repositories continua proibido (DA-006, P010).
