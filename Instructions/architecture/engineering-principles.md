@@ -38,6 +38,7 @@ Quando houver conflito, o comportamento de negócio vence e o trade-off deve ser
 - **Código**: sempre em inglês — nomes de classes, métodos, variáveis, arquivos, pastas, contratos, comentários técnicos.
 - **Respostas do agente**: sempre em português — toda resposta ao usuário no prompt deve ser em português.
 - **Resumo de mudanças**: ao executar qualquer tarefa, incluir na resposta um resumo em português do que foi alterado e a justificativa técnica da decisão tomada.
+- **Pull Requests**: todo pull request (título, descrição, comentários e seções do corpo) deve ser escrito em português brasileiro.
 
 ### P007 — File-Scoped Namespace
 A declaração de namespace em todas as classes C# deve seguir o padrão de **file-scoped namespace**.
@@ -200,6 +201,7 @@ O endpoint `/health` é a verificação canônica de disponibilidade da aplicaç
 - Testes passando obrigatoriamente antes de concluir qualquer tarefa.
 - Código sempre em inglês.
 - Respostas ao usuário sempre em português com resumo e justificativa técnica.
+- Pull requests sempre em português brasileiro (título, descrição e corpo).
 
 ---
 
@@ -227,3 +229,4 @@ O endpoint `/health` é a verificação canônica de disponibilidade da aplicaç
 | 2026-03-15 | Princípios P006–P012 adicionados: linguagem, namespace, var, SRP, tratamento de erros, formatação, workflow | Instruções do usuário |
 | 2026-03-15 | P012 atualizado: pré-commit inclui execução e verificação de HealthCheck; P013 adicionado: HealthCheck obrigatório em /health | Instrução do usuário |
 | 2026-03-15 | P014 adicionado: compilação AOT obrigatória; trade-off com Controllers registrado em DA-009 | Instrução do usuário |
+| 2026-03-15 | P006 atualizado: pull requests devem ser escritos em português brasileiro | Instrução do usuário |
