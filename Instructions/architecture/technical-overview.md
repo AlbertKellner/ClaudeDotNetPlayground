@@ -11,7 +11,7 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Camada | Tecnologia | Decisão |
 |---|---|---|
 | Linguagem principal | C# (.NET) | DA-004 |
-| Framework principal | ASP.NET Core — Minimal API | DA-004 |
+| Framework principal | ASP.NET Core — Controllers com Actions | DA-004, DA-008 |
 | Persistência | A definir por Feature | — |
 | Mensageria | A definir | — |
 | Containerização | A definir | — |
@@ -36,7 +36,7 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 
 | Componente | Localização | Responsabilidade |
 |---|---|---|
-| Endpoints (Minimal API) | `Features/<tipo>/<Feature>/<Feature>Endpoint/` | Orquestração de request/response, logging de fluxo |
+| Controllers com Actions | `Features/<tipo>/<Feature>/<Feature>Endpoint/` | Orquestração de request/response, logging de fluxo |
 | Use Cases | `Features/<tipo>/<Feature>/<Feature>UseCase/` | Orquestração da lógica de negócio da Slice |
 | Repositories | `Features/<tipo>/<Feature>/<Feature>Repository/` | Acesso a dados; materialização de objetos de domínio |
 | Models (Input/Output/Entity) | `Features/<tipo>/<Feature>/<Feature>Models/` | Contratos de entrada, saída e entidades de domínio por Slice |
@@ -58,13 +58,13 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 
 ```
 Request HTTP
-    └── Endpoint (Minimal API)
+    └── Controller / Action (pasta Endpoint)
             └── UseCase
                     └── Repository (via Interface)
                             └── Banco de dados / serviço externo
 ```
 
-O Endpoint não contém lógica de negócio — apenas orquestra request/response, define status codes e escreve logs relevantes.
+O Controller não contém lógica de negócio — apenas orquestra request/response, define status codes e escreve logs relevantes.
 
 ---
 
@@ -101,3 +101,4 @@ O Endpoint não contém lógica de negócio — apenas orquestra request/respons
 |---|---|---|
 | Bootstrap | Estrutura inicial criada | — |
 | 2026-03-15 | Stack, arquitetura e componentes definidos | DA-004, DA-005 |
+| 2026-03-15 | Framework HTTP atualizado: Minimal API substituída por Controllers com Actions | DA-008 |

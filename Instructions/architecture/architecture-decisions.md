@@ -27,16 +27,32 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 **Decisão**: Toda definição durável deve ser persistida na governança antes de qualquer mudança de código ou artefato.
 **Motivação**: Implementação sem governança cria código sem memória de intenção.
 
-### DA-004 — Stack Tecnológica: C# (.NET) com ASP.NET Core Minimal API
+### DA-004 — Stack Tecnológica: C# (.NET) com ASP.NET Core
 **Data**: 2026-03-15
-**Status**: Ativo
-**Decisão**: A linguagem principal é C# (.NET). O framework de exposição HTTP é ASP.NET Core com Minimal API.
+**Status**: Ativo (mecanismo HTTP atualizado por DA-008)
+**Decisão**: A linguagem principal é C# (.NET). O framework de exposição HTTP é ASP.NET Core.
 **Motivação**: Stack definida pelas convenções e pelo código existente no repositório.
 **Consequências**:
 - Namespaces devem seguir o padrão file-scoped (ver P007).
 - Variáveis devem usar `var` sempre que possível (ver P008).
-- Endpoints são implementados como Minimal API, sem Controllers MVC.
 - Todo código deve ser escrito em inglês.
+- Ver DA-008 para o mecanismo de exposição HTTP adotado.
+
+### DA-008 — Mecanismo de Exposição HTTP: Controllers com Actions
+**Data**: 2026-03-15
+**Status**: Ativo
+**Decisão**: A exposição HTTP é feita via Controllers com Actions bem definidas, usando ASP.NET Core MVC (não Minimal API).
+**Motivação**: Preferência explícita do time — Controllers com Actions oferecem organização mais explícita, melhor suporte a atributos de rota e são mais familiares para o time.
+**Alternativas consideradas**: Minimal API — descartada em favor de Controllers.
+**Consequências**:
+- Cada Slice tem seu próprio Controller, localizado na pasta `<Feature>Endpoint/`.
+- O Controller contém uma ou mais Actions bem definidas.
+- O arquivo do Controller segue a nomenclatura `<Feature>Endpoint.cs`, dentro de `<Feature>Endpoint/`.
+- O Controller não contém lógica de negócio — apenas orquestra request/response, status codes e logs.
+- Toda lógica de negócio permanece no UseCase da Slice.
+- Substitui a diretriz de Minimal API de DA-004.
+
+---
 
 ### DA-005 — Arquitetura: Vertical Slice com Segregação Command/Query
 **Data**: 2026-03-15
@@ -110,3 +126,4 @@ Ao adicionar uma nova decisão:
 |---|---|---|
 | Bootstrap | DA-001, DA-002, DA-003 criadas | — |
 | 2026-03-15 | DA-004 a DA-007 criadas: stack C#/.NET/Minimal API, Vertical Slice, SRP estrutural, linguagem do agente | Instruções do usuário |
+| 2026-03-15 | DA-004 atualizada: referência ao mecanismo HTTP movida para DA-008. DA-008 criada: Controllers com Actions substituem Minimal API | Instrução do usuário |

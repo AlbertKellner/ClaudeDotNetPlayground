@@ -79,33 +79,40 @@ A classificação deve ser feita com base na **intenção da operação**, não 
 
 ---
 
-### PAD-003 — Endpoint como Minimal API
+### PAD-003 — Endpoint como Controller com Action
 
 **Contexto**: Toda exposição de funcionalidade via HTTP.
 
-**Problema**: Controllers com múltiplas actions concentram responsabilidades e tornam difícil o isolamento por funcionalidade.
+**Problema**: Lógica de request/response espalhada ou acoplada a outros componentes da Slice.
 
-**Solução**: Cada Slice tem seu próprio Endpoint implementado como Minimal API. O Endpoint:
-- Registra a rota e o handler HTTP.
-- Orquestra request/response (leitura de body/params, retorno de status codes).
+**Solução**: Cada Slice tem seu próprio Controller localizado na pasta `<Feature>Endpoint/`. O Controller:
+- Define a rota via atributos (`[Route]`, `[HttpGet]`, `[HttpPost]`, etc.).
+- Contém uma ou mais Actions bem definidas, cada uma correspondendo a uma operação da Slice.
+- Orquestra request/response (leitura de body/params/route, retorno de status codes e resultados).
 - Escreve logs relevantes: início/fim da request, parâmetros relevantes, decisões de fluxo, erros, resultados.
 - Delega toda lógica ao UseCase.
 - Não contém lógica de negócio.
 
 ```csharp
-// Exemplo de estrutura de endpoint
-app.MapGet("/todo-items", async (ITodoItemsGetAllUseCase useCase, ILogger<TodoItemsGetAllEndpoint> logger) =>
+// Exemplo de estrutura de Controller na pasta Endpoint
+[ApiController]
+[Route("todo-items")]
+public class TodoItemsGetAllEndpoint(ITodoItemsGetAllUseCase useCase, ILogger<TodoItemsGetAllEndpoint> logger) : ControllerBase
 {
-    logger.LogInformation("Getting all todo items");
-    var output = await useCase.ExecuteAsync();
-    logger.LogInformation("Returning {Count} todo items", output.Items.Count);
-    return Results.Ok(output);
-});
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        logger.LogInformation("Getting all todo items");
+        var output = await useCase.ExecuteAsync();
+        logger.LogInformation("Returning {Count} todo items", output.Items.Count);
+        return Ok(output);
+    }
+}
 ```
 
-**Exceções permitidas**: validação básica de formato de rota (ex.: id como Guid) pode ficar no handler do endpoint.
+**Exceções permitidas**: validação básica de formato de rota (ex.: id como Guid) pode ficar na Action do Controller.
 
-*Referência: DA-004*
+*Referência: DA-008*
 
 ---
 
@@ -199,13 +206,14 @@ public record TodoItemInsertInput
 | Anti-Padrão | Por Que Evitar | Alternativa |
 |---|---|---|
 | Pastas globais `Services/`, `Repositories/` | Acoplamento entre Features; dificulta isolamento de mudanças | Organizar por Slice em `Features/Query/` ou `Features/Command/` |
-| Lógica de negócio no Endpoint | Viola SRP; dificulta testes | Mover para o UseCase da Slice |
+| Lógica de negócio no Controller/Action | Viola SRP; dificulta testes | Mover para o UseCase da Slice |
 | Lógica de negócio no Repository | Viola SRP; acopla infraestrutura ao negócio | Mover para o UseCase da Slice |
 | Comunicação direta entre Slices | Cria acoplamento entre Features | Mover lógica compartilhada para `Shared/` |
 | `try-catch` genérico espalhado pela aplicação | Oculta erros reais; viola SRP | Usar handler centralizado de erros |
 | Validação de payload fora do Input | Viola SRP; dificulta rastreamento | Mover validação para o objeto Input da Slice |
 | Namespace com chaves em C# | Inconsistência com o padrão do projeto | Usar file-scoped namespace |
 | Tipos explícitos onde `var` resolve | Verbosidade desnecessária | Usar `var` com nome de variável autoexplicativo |
+| Controller com múltiplas responsabilidades de Slices distintas | Quebra o isolamento da Vertical Slice | Um Controller por Slice, na pasta `<Feature>Endpoint/` |
 
 ---
 
@@ -224,3 +232,4 @@ public record TodoItemInsertInput
 |---|---|---|
 | Bootstrap | Estrutura criada sem padrões específicos | — |
 | 2026-03-15 | PAD-001 a PAD-007 criados: Vertical Slice, Command/Query, Minimal API, UseCase, Repository, Validação, Shared | Instruções do usuário |
+| 2026-03-15 | PAD-003 atualizado: Minimal API substituída por Controller com Action; anti-padrão adicionado | DA-008 |
