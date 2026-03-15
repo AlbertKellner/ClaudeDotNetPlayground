@@ -111,6 +111,33 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - Todo erro não tratado retorna HTTP 500 com body em `application/problem+json`.
 - `try-catch` genérico fora de Repositories continua proibido (DA-006, P010).
 
+### DA-011 — Estrutura Infra/ e Correlation ID Middleware
+**Data**: 2026-03-15
+**Status**: Ativo
+**Decisão**: Componentes de infraestrutura transversal residem em `Infra/` com subpastas semânticas (`Middlewares/`, `ExceptionHandling/`, `Correlation/`). A pasta `Shared/Middleware/` é removida. O Correlation ID é garantido por request via `CorrelationIdMiddleware`, que usa GUID v7 e enriquece todos os logs da requisição através do `Serilog.Context.LogContext`. O Correlation ID é completamente opaco para Features e Endpoints.
+**Motivação**: Separar infraestrutura transversal (middlewares, exception handling) de abstrações reutilizáveis de domínio (`Shared/`). Garantir rastreabilidade por request em logs estruturados sem acoplamento entre camada de aplicação e infraestrutura de observabilidade.
+**Alternativas consideradas**: Manter em `Shared/Middleware/` — descartado: mistura infraestrutura com abstrações de domínio. Usar `ILogger.BeginScope()` — descartado em favor do Serilog LogContext por ser mais limpo e nativamente suportado pelo Serilog.
+**Trade-offs**: Features não têm acesso direto ao CorrelationId (design intencional). O CorrelationId só é enriquecido nos logs; não é injetável via DI.
+**Consequências**:
+- `Infra/Middlewares/CorrelationIdMiddleware.cs` é o único lugar que conhece o Correlation ID.
+- `Infra/Correlation/GuidV7.cs` é utilitário interno de Infra — não exposto para Features.
+- `Serilog.AspNetCore` é dependência obrigatória do projeto.
+- `CorrelationIdMiddleware` deve ser registrado ANTES de `UseExceptionHandler()` no pipeline.
+- Header de entrada e saída: `X-Correlation-Id`.
+
+### DA-012 — Runtime: Migração de .NET 8 para .NET 10
+**Data**: 2026-03-15
+**Status**: Ativo
+**Decisão**: O projeto é migrado de `net8.0` para `net10.0`.
+**Motivação**: .NET 10 introduz `Guid.CreateVersion7()` nativo (adicionado no .NET 9), eliminando a necessidade de implementação manual de GUID v7. .NET 10 é LTS e oferece melhorias de performance e AOT.
+**Alternativas consideradas**: Permanecer em .NET 8 com implementação manual de GUID v7 — descartado: gera código desnecessário e dívida técnica quando a API nativa está disponível no runtime atual do projeto.
+**Trade-offs**: Requer runtime .NET 10 no ambiente de execução e CI/CD.
+**Consequências**:
+- `<TargetFramework>net10.0</TargetFramework>` no `.csproj`.
+- `Guid.CreateVersion7()` é a API canônica de geração de GUID v7.
+- AOT e `InvariantGlobalization` mantidos (DA-009 permanece ativo).
+- DA-004 atualizado implicitamente: "C# (.NET)" agora significa .NET 10.
+
 ---
 
 ## Decisões Pendentes
@@ -120,7 +147,9 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 | DP-001 | Estratégia de persistência (banco de dados, ORM ou SQL direto) | Médio-Alto |
 | DP-002 | Estratégia de mensageria (se aplicável) | Médio |
 | DP-003 | Estratégia de testes (cobertura mínima, tipos de testes por camada) | Médio |
-| DP-004 | Estratégia de observabilidade (logging estruturado, tracing, métricas) | Médio |
+| DP-004a | Observabilidade — log sinks em produção (Seq, Application Insights, Elasticsearch etc.) | Médio |
+| DP-004b | Observabilidade — distributed tracing (W3C TraceContext, OpenTelemetry) | Médio |
+| DP-004c | Observabilidade — métricas (.NET Meter API, Prometheus etc.) | Médio |
 
 ---
 

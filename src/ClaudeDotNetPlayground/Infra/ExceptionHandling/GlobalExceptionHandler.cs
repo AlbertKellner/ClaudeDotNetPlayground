@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ClaudeDotNetPlayground.Shared.Middleware;
+namespace ClaudeDotNetPlayground.Infra.ExceptionHandling;
 
 public sealed class GlobalExceptionHandler(IProblemDetailsService problemDetailsService, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {

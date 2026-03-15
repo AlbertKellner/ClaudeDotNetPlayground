@@ -120,10 +120,16 @@ src/
     │                  └── Scripts/
     │                       └── <NomeDaFeature>.sql
     │
+    ├── Infra/
+    │    ├── Correlation/
+    │    │    └── GuidV7.cs                    # Geração (Guid.CreateVersion7) e validação de GUID v7 (uso interno de Infra)
+    │    ├── ExceptionHandling/
+    │    │    └── GlobalExceptionHandler.cs   # Handler centralizado de exceções (IExceptionHandler + Problem Details RFC 7807)
+    │    └── Middlewares/
+    │         └── CorrelationIdMiddleware.cs   # Garante GUID v7 por request; enriquece Serilog LogContext; opaco para Features
+    │
     └── Shared/
-         ├── Middleware/
-         │    └── GlobalExceptionHandler.cs   # Handler centralizado de exceções (IExceptionHandler)
-         ├── <Abstrações e interfaces genéricas>
+         ├── <Abstrações e interfaces genéricas reutilizáveis entre Slices>
          ├── <Utilitários e helpers>
          ├── <Clientes de serviços externos>
          └── <Configurações de infraestrutura compartilhada>
@@ -176,3 +182,4 @@ Qualquer adição à estrutura de governança deve:
 | Bootstrap | Estrutura inicial de governança criada | — |
 | 2026-03-15 | Estrutura de implementação definida: Features/Query, Features/Command, Shared | DA-004, DA-005 |
 | 2026-03-15 | Shared/Middleware/ criada: GlobalExceptionHandler registrado | DA-010, PAD-008 |
+| 2026-03-15 | Infra/ criada com subpastas Correlation/, ExceptionHandling/, Middlewares/; Shared/Middleware/ removida; GlobalExceptionHandler movido para Infra/ExceptionHandling/ | DA-011 |
