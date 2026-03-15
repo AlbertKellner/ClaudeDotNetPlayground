@@ -13,33 +13,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Native AOT toolchain
-        run: sudo apt-get install -y clang zlib1g-dev
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
         with:
-          dotnet-version: '10.x'
-
-      - name: Restore dependencies
-        run: dotnet restore src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj
-
-      - name: Publish (Native AOT)
-        run: |
-          dotnet publish src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj \
-            -c Release \
-            -r linux-x64 \
-            --self-contained
+          name: published-app
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./app
 
       - name: Start application and wait for readiness
         run: |
-          BINARY="src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/ClaudeDotNetPlayground"
-          chmod +x "$BINARY"
+          chmod +x ./app/ClaudeDotNetPlayground
 
-          ASPNETCORE_URLS=http://localhost:5000 "$BINARY" > run.log 2>&1 &
+          ASPNETCORE_URLS=http://localhost:5000 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
           APP_PID=$!
           echo "APP_PID=$APP_PID" >> $GITHUB_ENV
 
