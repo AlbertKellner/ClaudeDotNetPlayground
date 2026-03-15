@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://repositorio.exemplo.com/schemas/recurso.schema.json",
+  "title": "Recurso",
+  "description": "Schema de exemplo genérico para um recurso do domínio. PLACEHOLDER — substituir pelo schema real quando o domínio for definido.",
+  "type": "object",
+  "required": ["id", "nome", "status"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Identificador único do recurso",
+      "minLength": 1,
+      "examples": ["REC-001", "REC-002"]
+    },
+    "nome": {
+      "type": "string",
+      "description": "Nome descritivo do recurso",
+      "minLength": 1,
+      "maxLength": 255,
+      "examples": ["Recurso Exemplo", "Outro Recurso"]
+    },
+    "status": {
+      "type": "string",
+      "description": "Status atual do recurso — controlado por transições de estado definidas nas regras de negócio",
+      "enum": ["Ativo", "Suspenso", "Encerrado"],
+      "examples": ["Ativo"]
+    },
+    "descricao": {
+      "type": ["string", "null"],
+      "description": "Descrição opcional do recurso",
+      "maxLength": 1000
+    },
+    "criadoEm": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Data e hora de criação no formato ISO 8601",
+      "examples": ["2024-01-15T10:30:00Z"]
+    },
+    "atualizadoEm": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Data e hora da última atualização no formato ISO 8601"
+    },
+    "metadados": {
+      "type": "object",
+      "description": "Campos adicionais específicos do domínio (a definir quando o domínio for conhecido)",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$comment": "PLACEHOLDER: Este schema deve ser substituído pelo schema real do domínio. Ver Instructions/contracts/README.md para política de contratos."
+}

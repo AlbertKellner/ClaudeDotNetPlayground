@@ -1,0 +1,10 @@
+{
+  "_comentario": "Exemplo de payload VÁLIDO para o schema em schemas/example.schema.json. PLACEHOLDER genérico.",
+  "id": "REC-001",
+  "nome": "Recurso de Exemplo Válido",
+  "status": "Ativo",
+  "descricao": "Este é um exemplo de recurso com todos os campos obrigatórios preenchidos corretamente.",
+  "criadoEm": "2024-01-15T10:30:00Z",
+  "atualizadoEm": null,
+  "metadados": {}
+}

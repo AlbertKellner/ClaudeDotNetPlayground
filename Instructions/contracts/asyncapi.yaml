@@ -1,0 +1,182 @@
+asyncapi: "3.0.0"
+
+# =============================================================================
+# ATENÇÃO: Este é um arquivo PLACEHOLDER genérico.
+# Substitua pelo contrato real de mensageria quando o domínio e broker forem definidos.
+# Toda alteração neste arquivo deve seguir a política em README.md.
+# =============================================================================
+
+info:
+  title: "Contratos de Mensageria — Placeholder"
+  version: "0.0.0"
+  description: |
+    **Este contrato é um placeholder genérico criado durante o bootstrap do sistema de governança.**
+
+    Quando o domínio e o message broker forem definidos:
+    1. Substitua pelos canais e mensagens reais
+    2. Defina o protocolo (AMQP, Kafka, SNS/SQS, etc.)
+    3. Referencie as regras de negócio nos comentários
+    4. Atualize os cenários BDD correspondentes
+    5. Registre a decisão de mensageria em Instructions/decisions/
+
+    Regras de negócio relacionadas: (a definir)
+    BDD relacionado: (a definir)
+
+defaultContentType: "application/json"
+
+# Definição de servers (broker) — substituir pelo broker real
+servers:
+  desenvolvimento:
+    host: "localhost:5672"
+    protocol: "amqp"
+    description: "Broker de desenvolvimento (placeholder — substituir pelo broker real)"
+
+channels:
+  # Canal de exemplo: evento publicado quando recurso é criado
+  recurso.criado:
+    address: "recurso.criado"
+    description: |
+      Canal para publicação de eventos quando um recurso é criado.
+      Placeholder — substituir pelo canal e evento reais do domínio.
+    messages:
+      RecursoCriadoEvent:
+        $ref: "#/components/messages/RecursoCriadoEvent"
+
+  # Canal de exemplo: evento publicado quando recurso é atualizado
+  recurso.atualizado:
+    address: "recurso.atualizado"
+    description: |
+      Canal para publicação de eventos quando um recurso é atualizado.
+      Placeholder — substituir pelo canal e evento reais do domínio.
+    messages:
+      RecursoAtualizadoEvent:
+        $ref: "#/components/messages/RecursoAtualizadoEvent"
+
+  # Canal de exemplo: comando para processar uma ação
+  recurso.processar:
+    address: "recurso.processar"
+    description: |
+      Canal para receber comandos de processamento de recurso.
+      Placeholder — substituir pelo canal e comando reais do domínio.
+    messages:
+      ProcessarRecursoCommand:
+        $ref: "#/components/messages/ProcessarRecursoCommand"
+
+operations:
+  publicarRecursoCriado:
+    action: "send"
+    channel:
+      $ref: "#/channels/recurso.criado"
+    description: "Publica evento quando recurso é criado com sucesso"
+
+  receberProcessarRecurso:
+    action: "receive"
+    channel:
+      $ref: "#/channels/recurso.processar"
+    description: "Recebe comando para processar recurso"
+
+components:
+  messages:
+    RecursoCriadoEvent:
+      name: "RecursoCriadoEvent"
+      title: "Recurso Criado"
+      summary: "Evento emitido quando um recurso é criado com sucesso"
+      description: |
+        Publicado após a criação bem-sucedida de um recurso.
+        Placeholder — substituir pelos campos reais do evento de domínio.
+      contentType: "application/json"
+      headers:
+        type: "object"
+        properties:
+          correlationId:
+            type: "string"
+            description: "ID de correlação para rastreamento"
+          eventType:
+            type: "string"
+            const: "recurso.criado"
+      payload:
+        $ref: "#/components/schemas/RecursoCriadoPayload"
+
+    RecursoAtualizadoEvent:
+      name: "RecursoAtualizadoEvent"
+      title: "Recurso Atualizado"
+      summary: "Evento emitido quando um recurso é atualizado"
+      contentType: "application/json"
+      payload:
+        $ref: "#/components/schemas/RecursoAtualizadoPayload"
+
+    ProcessarRecursoCommand:
+      name: "ProcessarRecursoCommand"
+      title: "Processar Recurso"
+      summary: "Comando para processar uma ação sobre um recurso"
+      contentType: "application/json"
+      payload:
+        $ref: "#/components/schemas/ProcessarRecursoPayload"
+
+  schemas:
+    RecursoCriadoPayload:
+      type: "object"
+      required:
+        - eventId
+        - occurredAt
+        - recursoId
+        - nome
+      properties:
+        eventId:
+          type: "string"
+          description: "Identificador único do evento"
+        occurredAt:
+          type: "string"
+          format: "date-time"
+          description: "Quando o evento ocorreu"
+        recursoId:
+          type: "string"
+          description: "Identificador do recurso criado"
+        nome:
+          type: "string"
+          description: "Nome do recurso criado"
+        status:
+          type: "string"
+          description: "Status inicial do recurso"
+
+    RecursoAtualizadoPayload:
+      type: "object"
+      required:
+        - eventId
+        - occurredAt
+        - recursoId
+      properties:
+        eventId:
+          type: "string"
+        occurredAt:
+          type: "string"
+          format: "date-time"
+        recursoId:
+          type: "string"
+          description: "Identificador do recurso atualizado"
+        camposAlterados:
+          type: "array"
+          items:
+            type: "string"
+          description: "Lista de campos que foram alterados"
+
+    ProcessarRecursoPayload:
+      type: "object"
+      required:
+        - commandId
+        - recursoId
+        - acao
+      properties:
+        commandId:
+          type: "string"
+          description: "Identificador único do comando"
+        recursoId:
+          type: "string"
+          description: "Identificador do recurso a ser processado"
+        acao:
+          type: "string"
+          description: "Ação a ser executada"
+        parametros:
+          type: "object"
+          additionalProperties: true
+          description: "Parâmetros adicionais da ação"
