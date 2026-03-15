@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/ClaudeDotNetPlayground.props" />
-</Project>
