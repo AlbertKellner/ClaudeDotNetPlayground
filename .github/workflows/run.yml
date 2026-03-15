@@ -1,0 +1,81 @@
+name: Run
+
+on:
+  workflow_run:
+    workflows:
+      - Build
+    types:
+      - completed
+
+jobs:
+  run:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Native AOT toolchain
+        run: sudo apt-get install -y clang zlib1g-dev
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj
+
+      - name: Publish (Native AOT)
+        run: |
+          dotnet publish src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj \
+            -c Release \
+            -r linux-x64 \
+            --self-contained
+
+      - name: Run application and verify startup
+        run: |
+          BINARY="src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/ClaudeDotNetPlayground"
+          chmod +x "$BINARY"
+
+          ASPNETCORE_URLS=http://localhost:5000 "$BINARY" > run.log 2>&1 &
+          APP_PID=$!
+
+          echo "Application started with PID $APP_PID"
+          echo "Waiting for application to be ready..."
+
+          STARTED=false
+          for i in $(seq 1 30); do
+            sleep 2
+
+            if ! kill -0 $APP_PID 2>/dev/null; then
+              echo ""
+              echo "❌ Application process exited unexpectedly after $((i * 2))s"
+              echo ""
+              echo "=== Application Output ==="
+              cat run.log
+              exit 1
+            fi
+
+            if curl -sf http://localhost:5000/health > /dev/null 2>&1; then
+              STARTED=true
+              break
+            fi
+
+            echo "  Attempt $i/30 — not ready yet..."
+          done
+
+          if [ "$STARTED" = "false" ]; then
+            echo ""
+            echo "❌ Application failed to start within 60 seconds"
+            echo ""
+            echo "=== Application Output ==="
+            cat run.log
+            kill $APP_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ Application started successfully"
+          kill $APP_PID 2>/dev/null || true
