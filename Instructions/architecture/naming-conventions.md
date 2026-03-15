@@ -125,6 +125,29 @@ A terminologia de domínio é definida no glossário:
 
 ---
 
+## Namespaces de Slice
+
+O namespace de todos os componentes de uma Slice (Endpoint, UseCase, Repository, Interfaces, Models) é o namespace da **Feature**, não o da subpasta do componente.
+
+```
+Pasta física:   Features/Query/TestGet/TestGetUseCase/TestGetUseCase.cs
+Namespace:      ClaudeDotNetPlayground.Features.Query.TestGet   ← para na Feature
+Proibido:       ClaudeDotNetPlayground.Features.Query.TestGet.TestGetUseCase
+```
+
+**Motivação**: o sufixo da subpasta (ex: `TestGetUseCase`) coincide com o nome da classe, criando colisão `Namespace.Tipo`. A convenção de namespace parar na Feature elimina essa colisão estruturalmente.
+
+**Consequência**: componentes da mesma Slice compartilham o namespace da Feature e se enxergam diretamente, sem necessidade de `using` adicional.
+
+---
+
+## Restrições de Código
+
+- **Proibido usar `using` alias para tipos** — aliases mascaram a origem dos tipos e dificultam rastreabilidade. Ex: `using UseCase = Some.Namespace.MyClass;` é proibido.
+- Se uma colisão de nomes exigir alias, a causa raiz deve ser corrigida (renomear, reorganizar namespace ou reorganizar estrutura).
+
+---
+
 ## Abreviações Permitidas
 
 > **Pendente de definição.** Abreviações aceitas no repositório serão listadas aqui quando estabelecidas.
@@ -160,3 +183,4 @@ Regra: só usar abreviações registradas aqui. Sem abreviações não documenta
 |---|---|---|
 | Bootstrap | Estrutura criada sem convenções específicas | — |
 | 2026-03-15 | Convenções definidas: linguagem (inglês), Feature naming, subcomponentes de Slice, prefixos/sufixos, termos proibidos | Instruções do usuário |
+| 2026-03-15 | Adicionado: namespace de Slice para na Feature (não na subpasta); proibido `using` alias para tipos | Instrução do usuário |
