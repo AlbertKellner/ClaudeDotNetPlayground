@@ -7,6 +7,7 @@ API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native 
 - Endpoint de disponibilidade (`GET /health`)
 - Autenticação de usuário com geração de JWT (`POST /login`)
 - Endpoint protegido por Bearer Token (`GET /test`)
+- Consulta de condições climáticas de São Paulo via Open-Meteo (`GET /weather-conditions`)
 - Infraestrutura transversal: rastreabilidade por Correlation ID, tratamento centralizado de exceções, autenticação JWT
 
 ---
@@ -32,6 +33,7 @@ API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native 
 | [Health Check](Feature-Health) | Endpoint de verificação de disponibilidade da aplicação (`GET /health`) |
 | [Login de Usuário](Feature-UserLogin) | Autenticação com credenciais e geração de JWT Bearer Token (`POST /login`) |
 | [Test Get](Feature-TestGet) | Endpoint protegido que retorna confirmação de funcionamento (`GET /test`) |
+| [Condições Climáticas de São Paulo](Feature-WeatherConditionsGet) | Consulta das condições climáticas atuais de São Paulo via Open-Meteo API (`GET /weather-conditions`) |
 
 ### Infraestrutura
 

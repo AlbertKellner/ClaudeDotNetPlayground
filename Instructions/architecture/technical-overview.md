@@ -13,6 +13,8 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Linguagem principal | C# (.NET 10) | DA-004, DA-012 |
 | Framework principal | ASP.NET Core — Controllers com Actions | DA-004, DA-008 |
 | Logging estruturado | Serilog (com Enrich.FromLogContext) | DA-011 |
+| Integração HTTP externa | Refit (`Refit.HttpClientFactory`) — interfaces decoradas com atributos HTTP; implementação source-generated | DA-017 |
+| Resiliência HTTP | Polly v8 via `Microsoft.Extensions.Http.Resilience` — retry exponencial + timeout por tentativa | DA-017 |
 | Persistência | A definir por Feature | — |
 | Mensageria | A definir | — |
 | Containerização | Docker — Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent | DA-016 |
@@ -45,6 +47,10 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 | Models (Input/Output/Entity) | `Features/<tipo>/<Feature>/<Feature>Models/` | Contratos de entrada, saída e entidades de domínio por Slice |
 | Interfaces | `Features/<tipo>/<Feature>/<Feature>Interfaces/` | Contratos para repositórios e integrações externos ao UseCase |
 | Shared | `Shared/` | Abstrações, utilitários, clientes e helpers reutilizáveis entre Slices |
+| IOpenMeteoApi | `Shared/ExternalApi/OpenMeteo/IOpenMeteoApi.cs` | Interface Refit para a API Open-Meteo; contrato HTTP com rota `/v1/forecast` hardcoded |
+| IOpenMeteoApiClient | `Shared/ExternalApi/OpenMeteo/IOpenMeteoApiClient.cs` | Interface de serviço; contrato que Features injetam via DI |
+| OpenMeteoApiClient | `Shared/ExternalApi/OpenMeteo/OpenMeteoApiClient.cs` | Implementa IOpenMeteoApiClient; usa IOpenMeteoApi (Refit + Polly via HttpClient); aplica logging SNP-001 |
+| OpenMeteoInput/Output | `Shared/ExternalApi/OpenMeteo/Models/` | Modelos de entrada (coordenadas + fields) e saída completa da Open-Meteo; inclui OpenMeteoJsonContext para AOT |
 | Exception Handler | `Infra/ExceptionHandling/GlobalExceptionHandler.cs` | Handler centralizado de exceções; retorna Problem Details (RFC 7807) |
 | Correlation ID Middleware | `Infra/Middlewares/CorrelationIdMiddleware.cs` | Garante GUID v7 por request; enriquece logs via Serilog LogContext; completamente opaco para Features |
 | GuidV7 | `Infra/Correlation/GuidV7.cs` | Utilitário de geração e validação de GUID v7 (uso interno da Infra) |
@@ -97,6 +103,8 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | `Serilog.AspNetCore` | latest | Logging estruturado com enrichment por request via LogContext |
 | `Serilog.Sinks.Console` | latest | Console sink com suporte a temas ANSI coloridos (AnsiConsoleTheme.Code) | DA-015 |
 | `System.IdentityModel.Tokens.Jwt` | latest | Geração e validação de JWT HS256 para Bearer Token | DA-013 |
+| `Refit.HttpClientFactory` | latest | Clientes HTTP fortemente tipados via interfaces decoradas com atributos; source-generated (AOT-compatível) | DA-017 |
+| `Microsoft.Extensions.Http.Resilience` | latest | Resiliência HTTP via Polly v8: retry exponencial + timeout por tentativa, integrado ao IHttpClientBuilder | DA-017 |
 
 ---
 
@@ -138,3 +146,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-15 | CI/CD expandido: workflow pr-language-check adicionado — valida título e corpo de PRs; template de PR em português criado | DA-014 |
 | 2026-03-15 | Padrões de logging definidos: formato `[Classe][Método]`, storytelling, console colorido ANSI, template com timestamp/correlationId/userName, isolamento visual, testes de log | DA-015, SNP-001 |
 | 2026-03-16 | Containerização adicionada: Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent; GitHub Environment ClaudeCode; DD_ENV por contexto (build, ci, local) para filtragem no Datadog | DA-016 |
+| 2026-03-16 | Integração HTTP externa adicionada: Refit + Polly; Shared/ExternalApi/OpenMeteo/ criada; Feature WeatherConditionsGet implementada; RN-004 | DA-017, RN-004 |

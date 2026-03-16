@@ -18,6 +18,7 @@
 - [Health Check](Feature-Health)
 - [Login de Usuário](Feature-UserLogin)
 - [Test Get](Feature-TestGet)
+- [Condições Climáticas](Feature-WeatherConditionsGet)
 
 ---
 

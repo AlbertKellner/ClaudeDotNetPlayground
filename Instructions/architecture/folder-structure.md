@@ -151,9 +151,16 @@ src/
     │         └── AuthenticateAttribute.cs     # TypeFilterAttribute: decorador [Authenticate] para Controllers
     │
     └── Shared/
+         ├── ExternalApi/                           # Integrações com APIs HTTP externas (DA-017)
+         │    └── <Servico>/                        # Uma subpasta por serviço externo integrado
+         │         ├── I<Servico>Api.cs             # Interface Refit (contrato HTTP; rota hardcoded)
+         │         ├── I<Servico>ApiClient.cs       # Interface de serviço (Features injetam este contrato)
+         │         ├── <Servico>ApiClient.cs        # Implementação: usa I<Servico>Api; aplica logging SNP-001
+         │         └── Models/
+         │              ├── <Servico>Input.cs       # Parâmetros da requisição à API
+         │              └── <Servico>Output.cs      # Modelo completo da resposta da API + JsonSerializerContext
          ├── <Abstrações e interfaces genéricas reutilizáveis entre Slices>
          ├── <Utilitários e helpers>
-         ├── <Clientes de serviços externos>
          └── <Configurações de infraestrutura compartilhada>
 ```
 
@@ -207,3 +214,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-15 | Infra/ criada com subpastas Correlation/, ExceptionHandling/, Middlewares/; Shared/Middleware/ removida; GlobalExceptionHandler movido para Infra/ExceptionHandling/ | DA-011 |
 | 2026-03-15 | Infra/Security/ criada com ITokenService, AuthenticatedUser, TokenService, AuthenticateFilter, AuthenticateAttribute | DA-013 |
 | 2026-03-15 | wiki/ criada na raiz: 12 arquivos-fonte da GitHub Wiki; Instructions/wiki/ criada com wiki-governance.md | Instrução do usuário |
+| 2026-03-16 | Shared/ExternalApi/ documentada: padrão de integração HTTP externa com Refit + Polly (DA-017); primeira integração: Open-Meteo | Instrução do usuário |
