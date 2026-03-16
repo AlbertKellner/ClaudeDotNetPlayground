@@ -104,6 +104,9 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 
 - Todo código deve compilar sem erros (`dotnet build`) antes de qualquer commit.
 - Todos os testes devem passar sem erros antes de qualquer commit.
+- A aplicação deve ser iniciada via `docker compose up -d` e responder HTTP 200 em `/health` antes de qualquer commit.
+- O Datadog Agent deve estar ativo durante a execução de validação pré-commit para que logs fluam ao Datadog.
+- `docker compose down` deve ser executado após a validação pré-commit.
 - Slices não podem depender de outras Slices diretamente.
 - `Shared/` não pode depender de Features.
 - Lógica de negócio não pode estar em Endpoints nem em Repositories.
