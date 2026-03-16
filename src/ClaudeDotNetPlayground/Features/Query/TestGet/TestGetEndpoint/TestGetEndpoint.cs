@@ -11,9 +11,12 @@ public sealed class TestGetEndpoint(TestGetUseCase useCase, ILogger<TestGetEndpo
     [HttpGet]
     public IActionResult Get()
     {
-        logger.LogInformation("TestGet request received");
+        logger.LogInformation("[TestGetEndpoint][Get] Processar requisição GET /test");
+
         var result = useCase.Execute();
-        logger.LogInformation("TestGet returning: {Result}", result);
+
+        logger.LogInformation("[TestGetEndpoint][Get] Retornar resposta do endpoint. Result={Result}", result);
+
         return Ok(result);
     }
 }

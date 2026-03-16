@@ -4,14 +4,18 @@ using Serilog.Context;
 
 namespace ClaudeDotNetPlayground.Infra.Security;
 
-public sealed class AuthenticateFilter(ITokenService tokenService) : IAsyncActionFilter
+public sealed class AuthenticateFilter(ITokenService tokenService, ILogger<AuthenticateFilter> logger) : IAsyncActionFilter
 {
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        logger.LogInformation("[AuthenticateFilter][OnActionExecutionAsync] Validar Bearer Token da requisição");
+
         var token = ExtractBearerToken(context.HttpContext);
 
         if (token is null)
         {
+            logger.LogWarning("[AuthenticateFilter][OnActionExecutionAsync] Retornar 401 - token ausente na requisição");
+
             context.Result = new ObjectResult(new ProblemDetails
             {
                 Status = StatusCodes.Status401Unauthorized,
@@ -27,6 +31,8 @@ public sealed class AuthenticateFilter(ITokenService tokenService) : IAsyncActio
 
         if (user is null)
         {
+            logger.LogWarning("[AuthenticateFilter][OnActionExecutionAsync] Retornar 401 - token inválido ou expirado");
+
             context.Result = new ObjectResult(new ProblemDetails
             {
                 Status = StatusCodes.Status401Unauthorized,
@@ -41,6 +47,8 @@ public sealed class AuthenticateFilter(ITokenService tokenService) : IAsyncActio
         using (LogContext.PushProperty("UserId", user.Id))
         using (LogContext.PushProperty("UserName", user.UserName))
         {
+            logger.LogInformation("[AuthenticateFilter][OnActionExecutionAsync] Prosseguir com requisição autenticada. UserId={UserId}, UserName={UserName}", user.Id, user.UserName);
+
             await next();
         }
     }
