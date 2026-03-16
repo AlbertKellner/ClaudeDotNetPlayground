@@ -89,3 +89,5 @@ app.MapHealthChecks("/health");
 Log.Information("[Program] Iniciar execução da aplicação");
 
 app.Run();
+
+public partial class Program { }
