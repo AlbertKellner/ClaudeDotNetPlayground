@@ -9,10 +9,14 @@ public sealed class WeatherConditionsGetUseCaseTests
 {
     private sealed class FakeOpenMeteoApiClient : IOpenMeteoApiClient
     {
+        public OpenMeteoInput? LastInput { get; private set; }
+
         public Task<OpenMeteoOutput> GetForecastAsync(
             OpenMeteoInput input,
             CancellationToken cancellationToken = default)
         {
+            LastInput = input;
+
             var output = new OpenMeteoOutput
             {
                 Latitude = input.Latitude,
@@ -93,5 +97,34 @@ public sealed class WeatherConditionsGetUseCaseTests
 
         Assert.IsType<OpenMeteoOutput>(result);
         Assert.Equal("America/Sao_Paulo", result.Timezone);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_DevePassarCoordenadaDeSaoPauloParaApi()
+    {
+        var fakeClient = new FakeOpenMeteoApiClient();
+        var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
+        var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
+
+        await useCase.ExecuteAsync();
+
+        Assert.NotNull(fakeClient.LastInput);
+        Assert.Equal(-23.5475, fakeClient.LastInput.Latitude);
+        Assert.Equal(-46.6361, fakeClient.LastInput.Longitude);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_DevePassarCamposDeCondicaoAtualParaApi()
+    {
+        var fakeClient = new FakeOpenMeteoApiClient();
+        var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
+        var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
+
+        await useCase.ExecuteAsync();
+
+        Assert.NotNull(fakeClient.LastInput);
+        Assert.Contains("temperature_2m", fakeClient.LastInput.Current);
+        Assert.Contains("weather_code", fakeClient.LastInput.Current);
+        Assert.Contains("wind_speed_10m", fakeClient.LastInput.Current);
     }
 }
