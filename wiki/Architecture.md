@@ -91,6 +91,26 @@ Os componentes de `Infra/` são transparentes para as Features:
 
 ---
 
+## Observabilidade
+
+### Datadog Agent (Docker)
+
+O [Datadog Agent](https://docs.datadoghq.com/agent/) é executado como container adjacente à aplicação e coleta:
+- Métricas de container e host via Docker socket
+- Métricas customizadas via DogStatsD
+
+A integração utiliza o modelo Docker sem APM. O tag `DD_ENV` varia por contexto de execução:
+
+| Contexto | `DD_ENV` | Como filtrar no Datadog |
+|----------|----------|------------------------|
+| Build/compilação | `build` | `env:build` |
+| CI run/healthcheck | `ci` | `env:ci` |
+| Local | `local` | `env:local` |
+
+Para execução local: copie `.env.example` para `.env`, preencha `DD_API_KEY` e execute `docker compose up`.
+
+---
+
 ## Features Implementadas
 
 | Feature | Tipo | Endpoint |
