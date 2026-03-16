@@ -172,6 +172,22 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - JWT secret configurado via `appsettings.json` (`Jwt:Secret`).
 - Token expira em 1 hora. Claims: `"id"` (int) e `"userName"` (string).
 
+### DA-017 — Padrão de Integração HTTP Externa: Shared/ExternalApi
+**Data**: 2026-03-16
+**Status**: Ativo
+**Decisão**: Toda integração com API HTTP externa deve ser implementada em `Shared/ExternalApi/<Servico>/`, contendo: interface Refit (`I<Servico>Api.cs`), interface de serviço (`I<Servico>ApiClient.cs`), classe cliente (`<Servico>ApiClient.cs`) e subpasta `Models/` com `<Servico>Input.cs` e `<Servico>Output.cs`. A comunicação HTTP usa Refit (`Refit.HttpClientFactory`). A resiliência usa Polly v8 via `Microsoft.Extensions.Http.Resilience` (`AddResilienceHandler`), configurada no `AddRefitClient` com retry exponencial e timeout por tentativa. O `BaseAddress` é configurado no `appsettings.json`; rotas específicas são codificadas diretamente nas interfaces Refit.
+**Motivação**: Centralizar integrações externas em `Shared/ExternalApi/` garante localização previsível, separação de responsabilidades (HTTP vs. negócio) e facilita evolução e teste independente de cada integração.
+**Alternativas consideradas**: `HttpClient` manual — descartado por boilerplate e menor expressividade. `IHttpClientFactory` sem Refit — descartado por ausência de tipagem via interface. Resiliência via `DelegatingHandler` manual — descartado em favor do `AddResilienceHandler` de `Microsoft.Extensions.Http.Resilience`, que é AOT-compatível e integra diretamente ao `IHttpClientBuilder`.
+**Trade-offs**: Refit com Native AOT requer configuração explícita de `JsonSerializerContext` para desserialização (`SystemTextJsonContentSerializer` com contexto source-generated). A `OpenMeteoJsonContext` garante compatibilidade AOT.
+**Consequências**:
+- Pacotes adicionados: `Refit.HttpClientFactory`, `Microsoft.Extensions.Http.Resilience`.
+- `BaseAddress` de toda integração deve ter entrada correspondente em `appsettings.json`.
+- Estratégia de resiliência padrão: `AddRetry` (externo, com `DelayBackoffType.Exponential`) + `AddTimeout` (interno, por tentativa).
+- Features podem depender de `I<Servico>ApiClient` de `Shared/ExternalApi/` via DI.
+- `<Servico>ApiClient` implementa `I<Servico>ApiClient` e aplica logging SNP-001 obrigatório.
+
+---
+
 ### DA-016 — Containerização e Observabilidade com Datadog Docker Agent
 **Data**: 2026-03-16
 **Status**: Ativo
@@ -240,3 +256,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-15 | DA-013 criada: JWT Bearer Token com AuthenticateFilter/AuthenticateAttribute; Infra/Security/ criada | RN-002, RN-003 |
 | 2026-03-15 | DA-007 atualizado: PRs explicitamente incluídos na regra de idioma. DA-014 criada: template de PR em português + workflow de validação | P006, instrução do usuário |
 | 2026-03-16 | DA-016 criada: containerização Docker + Datadog Agent; GitHub Environment ClaudeCode; DD_ENV por contexto | Instrução do usuário |
+| 2026-03-16 | DA-017 criada: padrão Shared/ExternalApi para integrações HTTP externas com Refit + Polly; primeira integração: Open-Meteo | Instrução do usuário |

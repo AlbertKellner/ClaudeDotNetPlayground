@@ -66,6 +66,19 @@ Cada regra segue a estrutura:
 
 ---
 
+### RN-004 — Consulta de condições climáticas atuais de São Paulo
+**Enunciado**: A aplicação deve expor um endpoint autenticado para consultar as condições climáticas atuais do município de São Paulo, retornando o payload completo retornado pela API Open-Meteo, sem filtragem, redução de campos ou mapeamento parcial.
+**Condição**: Quando uma requisição GET autenticada é recebida no endpoint de condições climáticas.
+**Ação**: O sistema consulta a API Open-Meteo (`GET /v1/forecast`) com as coordenadas centrais do município de São Paulo conforme indicadas pela Prefeitura de São Paulo (latitude: -23.5475, longitude: -46.6361) e os campos de condição atual definidos. Retorna HTTP 200 com o payload JSON completo da resposta da Open-Meteo, preservando sua estrutura original.
+**Exceções**: Nenhuma.
+**Dependências**: RN-003 (autenticação obrigatória).
+**BDD relacionado**: Nenhum no momento.
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
 ### Template de Regra de Negócio
 
 ```markdown
@@ -113,3 +126,4 @@ Cada regra segue a estrutura:
 | 2026-03-15 | RN-001 criada: endpoint TestGet retorna "funcionando" | Instrução do usuário |
 | 2026-03-15 | RN-002 criada: endpoint de login com JWT retornando id e userName | Instrução do usuário |
 | 2026-03-15 | RN-003 criada: proteção de endpoints por Bearer Token com enriquecimento de logs | Instrução do usuário |
+| 2026-03-16 | RN-004 criada: consulta de condições climáticas de São Paulo via Open-Meteo, payload completo | Instrução do usuário |

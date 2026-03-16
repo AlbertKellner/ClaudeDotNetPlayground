@@ -35,3 +35,14 @@ Toda requisição a endpoints da aplicação, exceto o endpoint de login e o de 
 - **Comportamento:** token válido → requisição processada normalmente; token ausente ou inválido → `HTTP 401`
 - **Documentação do endpoint protegido:** [Feature: Test Get](Feature-TestGet)
 - **Documentação do mecanismo:** [Autenticação JWT](Infra-Authentication)
+
+---
+
+## RN-004 — Consulta de condições climáticas de São Paulo
+
+A aplicação expõe um endpoint autenticado que retorna as condições climáticas atuais do município de São Paulo a partir da API Open-Meteo, preservando o payload completo da resposta sem filtragem ou mapeamento parcial.
+
+- **Endpoint:** `GET /weather-conditions`
+- **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
+- **Comportamento:** retorna `HTTP 200` com o payload completo da Open-Meteo; coordenadas de São Paulo e campos consultados são fixos na implementação
+- **Documentação completa:** [Feature: Condições Climáticas de São Paulo](Feature-WeatherConditionsGet)
