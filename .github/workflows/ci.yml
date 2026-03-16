@@ -13,6 +13,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    environment: ClaudeCode
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore dependencies
+        run: dotnet restore tests/ClaudeDotNetPlayground.Tests/ClaudeDotNetPlayground.Tests.csproj
+
+      - name: Run unit tests
+        run: dotnet test tests/ClaudeDotNetPlayground.Tests/ClaudeDotNetPlayground.Tests.csproj --verbosity normal
+
   build:
     runs-on: ubuntu-latest
     environment: ClaudeCode
@@ -287,6 +306,55 @@ jobs:
             echo "✅ Health check passed — application is healthy"
           else
             echo "❌ Health check failed — application returned HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+      - name: Call weather conditions endpoint
+        run: |
+          echo "Obtaining JWT token via POST http://localhost:5000/login ..."
+          echo ""
+
+          LOGIN_RESPONSE=$(curl -s -o /tmp/login_response.txt -w "%{http_code}" \
+            -X POST http://localhost:5000/login \
+            -H "Content-Type: application/json" \
+            -d '{"userName":"Albert","password":"albert123"}')
+
+          echo "Login status: $LOGIN_RESPONSE"
+
+          if [ "$LOGIN_RESPONSE" != "200" ]; then
+            echo "❌ Login failed with HTTP $LOGIN_RESPONSE"
+            cat /tmp/login_response.txt
+            exit 1
+          fi
+
+          TOKEN=$(cat /tmp/login_response.txt | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+          if [ -z "$TOKEN" ]; then
+            echo "❌ Token not found in login response"
+            cat /tmp/login_response.txt
+            exit 1
+          fi
+
+          echo "✅ Token obtained"
+          echo ""
+          echo "Calling GET http://localhost:5000/weather-conditions ..."
+          echo ""
+
+          HTTP_STATUS=$(curl -s -o /tmp/weather_response.txt -w "%{http_code}" \
+            -H "Authorization: Bearer $TOKEN" \
+            http://localhost:5000/weather-conditions)
+
+          RESPONSE=$(cat /tmp/weather_response.txt)
+
+          echo "=== Weather Conditions Result ==="
+          echo "Status: $HTTP_STATUS"
+          echo "Body:   $RESPONSE"
+          echo ""
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Weather conditions endpoint passed — returned HTTP 200"
+          else
+            echo "❌ Weather conditions endpoint failed — returned HTTP $HTTP_STATUS"
             exit 1
           fi
 
