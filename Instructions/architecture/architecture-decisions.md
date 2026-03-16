@@ -172,6 +172,22 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - JWT secret configurado via `appsettings.json` (`Jwt:Secret`).
 - Token expira em 1 hora. Claims: `"id"` (int) e `"userName"` (string).
 
+### DA-016 — Containerização e Observabilidade com Datadog Docker Agent
+**Data**: 2026-03-16
+**Status**: Ativo
+**Decisão**: A aplicação é containerizada via Dockerfile multi-stage (SDK para Native AOT → runtime-deps para imagem mínima). O Datadog Agent é executado como container adjacente via docker-compose, coletando métricas de container e host via Docker socket e DogStatsD. Sem APM. O `DD_ENV` varia por contexto de execução (`build`, `ci`, `local`) para permitir filtragem nos dashboards do Datadog. A API key é armazenada no GitHub Environment `ClaudeCode` como secret `DD_API_KEY`.
+**Motivação**: Prover observabilidade de infraestrutura e métricas de container de forma desacoplada da aplicação, sem alterar o código da app. O modelo Docker foi escolhido pelo usuário — integração via Docker socket é a abordagem recomendada pelo Datadog para coletar métricas de containers.
+**Alternativas consideradas**: APM com .NET tracer — descartado pelo usuário; incompatível com Native AOT (DA-009). Agente instalado no host — descartado em favor do modelo Docker por portabilidade.
+**Trade-offs**: O Datadog Agent consome recursos adicionais no mesmo host. Métricas de APM (traces da aplicação) não estão disponíveis nesta configuração.
+**Consequências**:
+- `src/ClaudeDotNetPlayground/Dockerfile` criado: estágio build com `mcr.microsoft.com/dotnet/sdk:10.0`, estágio runtime com `mcr.microsoft.com/dotnet/runtime-deps:10.0`.
+- `docker-compose.yml` criado na raiz: serviço `app` + serviço `datadog-agent` com configuração normativa do usuário.
+- `.env.example` criado: template com `DD_API_KEY`, `DD_SITE`, `DD_ENV=local`.
+- `.env` (gitignored): valores reais para execução local.
+- GitHub Environment `ClaudeCode` criado com secret `DD_API_KEY`.
+- `ci.yml` atualizado: todos os jobs declaram `environment: ClaudeCode`; jobs `run` e `healthcheck` iniciam o Datadog Agent container; `DD_ENV` diferente por job (`build`, `ci`).
+- Job `docker-build` adicionado ao CI: valida que o Dockerfile compila corretamente.
+
 ---
 
 ## Decisões Pendentes
@@ -223,3 +239,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-15 | DA-010 criada: IExceptionHandler com Problem Details como handler centralizado de exceções | P010, PAD-008 |
 | 2026-03-15 | DA-013 criada: JWT Bearer Token com AuthenticateFilter/AuthenticateAttribute; Infra/Security/ criada | RN-002, RN-003 |
 | 2026-03-15 | DA-007 atualizado: PRs explicitamente incluídos na regra de idioma. DA-014 criada: template de PR em português + workflow de validação | P006, instrução do usuário |
+| 2026-03-16 | DA-016 criada: containerização Docker + Datadog Agent; GitHub Environment ClaudeCode; DD_ENV por contexto | Instrução do usuário |

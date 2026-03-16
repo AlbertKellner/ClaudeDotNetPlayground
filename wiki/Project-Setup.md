@@ -106,6 +106,47 @@ Consulte [Health Check](Feature-Health) para mais detalhes sobre este endpoint.
 
 ---
 
+## Execução via Docker Compose
+
+Para executar a aplicação junto com o Datadog Agent localmente:
+
+### Pré-requisitos
+
+- **Docker** e **Docker Compose**
+- API key do Datadog
+
+### Configuração
+
+1. Copie o template de variáveis de ambiente:
+
+```bash
+cp .env.example .env
+```
+
+2. Preencha `DD_API_KEY` no arquivo `.env`:
+
+```
+DD_API_KEY=sua-api-key-aqui
+DD_SITE=datadoghq.com
+DD_ENV=local
+```
+
+### Inicialização
+
+```bash
+docker compose up
+```
+
+A aplicação ficará disponível em `http://localhost:8080`.
+
+```bash
+curl http://localhost:8080/health
+```
+
+> O arquivo `.env` é ignorado pelo git (`.gitignore`). Nunca comite a API key no repositório.
+
+---
+
 ## Funcionalidades disponíveis após inicialização
 
 | Endpoint | Descrição |

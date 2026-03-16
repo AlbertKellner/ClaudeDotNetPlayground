@@ -13,7 +13,9 @@ A aplicação possui dois pipelines de GitHub Actions: um pipeline de integraç�
 - Pull requests abertos, sincronizados ou reabertos
 - Execução manual via `workflow_dispatch`
 
-O pipeline é composto por **três jobs encadeados**, onde cada job depende do anterior:
+Todos os jobs utilizam o GitHub Environment **`ClaudeCode`**, onde o secret `DD_API_KEY` é armazenado para integração com o Datadog.
+
+O pipeline é composto por **quatro jobs**, onde `run` e `healthcheck` dependem de `build`, e `docker-build` é independente:
 
 ### Job 1: `build`
 
@@ -33,9 +35,11 @@ Verifica se a aplicação inicia corretamente a partir do binário compilado.
 
 **Passos:**
 1. Download do artefato `published-app`
-2. Execução do binário em background
-3. Verificação de startup via polling em `GET /health` (até 30 tentativas a cada 2 segundos)
-4. Falha se a aplicação não responder dentro de 60 segundos
+2. Inicialização do Datadog Agent container (`DD_ENV=ci`) se `DD_API_KEY` estiver disponível
+3. Execução do binário em background
+4. Verificação de startup via polling em `GET /health` (até 30 tentativas a cada 2 segundos)
+5. Falha se a aplicação não responder dentro de 60 segundos
+6. Encerramento do Datadog Agent ao final
 
 ### Job 3: `healthcheck`
 
@@ -43,10 +47,22 @@ Valida que o endpoint de saúde responde corretamente.
 
 **Passos:**
 1. Download do artefato `published-app`
-2. Inicialização da aplicação e aguarda readiness via `GET /health`
-3. Chamada explícita a `GET /health` e verificação do HTTP status
-4. Sucesso se `HTTP 200`; falha caso contrário
-5. Encerramento da aplicação ao final (mesmo em caso de falha)
+2. Inicialização do Datadog Agent container (`DD_ENV=ci`) se `DD_API_KEY` estiver disponível
+3. Inicialização da aplicação e aguarda readiness via `GET /health`
+4. Chamada explícita a `GET /health` e verificação do HTTP status
+5. Sucesso se `HTTP 200`; falha caso contrário
+6. Encerramento da aplicação e do Datadog Agent ao final (mesmo em caso de falha)
+
+### Job 4: `docker-build`
+
+Valida que o Dockerfile compila e que a imagem Docker sobe corretamente. Executa em paralelo com `build`.
+
+**Passos:**
+1. Checkout do repositório
+2. Build da imagem Docker com `docker build`
+3. Execução do container em modo de teste na porta `8080`
+4. Verificação de startup via polling em `GET /health` (até 30 tentativas a cada 2 segundos)
+5. Remoção do container de teste ao final
 
 ---
 
@@ -83,7 +99,18 @@ Todo PR criado no repositório utiliza automaticamente o template padrão, que i
 
 ---
 
+---
+
+## Datadog e GitHub Environment
+
+Todos os jobs declaram `environment: ClaudeCode`. O secret `DD_API_KEY` deve ser cadastrado neste environment no GitHub (Settings → Environments → ClaudeCode → Secrets).
+
+Se o secret não estiver disponível (ex: PR de fork), o Datadog Agent é simplesmente ignorado e o job continua normalmente.
+
+---
+
 ## Relação com o Projeto
 
 - O job `healthcheck` valida o endpoint documentado em [Feature: Health Check](Feature-Health)
 - O build Native AOT é descrito em [Configuração do Projeto](Project-Setup)
+- A integração Docker e Datadog é descrita em [Arquitetura](Architecture)

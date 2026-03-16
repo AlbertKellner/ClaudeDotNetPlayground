@@ -42,6 +42,27 @@ Esses comportamentos estão escritos aqui e devem ser executados automaticamente
 
 ---
 
+## Pipeline de Validação Pré-Commit (Obrigatório)
+
+Antes de qualquer commit, executar obrigatoriamente esta sequência:
+
+1. `dotnet build` — verificar compilação sem erros
+2. `docker compose up -d` — iniciar aplicação + Datadog Agent em Docker
+3. Aguardar `/health` responder HTTP 200 (polling até 30 tentativas)
+4. Exibir logs do container da aplicação
+5. `docker compose down` — parar todos os containers
+6. Somente então realizar o commit
+
+**A aplicação deve ser executada via `docker compose`** para que os logs fluam ao Datadog e o usuário possa visualizá-los em tempo real.
+
+Se Docker daemon não estiver disponível no ambiente (ex: sandbox sem socket):
+- Usar `dotnet build` + `dotnet run` para validar build e health check
+- Registrar como premissa de ambiente; os logs aparecerão no Datadog quando o CI executar
+
+Se não houver `.env` com `DD_API_KEY` válida, registrar como premissa e prosseguir apenas com build + health check (sem Datadog).
+
+---
+
 ## Pipeline de Execução Obrigatório
 
 Para toda mensagem do usuário, siga internamente esta sequência:
