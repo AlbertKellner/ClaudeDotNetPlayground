@@ -59,6 +59,20 @@ Este arquivo contém **apenas** premissas **ainda ativas** ou ainda não confirm
 | **Precisa de confirmação** | Não — implícito pela natureza do bootstrap |
 | **Status** | Ativo |
 
+### PREM-004
+| Campo | Valor |
+|---|---|
+| **Id** | PREM-004 |
+| **Data** | 2026-03-17 |
+| **Premissa** | O ambiente de execução (sandbox Claude Code) usa proxy HTTP com inspeção TLS (`21.0.0.183:15004`, CA: `sandbox-egress-production TLS Inspection CA`). Containers Docker não herdam proxy/CA do host automaticamente sem configuração explícita. |
+| **Motivo** | Erros de DNS e TLS durante docker build e execução do Datadog Agent confirmaram a necessidade de configuração explícita de proxy e CA trust. |
+| **Escopo** | `docker-compose.yml`, `Dockerfile`, pipeline de build Docker |
+| **Artefatos impactados** | `docker-compose.yml`, `src/ClaudeDotNetPlayground/Dockerfile`, `.env` (EXTRA_CA_CERT), `~/.docker/config.json` |
+| **Nível de risco** | Médio — afeta qualquer operação Docker que precise de acesso externo |
+| **Precisa de confirmação** | Não — confirmado empiricamente durante execução do pipeline |
+| **Status** | Ativo |
+| **Log de erros** | `bash-errors-log.md` — erros completos documentados com causa e solução |
+
 ---
 
 ## Template para Nova Premissa

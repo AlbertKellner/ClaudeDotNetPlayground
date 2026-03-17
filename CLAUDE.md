@@ -96,6 +96,7 @@ Para toda mensagem do usuário, siga internamente esta sequência:
 @Instructions/wiki/wiki-governance.md
 @open-questions.md
 @assumptions-log.md
+@bash-errors-log.md
 
 ### Rules operacionais ativas
 
