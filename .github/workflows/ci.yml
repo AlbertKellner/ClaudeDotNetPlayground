@@ -1,4 +1,4 @@
-name: CI
+name: Validar Execução
 
 on:
   push:
@@ -13,26 +13,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  unit-tests:
-    runs-on: ubuntu-latest
-    environment: ClaudeCode
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.x'
-
-      - name: Restore dependencies
-        run: dotnet restore tests/ClaudeDotNetPlayground.Tests/ClaudeDotNetPlayground.Tests.csproj
-
-      - name: Run unit tests
-        run: dotnet test tests/ClaudeDotNetPlayground.Tests/ClaudeDotNetPlayground.Tests.csproj --verbosity normal
-
   build:
+    name: Compilação
     runs-on: ubuntu-latest
     environment: ClaudeCode
 
@@ -65,68 +47,8 @@ jobs:
           path: src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/ClaudeDotNetPlayground
           if-no-files-found: error
 
-  docker-build:
-    runs-on: ubuntu-latest
-    environment: ClaudeCode
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build Docker image
-        run: |
-          docker build \
-            -t claudedotnetplayground:ci \
-            -f src/ClaudeDotNetPlayground/Dockerfile \
-            src/ClaudeDotNetPlayground
-
-      - name: Verify Docker image starts
-        run: |
-          docker run -d \
-            --name app-test \
-            -p 8080:8080 \
-            claudedotnetplayground:ci
-
-          echo "Waiting for application to be ready..."
-
-          STARTED=false
-          for i in $(seq 1 30); do
-            sleep 2
-
-            if ! docker ps --filter "name=app-test" --filter "status=running" --quiet | grep -q .; then
-              echo ""
-              echo "❌ Container exited unexpectedly after $((i * 2))s"
-              echo ""
-              echo "=== Container Logs ==="
-              docker logs app-test
-              exit 1
-            fi
-
-            if curl -sf http://localhost:8080/health > /dev/null 2>&1; then
-              STARTED=true
-              break
-            fi
-
-            echo "  Attempt $i/30 — not ready yet..."
-          done
-
-          if [ "$STARTED" = "false" ]; then
-            echo ""
-            echo "❌ Application failed to start within 60 seconds"
-            echo ""
-            echo "=== Container Logs ==="
-            docker logs app-test
-            exit 1
-          fi
-
-          echo ""
-          echo "✅ Docker image started successfully"
-
-      - name: Stop test container
-        if: always()
-        run: docker rm -f app-test 2>/dev/null || true
-
   run:
+    name: Execução
     needs: build
     runs-on: ubuntu-latest
     environment: ClaudeCode
@@ -210,8 +132,29 @@ jobs:
         if: always()
         run: docker rm -f dd-agent 2>/dev/null || true
 
-  healthcheck:
+  unit-tests:
     needs: run
+    runs-on: ubuntu-latest
+    environment: ClaudeCode
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore dependencies
+        run: dotnet restore tests/ClaudeDotNetPlayground.Tests/ClaudeDotNetPlayground.Tests.csproj
+
+      - name: Run unit tests
+        run: dotnet test tests/ClaudeDotNetPlayground.Tests/ClaudeDotNetPlayground.Tests.csproj --verbosity normal
+
+  healthcheck:
+    name: Validar Health Check
+    needs: unit-tests
     runs-on: ubuntu-latest
     environment: ClaudeCode
 

@@ -18,7 +18,7 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Persistência | A definir por Feature | — |
 | Mensageria | A definir | — |
 | Containerização | Docker — Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent | DA-016 |
-| CI/CD | GitHub Actions — workflows: build (Native AOT), run, healthcheck, docker-build, pr-language-check, wiki-publish; GitHub Environment: ClaudeCode | — |
+| CI/CD | GitHub Actions — workflows: Validar Execução (`ci.yml`: Compilação → Execução → unit-tests → Validar Health Check), wiki-publish; GitHub Environment: ClaudeCode | — |
 | Observabilidade (logging) | Serilog — Console colorido (AnsiConsoleTheme.Code) + storytelling por classe/método + enrichment por request | DA-011, DA-015, DP-004 parcial |
 | Observabilidade (tracing) | A definir | DP-004 |
 | Observabilidade (métricas) | Datadog Agent (Docker) — métricas de container e host via Docker socket; DogStatsD para métricas customizadas; filtros por env: build, ci, local | DA-016, DP-004 parcial |
@@ -149,3 +149,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-16 | Containerização adicionada: Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent; GitHub Environment ClaudeCode; DD_ENV por contexto (build, ci, local) para filtragem no Datadog | DA-016 |
 | 2026-03-16 | Integração HTTP externa adicionada: Refit + Polly; Shared/ExternalApi/OpenMeteo/ criada; Feature WeatherConditionsGet implementada; RN-004 | DA-017, RN-004 |
 | 2026-03-17 | Restrição adicionada: toda feature com endpoint deve ser validada via chamada HTTP real antes do commit; geração de token quando necessário | endpoint-validation rule |
+| 2026-03-17 | Workflows de CI/CD reorganizados: pr-language-check e docker-build removidos; CI renomeado para "Validar Execução"; jobs renomeados para Compilação, Execução e Validar Health Check; unit-tests inserido na cadeia sequencial entre Execução e Validar Health Check | — |
