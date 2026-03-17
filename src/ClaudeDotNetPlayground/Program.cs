@@ -9,6 +9,7 @@ using ClaudeDotNetPlayground.Infra.Middlewares;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using ClaudeDotNetPlayground.Infra.HealthChecks;
 using ClaudeDotNetPlayground.Infra.Security;
 using ClaudeDotNetPlayground.Shared.ExternalApi.OpenMeteo;
 using Microsoft.Extensions.Http.Resilience;
@@ -68,7 +69,15 @@ builder.Services.AddControllers(options =>
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonContext.Default));
 builder.Services.AddSingleton<IObjectModelValidator, NoOpObjectModelValidator>();
-builder.Services.AddHealthChecks();
+
+builder.Services.AddHttpClient("datadog-agent", c =>
+{
+    c.BaseAddress = new Uri(builder.Configuration["Datadog:AgentUrl"] ?? "http://datadog-agent:8126");
+    c.Timeout = TimeSpan.FromSeconds(5);
+});
+
+builder.Services.AddHealthChecks()
+    .AddCheck<DatadogAgentHealthCheck>("datadog-agent");
 
 Log.Information("[Program] Registrar integrações com APIs externas");
 
