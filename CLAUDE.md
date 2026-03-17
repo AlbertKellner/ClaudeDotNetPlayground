@@ -60,9 +60,10 @@ Antes de qualquer commit, executar obrigatoriamente esta sequência:
 1. `dotnet build` — verificar compilação sem erros
 2. `docker compose up -d` — iniciar aplicação + Datadog Agent em Docker
 3. Aguardar `/health` responder HTTP 200 (polling até 30 tentativas)
-4. Exibir logs do container da aplicação
-5. `docker compose down` — parar todos os containers
-6. Somente então realizar o commit
+4. Se a tarefa criou ou alterou features com endpoint: validar cada endpoint via chamada HTTP real (ver `.claude/rules/endpoint-validation.md`). Se o endpoint exigir autenticação, obter Bearer Token via `POST /login` antes de consumir. Status code inesperado bloqueia o commit.
+5. Exibir logs do container da aplicação
+6. `docker compose down` — parar todos os containers
+7. Somente então realizar o commit
 
 **O Passo 0 é obrigatório e não deve ser pulado.** Previne o ciclo de falhas em cascata documentado em `bash-errors-log.md`. Ver `.claude/rules/environment-readiness.md` para o protocolo completo.
 
@@ -125,6 +126,7 @@ Para toda mensagem do usuário, siga internamente esta sequência:
 @.claude/rules/repository-context-evolution.md
 @.claude/rules/bash-error-logging.md
 @.claude/rules/environment-readiness.md
+@.claude/rules/endpoint-validation.md
 
 ---
 

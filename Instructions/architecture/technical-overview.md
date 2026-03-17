@@ -113,6 +113,7 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 - Todo código deve compilar sem erros (`dotnet build`) antes de qualquer commit.
 - Todos os testes devem passar sem erros antes de qualquer commit.
 - A aplicação deve ser iniciada via `docker compose up -d` e responder HTTP 200 em `/health` antes de qualquer commit.
+- Toda feature com endpoint criada ou alterada deve ser validada via chamada HTTP real ao endpoint, com a aplicação em execução, antes do commit. Se o endpoint exigir autenticação, o Bearer Token deve ser obtido via `POST /login` antes da chamada. Ver `.claude/rules/endpoint-validation.md`.
 - O Datadog Agent deve estar ativo durante a execução de validação pré-commit para que logs fluam ao Datadog.
 - `docker compose down` deve ser executado após a validação pré-commit.
 - Slices não podem depender de outras Slices diretamente.
@@ -147,3 +148,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-15 | Padrões de logging definidos: formato `[Classe][Método]`, storytelling, console colorido ANSI, template com timestamp/correlationId/userName, isolamento visual, testes de log | DA-015, SNP-001 |
 | 2026-03-16 | Containerização adicionada: Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent; GitHub Environment ClaudeCode; DD_ENV por contexto (build, ci, local) para filtragem no Datadog | DA-016 |
 | 2026-03-16 | Integração HTTP externa adicionada: Refit + Polly; Shared/ExternalApi/OpenMeteo/ criada; Feature WeatherConditionsGet implementada; RN-004 | DA-017, RN-004 |
+| 2026-03-17 | Restrição adicionada: toda feature com endpoint deve ser validada via chamada HTTP real antes do commit; geração de token quando necessário | endpoint-validation rule |
