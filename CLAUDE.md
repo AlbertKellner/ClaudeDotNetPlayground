@@ -112,6 +112,7 @@ Para toda mensagem do usuário, siga internamente esta sequência:
 @.claude/rules/folder-governance.md
 @.claude/rules/change-propagation.md
 @.claude/rules/repository-context-evolution.md
+@.claude/rules/bash-error-logging.md
 
 ---
 
