@@ -19,10 +19,6 @@ using Refit;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
-[assembly: DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Query.TestGet.TestGetEndpoint))]
-[assembly: DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Command.UserLogin.UserLoginEndpoint))]
-[assembly: DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Query.WeatherConditionsGet.WeatherConditionsGetEndpoint))]
-
 const string OutputTemplate =
     "[{Timestamp:dd/MM/yyyy HH:mm:ss.fffffff}] [{CorrelationId}] [{UserName}] {Message:lj}{NewLine}{Exception}";
 
@@ -138,3 +134,13 @@ app.MapHealthChecks("/health");
 Log.Information("[Program] Iniciar execução da aplicação");
 
 app.Run();
+
+// AOT: DynamicDependency deve ser aplicado em método, constructor ou field — não em assembly.
+// Esta classe preserva os tipos de Controller para Native AOT sem usar [assembly: DynamicDependency].
+internal static class AotControllerPreservation
+{
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Query.TestGet.TestGetEndpoint))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Command.UserLogin.UserLoginEndpoint))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Query.WeatherConditionsGet.WeatherConditionsGetEndpoint))]
+    private static void PreserveControllers() { }
+}

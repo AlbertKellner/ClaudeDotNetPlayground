@@ -57,19 +57,23 @@ Ver detalhamento completo em `.claude/rules/environment-readiness.md`.
 Antes de qualquer commit, executar obrigatoriamente esta sequência:
 
 0. Verificar pré-requisitos de ambiente (checklist em `.claude/rules/environment-readiness.md`). O ambiente deve estar pronto — se não estiver, seguir o protocolo de ambiente não pronto antes de prosseguir.
-1. `dotnet build` — verificar compilação sem erros
-2. `docker compose up -d` — iniciar aplicação + Datadog Agent em Docker
-3. Aguardar `/health` responder HTTP 200 (polling até 30 tentativas)
-4. Se a tarefa criou ou alterou features com endpoint: validar cada endpoint via chamada HTTP real (ver `.claude/rules/endpoint-validation.md`). Se o endpoint exigir autenticação, obter Bearer Token via `POST /login` antes de consumir. Status code inesperado bloqueia o commit.
-5. Exibir logs do container da aplicação
-6. `docker compose down` — parar todos os containers
-7. Somente então realizar o commit
+1. `dotnet build` — verificar compilação em modo Debug sem erros
+2. `dotnet run` (modo debug) — iniciar a aplicação localmente, aguardar `/health` responder (qualquer código HTTP confirma inicialização), encerrar o processo. Primeira validação em modo debug antes de executar os testes.
+3. `dotnet test` — executar todos os testes em modo debug. **Gate obrigatório**: falha em qualquer teste bloqueia o avanço para os passos seguintes. Somente se todos os testes passarem, prosseguir.
+4. `docker compose up -d` — publicar (Release/Native AOT) e iniciar aplicação + Datadog Agent em Docker. Executado somente após aprovação no gate de testes (passo 3).
+5. Aguardar `/health` responder HTTP 200 (polling até 30 tentativas)
+6. Se a tarefa criou ou alterou features com endpoint: validar cada endpoint via chamada HTTP real (ver `.claude/rules/endpoint-validation.md`). Se o endpoint exigir autenticação, obter Bearer Token via `POST /login` antes de consumir. Status code inesperado bloqueia o commit.
+7. Exibir logs do container da aplicação
+8. `docker compose down` — parar todos os containers
+9. Somente então realizar o commit
 
 **O Passo 0 é obrigatório e não deve ser pulado.** Previne o ciclo de falhas em cascata documentado em `bash-errors-log.md`. Ver `.claude/rules/environment-readiness.md` para o protocolo completo.
 
+**O Passo 3 é um gate obrigatório.** O `docker compose up -d` (publish Release/AOT) só deve ser executado após todos os testes passarem em modo debug. Testes falhando bloqueiam o commit — corrigir antes de avançar.
+
 **`scripts/setup-env.sh` é um modelo declarativo** copiado manualmente pelo usuário em ferramenta externa de configuração de container. O agente não executa esse script — o ambiente deve chegar já pronto. Se um pré-requisito estiver ausente, o agente atualiza o script e sinaliza ao usuário para sincronizar a ferramenta externa.
 
-**A aplicação deve ser executada via `docker compose`** para que os logs fluam ao Datadog e o usuário possa visualizá-los em tempo real.
+**A aplicação deve ser executada via `docker compose`** para que os logs fluam ao Datadog e o usuário possa visualizá-los em tempo real. A execução em modo debug (passo 2) é uma validação intermediária local, não substitui a execução via Docker.
 
 Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Datadog — os logs aparecerão quando o CI executar com a chave configurada.
 
