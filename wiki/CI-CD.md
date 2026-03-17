@@ -1,6 +1,6 @@
 # CI/CD
 
-A aplicação possui dois pipelines de GitHub Actions: um pipeline de integração contínua (`ci.yml`) e um de validação de pull requests (`pr-language-check.yml`).
+A aplicação possui três pipelines de GitHub Actions: um pipeline de integração contínua (`ci.yml`), um de validação do endpoint de tempo (`validate-weather.yml`) e um de validação de pull requests (`pr-language-check.yml`).
 
 ---
 
@@ -66,6 +66,31 @@ Valida que o Dockerfile compila e que a imagem Docker sobe corretamente. Executa
 
 ---
 
+## Pipeline de Validação do Endpoint de Tempo
+
+**Arquivo:** `.github/workflows/validate-weather.yml`
+
+**Gatilhos:**
+- Conclusão bem-sucedida do workflow `CI` (via `workflow_run`)
+- Execução manual via `workflow_dispatch`
+
+Este workflow valida especificamente o endpoint autenticado `GET /weather-conditions` (RN-004), exercitando o fluxo completo de autenticação + consulta ao tempo.
+
+O job `validate-weather` utiliza o GitHub Environment **`ClaudeCode`** e executa os seguintes passos:
+
+### Job: `validate-weather`
+
+**Passos:**
+1. Checkout do repositório (no SHA do workflow disparador ou HEAD para execução manual)
+2. Configuração do .NET 10
+3. Restore de dependências
+4. Inicialização da aplicação via `dotnet run` e aguarda readiness via polling em `GET /health` (até 30 tentativas a cada 2 segundos)
+5. **Gerar token JWT** — `POST /login` com as credenciais do usuário registrado; extrai o token da resposta
+6. **Validar endpoint de tempo** — `GET /weather-conditions` com o header `Authorization: Bearer <token>`; verifica `HTTP 200` e exibe o payload retornado
+7. Encerramento da aplicação ao final (mesmo em caso de falha)
+
+---
+
 ## Pipeline de Validação de Pull Requests
 
 **Arquivo:** `.github/workflows/pr-language-check.yml`
@@ -112,5 +137,6 @@ Se o secret não estiver disponível (ex: PR de fork), o Datadog Agent é simple
 ## Relação com o Projeto
 
 - O job `healthcheck` valida o endpoint documentado em [Feature: Health Check](Feature-Health)
+- O workflow `validate-weather` valida o endpoint documentado em [Feature: Condições Climáticas](Feature-WeatherConditionsGet)
 - O build Native AOT é descrito em [Configuração do Projeto](Project-Setup)
 - A integração Docker e Datadog é descrita em [Arquitetura](Architecture)
