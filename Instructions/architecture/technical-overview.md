@@ -111,7 +111,8 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 ## Restrições Técnicas Conhecidas
 
 - Todo código deve compilar sem erros (`dotnet build`) antes de qualquer commit.
-- Todos os testes devem passar sem erros antes de qualquer commit.
+- A aplicação deve ser validada em modo debug (`dotnet run`) antes de executar os testes — o processo deve iniciar e responder em `/health` (qualquer código HTTP) antes de ser encerrado.
+- Todos os testes devem passar em modo debug (`dotnet test`) antes de qualquer `docker compose up -d`. O publish Release/AOT só é executado após aprovação no gate de testes.
 - A aplicação deve ser iniciada via `docker compose up -d` e responder HTTP 200 em `/health` antes de qualquer commit.
 - Toda feature com endpoint criada ou alterada deve ser validada via chamada HTTP real ao endpoint, com a aplicação em execução, antes do commit. Se o endpoint exigir autenticação, o Bearer Token deve ser obtido via `POST /login` antes da chamada. Ver `.claude/rules/endpoint-validation.md`.
 - O Datadog Agent deve estar ativo durante a execução de validação pré-commit para que logs fluam ao Datadog.
@@ -150,3 +151,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-16 | Integração HTTP externa adicionada: Refit + Polly; Shared/ExternalApi/OpenMeteo/ criada; Feature WeatherConditionsGet implementada; RN-004 | DA-017, RN-004 |
 | 2026-03-17 | Restrição adicionada: toda feature com endpoint deve ser validada via chamada HTTP real antes do commit; geração de token quando necessário | endpoint-validation rule |
 | 2026-03-17 | Workflows de CI/CD reorganizados: pr-language-check e docker-build removidos; CI renomeado para "Validar Execução"; jobs renomeados para Compilação, Execução e Validar Health Check; unit-tests inserido na cadeia sequencial entre Execução e Validar Health Check | — |
+| 2026-03-17 | Restrições adicionadas: validação em modo debug (dotnet run + dotnet test) como gate obrigatório antes do docker compose up -d (publish Release/AOT); health check pós-publish explicitamente separado da validação debug | Pipeline pré-commit |
