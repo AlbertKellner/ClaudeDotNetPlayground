@@ -4,7 +4,7 @@
 
 Esta rule define dois comportamentos obrigatórios e complementares:
 
-1. **Verificação de prontidão de ambiente**: antes de qualquer pipeline de build, execução Docker ou deploy, verificar e preparar proativamente todas as dependências do ambiente deste repositório.
+1. **Verificação de prontidão de ambiente**: antes de qualquer pipeline de build, execução Docker ou deploy, verificar os pré-requisitos do ambiente. O ambiente deve chegar já configurado — se não estiver, atualizar o script canônico e sinalizar ao usuário.
 2. **Eficiência de execução**: em toda tarefa, identificar e eliminar etapas desnecessárias, antecipar validações e reaproveitar artefatos já disponíveis.
 
 Estes comportamentos eliminam o padrão de falha documentado em `bash-errors-log.md`: o agente executa etapas custosas, encontra um erro previsível apenas no final, corrige o ambiente e reinicia tudo do zero. Esse ciclo é inaceitável e prevenível.
@@ -22,18 +22,13 @@ Estes comportamentos eliminam o padrão de falha documentado em `bash-errors-log
 
 ## Parte 1: Script de Bootstrap de Ambiente
 
-### O Script Canônico
+### Natureza do Script
 
-Este repositório mantém `scripts/setup-env.sh` como o script de bootstrap canônico de ambiente. Ele consolida em um único lugar executável toda preparação necessária para que o pipeline de build e run funcione na primeira tentativa.
+`scripts/setup-env.sh` é um **modelo declarativo de configuração de ambiente**. Ele não é executado pelo agente — é copiado manualmente pelo usuário em uma ferramenta externa de configuração de container (ex: devcontainer, ambiente de CI, configurador de sandbox). O ambiente resultante deve chegar ao agente já pronto para uso.
 
-**O script deve ser executado:**
-- No início de toda sessão de trabalho que envolverá operações Docker
-- Antes de qualquer `docker compose up`, `docker build` ou operação que dependa do Docker daemon
-- Sempre que houver dúvida sobre o estado do ambiente
+**O agente nunca deve executar `scripts/setup-env.sh` diretamente** nem tentar replicar seu conteúdo manualmente como workaround de ambiente não configurado.
 
-**O script é idempotente:** executá-lo quando o ambiente já está corretamente configurado é uma no-op segura — nenhum estado existente é destruído.
-
-### Responsabilidade do Script de Bootstrap
+### Responsabilidade do Script
 
 O script `scripts/setup-env.sh` deve conter **tudo** o que for necessário para preparar o ambiente do zero, incluindo:
 
@@ -44,19 +39,35 @@ O script `scripts/setup-env.sh` deve conter **tudo** o que for necessário para 
 - Verificação de disponibilidade de certificados TLS e CA do proxy
 - Qualquer outro pré-requisito recorrente identificado em sessões anteriores
 
-**Princípio de concentração**: dependências conhecidas, sensíveis ou recorrentes devem ser resolvidas no script de bootstrap, não tratadas de forma reativa durante tentativas de build, run ou debug. Se uma dependência é conhecida antes da execução, sua verificação e preparação pertencem ao script.
+**Princípio de concentração**: toda dependência conhecida, sensível ou recorrente pertence ao script — não deve ser tratada de forma reativa durante build, run ou debug.
 
-### Quando NÃO Executar o Script
+### Quando o Ambiente Não Está Pronto
 
-- Quando o ambiente já foi verificado nesta sessão e nenhuma alteração estrutural ocorreu
-- Quando a tarefa não envolve Docker (ex: somente `dotnet build` sem run)
-- Quando o agente verificou manualmente que todos os pré-requisitos estão satisfeitos (ver checklist abaixo)
+Se o agente detectar que um pré-requisito do ambiente está ausente (ex: `.env` inexistente, Docker daemon parado, proxy não configurado), isso significa que a ferramenta externa não foi atualizada com a versão mais recente do script.
+
+**Comportamento obrigatório do agente nesse caso:**
+
+1. **Identificar** qual pré-requisito está ausente e qual trecho do script o cobre
+2. **Verificar** se o trecho correspondente já existe em `scripts/setup-env.sh`
+3. **Se não existir:** atualizar `scripts/setup-env.sh` com o trecho que resolve o pré-requisito ausente
+4. **Sinalizar ao usuário** com a seguinte mensagem padronizada:
+
+```
+[Ambiente não pronto — ferramenta externa desatualizada]
+
+Pré-requisito ausente: [descrição do que está faltando]
+Causa provável: scripts/setup-env.sh foi atualizado mas a ferramenta externa de configuração de container ainda não foi sincronizada.
+
+O script foi atualizado nesta sessão. Copie o conteúdo atualizado de scripts/setup-env.sh para a ferramenta de configuração de container e reaplique o ambiente antes de continuar.
+```
+
+5. **Não prosseguir** com operações que dependem do pré-requisito ausente até que o usuário confirme que o ambiente foi reconfigurado.
 
 ---
 
 ## Parte 2: Checklist de Pré-requisitos
 
-Quando `scripts/setup-env.sh` não estiver disponível ou quando for necessária verificação manual, aplicar este checklist antes de qualquer operação Docker:
+Aplicar este checklist antes de qualquer operação Docker para verificar se o ambiente está pronto:
 
 | # | Pré-requisito | Comando de Verificação | Estado Esperado |
 |---|---|---|---|
@@ -68,52 +79,7 @@ Quando `scripts/setup-env.sh` não estiver disponível ou quando for necessária
 
 **Todos os 5 pré-requisitos devem estar satisfeitos antes de executar `docker compose up`.**
 
-### Preparação Manual por Pré-requisito
-
-Se o script `setup-env.sh` não puder ser executado, preparar cada dependência ausente individualmente:
-
-#### Pré-requisito 2 ausente — Arquivo `.env` ausente ou incompleto
-
-```bash
-DD_API_KEY=$(env | grep DD_API_KEY | cut -d= -f2)
-EXTRA_CA_CERT=$(base64 -w 0 /usr/local/share/ca-certificates/swp-ca-production.crt 2>/dev/null || echo "")
-echo "DD_API_KEY=${DD_API_KEY}" > .env
-[ -n "$EXTRA_CA_CERT" ] && echo "EXTRA_CA_CERT=${EXTRA_CA_CERT}" >> .env
-```
-
-Se `DD_API_KEY` estiver vazia no host: registrar premissa em `assumptions-log.md` — execução continuará sem Datadog, apenas com build e health check local.
-
-#### Pré-requisito 3 ausente — Docker daemon não em execução
-
-```bash
-dockerd --host=unix:///var/run/docker.sock &>/tmp/dockerd.log &
-sleep 6
-ls /var/run/docker.sock
-```
-
-O daemon não inicia automaticamente neste ambiente (sem systemd). Esse comportamento é esperado — não registrar como erro. Ver PREM-004 em `assumptions-log.md`.
-
-#### Pré-requisito 4 ausente — `~/.docker/config.json` sem proxy
-
-```bash
-HTTP_PROXY_VAL=$(env | grep -i "^HTTP_PROXY\|^http_proxy" | head -1 | cut -d= -f2-)
-HTTPS_PROXY_VAL=$(env | grep -i "^HTTPS_PROXY\|^https_proxy" | head -1 | cut -d= -f2-)
-NO_PROXY_VAL=$(env | grep -i "^NO_PROXY\|^no_proxy" | head -1 | cut -d= -f2-)
-mkdir -p ~/.docker
-cat > ~/.docker/config.json <<EOF
-{
-  "proxies": {
-    "default": {
-      "httpProxy": "${HTTP_PROXY_VAL}",
-      "httpsProxy": "${HTTPS_PROXY_VAL}",
-      "noProxy": "${NO_PROXY_VAL}"
-    }
-  }
-}
-EOF
-```
-
-Esta configuração é necessária para que containers de build herdem o proxy do host. Ver Erros 2 e 3 em `bash-errors-log.md`.
+Se algum pré-requisito estiver ausente → seguir o protocolo da Parte 1 (atualizar script + sinalizar usuário). O agente não deve tentar corrigir o ambiente manualmente.
 
 ---
 
@@ -162,45 +128,21 @@ Se a resposta for sim, aplicar a otimização. Se a resposta for não, prossegui
 
 ## Parte 4: Evolução do Script de Bootstrap
 
-### Identificação de Melhorias
+### Quando Atualizar o Script
 
-Sempre que o agente executar uma configuração manual de ambiente que não estava no `scripts/setup-env.sh`, deve:
+O agente **pode e deve** atualizar `scripts/setup-env.sh` autonomamente quando:
+- Um pré-requisito ausente no ambiente não está coberto pelo script
+- Uma nova dependência de ambiente for identificada durante uma sessão
+- Um comando manual que resolve um problema recorrente não está no script
 
-1. **Identificar** que essa configuração poderia ter sido feita pelo script
-2. **Reportar ao usuário** ao final da tarefa, descrevendo claramente:
-   - O que foi feito manualmente
-   - Por que isso poderia estar no script
-   - O trecho exato que poderia ser adicionado
+Nesses casos, o agente atualiza o script e emite o sinal padronizado (ver Parte 1) para que o usuário sincronize a ferramenta externa.
 
-3. **Não alterar o script autonomamente** — o script de bootstrap é um artefato de infraestrutura relevante e sua evolução requer instrução explícita do usuário
+### Exemplos de Situações que Disparam Atualização
 
-4. **Formatar a sugestão como snippet pronto para copiar**
-
-### Formato Obrigatório de Feedback
-
-```
-[Sugestão de melhoria para scripts/setup-env.sh]
-
-O que foi feito manualmente nesta sessão: [descrição]
-Por que pertence ao script: [justificativa]
-
-Trecho sugerido:
-
----
-[código exato]
----
-
-Adicionar ao scripts/setup-env.sh eliminará esse passo manual nas próximas sessões.
-```
-
-### Exemplos de Situações que Geram Feedback
-
-- Docker proxy foi configurado manualmente em `~/.docker/config.json`
-- Arquivo `.env` foi criado manualmente após o pipeline falhar
-- Docker daemon foi iniciado manualmente com `dockerd &`
-- Certificado CA foi copiado manualmente para o container
-- Qualquer variável de ambiente foi exportada manualmente para corrigir uma falha
-- Qualquer diretório ou arquivo de configuração foi criado manualmente para desbloquear uma operação
+- Novo pré-requisito identificado que o script ainda não verifica
+- Nova variável de ambiente necessária que o script não exporta
+- Nova dependência de certificado ou proxy não coberta
+- Novo diretório, arquivo de configuração ou permissão necessária ao ambiente
 
 ---
 
