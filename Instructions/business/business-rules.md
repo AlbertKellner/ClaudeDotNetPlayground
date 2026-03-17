@@ -96,6 +96,19 @@ Cada regra segue a estrutura:
 
 ---
 
+### RN-005 — Health Check com verificação do Datadog Agent
+**Enunciado**: O endpoint de health check da aplicação deve verificar a disponibilidade do Datadog Agent além da própria aplicação.
+**Condição**: Quando uma requisição GET é recebida no endpoint `/health`.
+**Ação**: O sistema verifica se o Datadog Agent está acessível via HTTP. Se ambos (aplicação e Datadog Agent) estiverem disponíveis, retorna HTTP 200 com corpo `Healthy`. Se o Datadog Agent responder com status inesperado, retorna HTTP 200 com corpo `Degraded`. Se o Datadog Agent estiver inacessível, retorna HTTP 503 com corpo `Unhealthy`.
+**Exceções**: Nenhuma.
+**Dependências**: RN-003 (o endpoint `/health` é exceção à autenticação).
+**BDD relacionado**: Nenhum no momento.
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
 ## Regras Substituídas ou Depreciadas
 
 > Nenhuma regra substituída no momento.
@@ -127,3 +140,4 @@ Cada regra segue a estrutura:
 | 2026-03-15 | RN-002 criada: endpoint de login com JWT retornando id e userName | Instrução do usuário |
 | 2026-03-15 | RN-003 criada: proteção de endpoints por Bearer Token com enriquecimento de logs | Instrução do usuário |
 | 2026-03-16 | RN-004 criada: consulta de condições climáticas de São Paulo via Open-Meteo, payload completo | Instrução do usuário |
+| 2026-03-17 | RN-005 criada: health check inclui verificação do Datadog Agent via HTTP | Instrução do usuário |

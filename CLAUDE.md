@@ -40,12 +40,23 @@ O comportamento futuro é governado pelos arquivos criados neste bootstrap e evo
 O usuário não deve precisar dizer: "classifique isso", "consulte as regras", "atualize a governança primeiro", "use BDD", "use contratos", "alinhe com a arquitetura".
 Esses comportamentos estão escritos aqui e devem ser executados automaticamente.
 
+### 9. Avaliar eficiência em toda tarefa (instrução permanente)
+Em toda tarefa, antes de iniciar qualquer sequência de operações, avaliar ativamente:
+- Existe artefato já gerado que pode ser reutilizado? (imagem Docker, resultado de build, `.env` válido)
+- Existe etapa que pode ser antecipada para evitar falha custosa posterior?
+- Existe etapa redundante que pode ser eliminada sem comprometer o resultado?
+- Existe abordagem mais rápida e reversível que produz o mesmo resultado?
+
+Aplicar a otimização quando a resposta for sim. Registrar quando a otimização não for possível e por quê.
+Ver detalhamento completo em `.claude/rules/environment-readiness.md`.
+
 ---
 
 ## Pipeline de Validação Pré-Commit (Obrigatório)
 
 Antes de qualquer commit, executar obrigatoriamente esta sequência:
 
+0. Verificar pré-requisitos de ambiente (checklist em `.claude/rules/environment-readiness.md`). O ambiente deve estar pronto — se não estiver, seguir o protocolo de ambiente não pronto antes de prosseguir.
 1. `dotnet build` — verificar compilação sem erros
 2. `docker compose up -d` — iniciar aplicação + Datadog Agent em Docker
 3. Aguardar `/health` responder HTTP 200 (polling até 30 tentativas)
@@ -53,13 +64,13 @@ Antes de qualquer commit, executar obrigatoriamente esta sequência:
 5. `docker compose down` — parar todos os containers
 6. Somente então realizar o commit
 
+**O Passo 0 é obrigatório e não deve ser pulado.** Previne o ciclo de falhas em cascata documentado em `bash-errors-log.md`. Ver `.claude/rules/environment-readiness.md` para o protocolo completo.
+
+**`scripts/setup-env.sh` é um modelo declarativo** copiado manualmente pelo usuário em ferramenta externa de configuração de container. O agente não executa esse script — o ambiente deve chegar já pronto. Se um pré-requisito estiver ausente, o agente atualiza o script e sinaliza ao usuário para sincronizar a ferramenta externa.
+
 **A aplicação deve ser executada via `docker compose`** para que os logs fluam ao Datadog e o usuário possa visualizá-los em tempo real.
 
-Se Docker daemon não estiver disponível no ambiente (ex: sandbox sem socket):
-- Usar `dotnet build` + `dotnet run` para validar build e health check
-- Registrar como premissa de ambiente; os logs aparecerão no Datadog quando o CI executar
-
-Se não houver `.env` com `DD_API_KEY` válida, registrar como premissa e prosseguir apenas com build + health check (sem Datadog).
+Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Datadog — os logs aparecerão quando o CI executar com a chave configurada.
 
 ---
 
@@ -113,6 +124,7 @@ Para toda mensagem do usuário, siga internamente esta sequência:
 @.claude/rules/change-propagation.md
 @.claude/rules/repository-context-evolution.md
 @.claude/rules/bash-error-logging.md
+@.claude/rules/environment-readiness.md
 
 ---
 
