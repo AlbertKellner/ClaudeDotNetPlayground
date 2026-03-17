@@ -67,6 +67,7 @@ jobs:
           if [ -n "$DD_API_KEY" ]; then
             docker run -d \
               --name dd-agent \
+              -p 8126:8126 \
               -e DD_API_KEY="$DD_API_KEY" \
               -e DD_SITE="datadoghq.com" \
               -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
@@ -87,7 +88,7 @@ jobs:
         run: |
           chmod +x ./app/ClaudeDotNetPlayground
 
-          ASPNETCORE_URLS=http://localhost:5000 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
+          ASPNETCORE_URLS=http://localhost:5000 Datadog__AgentUrl=http://localhost:8126 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
           APP_PID=$!
 
           echo "Application started with PID $APP_PID"
@@ -173,6 +174,7 @@ jobs:
           if [ -n "$DD_API_KEY" ]; then
             docker run -d \
               --name dd-agent \
+              -p 8126:8126 \
               -e DD_API_KEY="$DD_API_KEY" \
               -e DD_SITE="datadoghq.com" \
               -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
@@ -193,7 +195,7 @@ jobs:
         run: |
           chmod +x ./app/ClaudeDotNetPlayground
 
-          ASPNETCORE_URLS=http://localhost:5000 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
+          ASPNETCORE_URLS=http://localhost:5000 Datadog__AgentUrl=http://localhost:8126 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
           APP_PID=$!
           echo "APP_PID=$APP_PID" >> $GITHUB_ENV
 
