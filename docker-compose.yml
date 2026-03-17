@@ -3,6 +3,8 @@ services:
     build:
       context: src/ClaudeDotNetPlayground
       dockerfile: Dockerfile
+      args:
+        EXTRA_CA_CERT: ${EXTRA_CA_CERT:-}
     ports:
       - "8080:8080"
     depends_on:
@@ -13,6 +15,11 @@ services:
   datadog-agent:
     image: registry.datadoghq.com/agent:7
     container_name: dd-agent
+    entrypoint: >
+      /bin/bash -c "
+        cat /custom-certs/proxy-ca.crt >> /etc/ssl/certs/cacert.pem &&
+        exec /bin/entrypoint.sh
+      "
     environment:
       - DD_API_KEY=${DD_API_KEY}
       - DD_SITE=datadoghq.com
@@ -20,8 +27,11 @@ services:
       - DD_ENV=${DD_ENV:-local}
       - DD_LOGS_ENABLED=true
       - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
+      - DD_HOSTNAME=claudedotnetplayground-local
+      - DD_CONVERT_DD_SITE_FQDN_ENABLED=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /proc/:/host/proc/:ro
       - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /usr/local/share/ca-certificates/swp-ca-production.crt:/custom-certs/proxy-ca.crt:ro
