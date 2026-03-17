@@ -2,9 +2,14 @@
 # =============================================================================
 # setup-env.sh — Bootstrap de Ambiente para ClaudeDotNetPlayground
 # =============================================================================
-# Prepara todo o ambiente necessário para build e run da aplicação.
-# Deve ser executado uma vez por sessão, antes de qualquer operação Docker.
-# É idempotente: executar quando o ambiente já está pronto é uma no-op segura.
+# MODELO DECLARATIVO — não execute diretamente.
+# Copie este script para a ferramenta externa de configuração de container.
+# O ambiente resultante deve chegar ao agente já pronto para uso.
+#
+# Todas as secrets e variáveis listadas em scripts/required-vars.md devem
+# estar disponíveis na ferramenta externa ANTES de aplicar este script.
+# Se alguma entrada obrigatória estiver ausente, o script emite [ERR] e
+# encerra com código não-zero.
 #
 # Pré-requisitos cobertos:
 #   1. Arquivo .env com DD_API_KEY e EXTRA_CA_CERT
@@ -12,11 +17,13 @@
 #   3. ~/.docker/config.json com proxy HTTP configurado
 #   4. Certificado CA do proxy disponível
 #
-# Uso:
-#   bash scripts/setup-env.sh
+# Ver: scripts/required-vars.md   — variáveis e secrets a cadastrar na ferramenta externa
+#      scripts/container-setup.md — dependências de sistema do container
 # =============================================================================
 
 set -uo pipefail
+
+ERRORS=0
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="${REPO_ROOT}/.env"
@@ -28,6 +35,7 @@ DOCKER_CONFIG="${HOME}/.docker/config.json"
 READY=0
 PREPARED=0
 WARNINGS=0
+ERRORS=0
 
 print_header() {
   echo ""
@@ -46,14 +54,14 @@ print_item() {
     OK)   echo "  [OK]   ${label}${detail:+ — ${detail}}" ; READY=$((READY+1)) ;;
     PREP) echo "  [PREP] ${label}${detail:+ — ${detail}}" ; PREPARED=$((PREPARED+1)) ;;
     WARN) echo "  [WARN] ${label}${detail:+ — ${detail}}" ; WARNINGS=$((WARNINGS+1)) ;;
-    ERR)  echo "  [ERR]  ${label}${detail:+ — ${detail}}" ;;
+    ERR)  echo "  [ERR]  ${label}${detail:+ — ${detail}}" ; ERRORS=$((ERRORS+1)) ;;
   esac
 }
 
 print_summary() {
   echo ""
   echo "----------------------------------------"
-  echo "  Sumário: ${READY} prontos | ${PREPARED} preparados | ${WARNINGS} avisos"
+  echo "  Sumário: ${READY} prontos | ${PREPARED} preparados | ${WARNINGS} avisos | ${ERRORS} erros"
   echo "----------------------------------------"
   echo ""
 }
@@ -95,7 +103,7 @@ setup_env_file() {
   if [ -n "$dd_api_key" ]; then
     print_item "PREP" ".env" "criado com DD_API_KEY e EXTRA_CA_CERT"
   else
-    print_item "WARN" ".env" "DD_API_KEY não encontrada no ambiente do host — Datadog desabilitado nesta sessão"
+    print_item "ERR" ".env" "DD_API_KEY ausente no ambiente — cadastre-a na ferramenta externa (ver scripts/required-vars.md)"
   fi
 }
 
@@ -204,18 +212,28 @@ main() {
 
   print_summary
 
+  if [ $ERRORS -gt 0 ]; then
+    echo "  ERROS CRÍTICOS: ${ERRORS} entrada(s) obrigatória(s) ausente(s)."
+    echo "  Consulte scripts/required-vars.md e cadastre as entradas faltantes"
+    echo "  na ferramenta externa de configuração de container antes de continuar."
+    echo ""
+  fi
+
   if [ $WARNINGS -gt 0 ]; then
     echo "  Avisos presentes. Verifique os itens marcados com [WARN] acima."
     echo "  O pipeline pode falhar se os avisos não forem resolvidos."
     echo ""
   fi
 
-  if [ $PREPARED -gt 0 ]; then
+  if [ $ERRORS -eq 0 ] && [ $PREPARED -gt 0 ]; then
     echo "  Ambiente preparado. Pronto para executar o pipeline."
-  else
+  elif [ $ERRORS -eq 0 ]; then
     echo "  Ambiente já estava pronto. Nenhuma ação necessária."
   fi
   echo ""
+
+  return $ERRORS
 }
 
 main "$@"
+exit $?

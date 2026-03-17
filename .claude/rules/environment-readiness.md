@@ -41,6 +41,17 @@ O script `scripts/setup-env.sh` deve conter **tudo** o que for necessário para 
 
 **Princípio de concentração**: toda dependência conhecida, sensível ou recorrente pertence ao script — não deve ser tratada de forma reativa durante build, run ou debug.
 
+### Arquivos de Registro da Ferramenta Externa
+
+Dois arquivos documentam o que deve ser configurado na ferramenta externa:
+
+| Arquivo | Propósito |
+|---|---|
+| `scripts/required-vars.md` | Registro de **variáveis de ambiente e secrets** que a ferramenta externa deve prover ao container |
+| `scripts/container-setup.md` | Guia de **configuração do container** na ferramenta externa: dependências de sistema, PATH, SDKs, permissões |
+
+O agente consulta esses arquivos para saber o que validar e o que referenciar nas mensagens de erro quando o ambiente não estiver pronto.
+
 ### Quando o Ambiente Não Está Pronto
 
 Se o agente detectar que um pré-requisito do ambiente está ausente (ex: `.env` inexistente, Docker daemon parado, proxy não configurado), isso significa que a ferramenta externa não foi atualizada com a versão mais recente do script.
