@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using ClaudeDotNetPlayground.Features.Command.UserLogin;
 using ClaudeDotNetPlayground.Features.Query.WeatherConditionsGet;
@@ -17,6 +18,10 @@ using Polly;
 using Refit;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+
+[assembly: DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Query.TestGet.TestGetEndpoint))]
+[assembly: DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Command.UserLogin.UserLoginEndpoint))]
+[assembly: DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Query.WeatherConditionsGet.WeatherConditionsGetEndpoint))]
 
 const string OutputTemplate =
     "[{Timestamp:dd/MM/yyyy HH:mm:ss.fffffff}] [{CorrelationId}] [{UserName}] {Message:lj}{NewLine}{Exception}";
