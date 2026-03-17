@@ -133,6 +133,7 @@ jobs:
         run: docker rm -f dd-agent 2>/dev/null || true
 
   unit-tests:
+    name: Teste Unitário
     needs: run
     runs-on: ubuntu-latest
     environment: ClaudeCode
