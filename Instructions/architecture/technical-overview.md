@@ -18,7 +18,7 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Persistência | A definir por Feature | — |
 | Mensageria | A definir | — |
 | Containerização | Docker — Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent | DA-016 |
-| CI/CD | GitHub Actions — workflows: build (Native AOT), run, healthcheck, docker-build, pr-language-check, wiki-publish, validate-weather; GitHub Environment: ClaudeCode | — |
+| CI/CD | GitHub Actions — workflows: build (Native AOT), run, healthcheck, validate-weather, docker-build, pr-language-check, wiki-publish; GitHub Environment: ClaudeCode | — |
 | Observabilidade (logging) | Serilog — Console colorido (AnsiConsoleTheme.Code) + storytelling por classe/método + enrichment por request | DA-011, DA-015, DP-004 parcial |
 | Observabilidade (tracing) | A definir | DP-004 |
 | Observabilidade (métricas) | Datadog Agent (Docker) — métricas de container e host via Docker socket; DogStatsD para métricas customizadas; filtros por env: build, ci, local | DA-016, DP-004 parcial |
@@ -147,4 +147,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-15 | Padrões de logging definidos: formato `[Classe][Método]`, storytelling, console colorido ANSI, template com timestamp/correlationId/userName, isolamento visual, testes de log | DA-015, SNP-001 |
 | 2026-03-16 | Containerização adicionada: Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent; GitHub Environment ClaudeCode; DD_ENV por contexto (build, ci, local) para filtragem no Datadog | DA-016 |
 | 2026-03-16 | Integração HTTP externa adicionada: Refit + Polly; Shared/ExternalApi/OpenMeteo/ criada; Feature WeatherConditionsGet implementada; RN-004 | DA-017, RN-004 |
-| 2026-03-17 | CI/CD expandido: workflow validate-weather adicionado — valida endpoint GET /weather-conditions após CI; gera token JWT via POST /login e consome o endpoint autenticado; dispara via workflow_run após CI | — |
+| 2026-03-17 | CI/CD expandido: job validate-weather adicionado ao ci.yml — valida GET /weather-conditions após healthcheck (needs: healthcheck); gera token JWT via POST /login e consome o endpoint autenticado | — |

@@ -309,25 +309,112 @@ jobs:
             exit 1
           fi
 
-      - name: Call weather conditions endpoint
+      - name: Stop application
+        if: always()
+        run: kill $APP_PID 2>/dev/null || true
+
+      - name: Stop Datadog Agent
+        if: always()
+        run: docker rm -f dd-agent 2>/dev/null || true
+
+  validate-weather:
+    needs: healthcheck
+    runs-on: ubuntu-latest
+    environment: ClaudeCode
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: published-app
+          path: ./app
+
+      - name: Start Datadog Agent
+        env:
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+        run: |
+          if [ -n "$DD_API_KEY" ]; then
+            docker run -d \
+              --name dd-agent \
+              -e DD_API_KEY="$DD_API_KEY" \
+              -e DD_SITE="datadoghq.com" \
+              -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+              -e DD_ENV=ci \
+              -e DD_LOGS_ENABLED=true \
+              -e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true \
+              -v /var/run/docker.sock:/var/run/docker.sock:ro \
+              -v /proc/:/host/proc/:ro \
+              -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+              -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
+              registry.datadoghq.com/agent:7
+            echo "Datadog Agent started (DD_ENV=ci)"
+          else
+            echo "DD_API_KEY not set — skipping Datadog Agent"
+          fi
+
+      - name: Start application and wait for readiness
+        run: |
+          chmod +x ./app/ClaudeDotNetPlayground
+
+          ASPNETCORE_URLS=http://localhost:5000 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
+          APP_PID=$!
+          echo "APP_PID=$APP_PID" >> $GITHUB_ENV
+
+          echo "Application started with PID $APP_PID"
+          echo "Waiting for application to be ready..."
+
+          STARTED=false
+          for i in $(seq 1 30); do
+            sleep 2
+
+            if ! kill -0 $APP_PID 2>/dev/null; then
+              echo ""
+              echo "❌ Application process exited unexpectedly after $((i * 2))s"
+              echo ""
+              echo "=== Application Output ==="
+              cat run.log
+              exit 1
+            fi
+
+            if curl -sf http://localhost:5000/health > /dev/null 2>&1; then
+              STARTED=true
+              break
+            fi
+
+            echo "  Attempt $i/30 — not ready yet..."
+          done
+
+          if [ "$STARTED" = "false" ]; then
+            echo ""
+            echo "❌ Application failed to start within 60 seconds"
+            echo ""
+            echo "=== Application Output ==="
+            cat run.log
+            kill $APP_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          echo "Application is ready"
+
+      - name: Generate JWT token via POST /login
         run: |
           echo "Obtaining JWT token via POST http://localhost:5000/login ..."
           echo ""
 
-          LOGIN_RESPONSE=$(curl -s -o /tmp/login_response.txt -w "%{http_code}" \
+          LOGIN_HTTP_STATUS=$(curl -s -o /tmp/login_response.txt -w "%{http_code}" \
             -X POST http://localhost:5000/login \
             -H "Content-Type: application/json" \
             -d '{"userName":"Albert","password":"albert123"}')
 
-          echo "Login status: $LOGIN_RESPONSE"
+          echo "Login status: $LOGIN_HTTP_STATUS"
 
-          if [ "$LOGIN_RESPONSE" != "200" ]; then
-            echo "❌ Login failed with HTTP $LOGIN_RESPONSE"
+          if [ "$LOGIN_HTTP_STATUS" != "200" ]; then
+            echo "❌ Login failed with HTTP $LOGIN_HTTP_STATUS"
             cat /tmp/login_response.txt
             exit 1
           fi
 
-          TOKEN=$(cat /tmp/login_response.txt | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+          TOKEN=$(grep -o '"token":"[^"]*"' /tmp/login_response.txt | cut -d'"' -f4)
 
           if [ -z "$TOKEN" ]; then
             echo "❌ Token not found in login response"
@@ -335,13 +422,16 @@ jobs:
             exit 1
           fi
 
-          echo "✅ Token obtained"
-          echo ""
+          echo "JWT_TOKEN=$TOKEN" >> $GITHUB_ENV
+          echo "✅ Token obtained successfully"
+
+      - name: Call weather conditions endpoint with Bearer Token
+        run: |
           echo "Calling GET http://localhost:5000/weather-conditions ..."
           echo ""
 
           HTTP_STATUS=$(curl -s -o /tmp/weather_response.txt -w "%{http_code}" \
-            -H "Authorization: Bearer $TOKEN" \
+            -H "Authorization: Bearer $JWT_TOKEN" \
             http://localhost:5000/weather-conditions)
 
           RESPONSE=$(cat /tmp/weather_response.txt)

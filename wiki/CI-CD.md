@@ -1,6 +1,6 @@
 # CI/CD
 
-A aplicação possui três pipelines de GitHub Actions: um pipeline de integração contínua (`ci.yml`), um de validação do endpoint de tempo (`validate-weather.yml`) e um de validação de pull requests (`pr-language-check.yml`).
+A aplicação possui dois pipelines de GitHub Actions: um pipeline de integração contínua (`ci.yml`) e um de validação de pull requests (`pr-language-check.yml`).
 
 ---
 
@@ -15,7 +15,7 @@ A aplicação possui três pipelines de GitHub Actions: um pipeline de integraç
 
 Todos os jobs utilizam o GitHub Environment **`ClaudeCode`**, onde o secret `DD_API_KEY` é armazenado para integração com o Datadog.
 
-O pipeline é composto por **quatro jobs**, onde `run` e `healthcheck` dependem de `build`, e `docker-build` é independente:
+O pipeline é composto por **cinco jobs** encadeados: `build` → `run` → `healthcheck` → `validate-weather`, mais `docker-build` que executa em paralelo de forma independente:
 
 ### Job 1: `build`
 
@@ -43,7 +43,7 @@ Verifica se a aplicação inicia corretamente a partir do binário compilado.
 
 ### Job 3: `healthcheck`
 
-Valida que o endpoint de saúde responde corretamente.
+Valida que o endpoint de saúde responde corretamente. Depende de `run`.
 
 **Passos:**
 1. Download do artefato `published-app`
@@ -53,7 +53,19 @@ Valida que o endpoint de saúde responde corretamente.
 5. Sucesso se `HTTP 200`; falha caso contrário
 6. Encerramento da aplicação e do Datadog Agent ao final (mesmo em caso de falha)
 
-### Job 4: `docker-build`
+### Job 4: `validate-weather`
+
+Valida o endpoint autenticado de condições climáticas. **Depende de `healthcheck`** — só executa se o healthcheck retornar sucesso.
+
+**Passos:**
+1. Download do artefato `published-app`
+2. Inicialização do Datadog Agent container (`DD_ENV=ci`) se `DD_API_KEY` estiver disponível
+3. Inicialização da aplicação e aguarda readiness via `GET /health`
+4. **Gerar token JWT** — `POST /login` com as credenciais do usuário registrado; extrai o `token` da resposta e exporta como `$JWT_TOKEN`
+5. **Validar endpoint de tempo** — `GET /weather-conditions` com `Authorization: Bearer $JWT_TOKEN`; verifica `HTTP 200` e exibe o payload retornado
+6. Encerramento da aplicação e do Datadog Agent ao final (mesmo em caso de falha)
+
+### Job 5: `docker-build`
 
 Valida que o Dockerfile compila e que a imagem Docker sobe corretamente. Executa em paralelo com `build`.
 
@@ -63,31 +75,6 @@ Valida que o Dockerfile compila e que a imagem Docker sobe corretamente. Executa
 3. Execução do container em modo de teste na porta `8080`
 4. Verificação de startup via polling em `GET /health` (até 30 tentativas a cada 2 segundos)
 5. Remoção do container de teste ao final
-
----
-
-## Pipeline de Validação do Endpoint de Tempo
-
-**Arquivo:** `.github/workflows/validate-weather.yml`
-
-**Gatilhos:**
-- Conclusão bem-sucedida do workflow `CI` (via `workflow_run`)
-- Execução manual via `workflow_dispatch`
-
-Este workflow valida especificamente o endpoint autenticado `GET /weather-conditions` (RN-004), exercitando o fluxo completo de autenticação + consulta ao tempo.
-
-O job `validate-weather` utiliza o GitHub Environment **`ClaudeCode`** e executa os seguintes passos:
-
-### Job: `validate-weather`
-
-**Passos:**
-1. Checkout do repositório (no SHA do workflow disparador ou HEAD para execução manual)
-2. Configuração do .NET 10
-3. Restore de dependências
-4. Inicialização da aplicação via `dotnet run` e aguarda readiness via polling em `GET /health` (até 30 tentativas a cada 2 segundos)
-5. **Gerar token JWT** — `POST /login` com as credenciais do usuário registrado; extrai o token da resposta
-6. **Validar endpoint de tempo** — `GET /weather-conditions` com o header `Authorization: Bearer <token>`; verifica `HTTP 200` e exibe o payload retornado
-7. Encerramento da aplicação ao final (mesmo em caso de falha)
 
 ---
 
