@@ -90,7 +90,11 @@ jobs:
         run: |
           chmod +x ./app/ClaudeDotNetPlayground
 
-          ASPNETCORE_URLS=http://localhost:5000 Datadog__AgentUrl=http://localhost:8126 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
+          ASPNETCORE_URLS=http://localhost:5000 \
+          Datadog__AgentUrl=http://localhost:8126 \
+          Jwt__Secret=super-secret-key-for-development-only-change-in-production \
+          OpenMeteo__BaseAddress=https://api.open-meteo.com \
+          ./app/ClaudeDotNetPlayground > run.log 2>&1 &
           APP_PID=$!
 
           echo "Application started with PID $APP_PID"
@@ -362,6 +366,8 @@ jobs:
 
           ASPNETCORE_URLS=http://localhost:5000 \
           Datadog__AgentUrl=http://localhost:8126 \
+          Jwt__Secret=super-secret-key-for-development-only-change-in-production \
+          OpenMeteo__BaseAddress=https://api.open-meteo.com \
           ./app/ClaudeDotNetPlayground > run.log 2>&1 &
           APP_PID=$!
           echo "APP_PID=$APP_PID" >> $GITHUB_ENV
