@@ -17,6 +17,7 @@
 #   3. ~/.docker/config.json com proxy HTTP configurado
 #   4. Certificado CA do proxy disponível
 #   5. GitHub CLI (gh) instalado
+#   6. DD_APP_KEY disponível no ambiente (Datadog MCP)
 #
 # Ver: scripts/required-vars.md   — variáveis e secrets a cadastrar na ferramenta externa
 #      scripts/container-setup.md — dependências de sistema do container
@@ -208,6 +209,20 @@ check_gh_cli() {
 }
 
 # =============================================================================
+# 7. Verificar DD_APP_KEY (Datadog MCP)
+# =============================================================================
+check_dd_app_key() {
+  local dd_app_key
+  dd_app_key="$(printenv DD_APP_KEY 2>/dev/null || true)"
+
+  if [ -n "$dd_app_key" ]; then
+    print_item "OK" "DD_APP_KEY" "presente no ambiente"
+  else
+    print_item "WARN" "DD_APP_KEY" "ausente — conexão MCP do Datadog não funcionará (ver scripts/required-vars.md)"
+  fi
+}
+
+# =============================================================================
 # Execução principal
 # =============================================================================
 main() {
@@ -224,6 +239,7 @@ main() {
   check_ca_cert
   check_dotnet
   check_gh_cli
+  check_dd_app_key
 
   print_summary
 
