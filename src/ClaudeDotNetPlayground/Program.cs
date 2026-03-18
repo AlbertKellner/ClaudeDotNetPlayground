@@ -133,14 +133,21 @@ app.MapHealthChecks("/health");
 
 Log.Information("[Program] Iniciar execução da aplicação");
 
+// AOT: garante que os tipos de Controller sejam preservados pelo linker.
+// PreserveControllers() deve ser chamado antes de app.Run() para que as
+// DynamicDependency declarations tenham efeito na compilação AOT.
+AotControllerPreservation.PreserveControllers();
+
 app.Run();
 
 // AOT: DynamicDependency deve ser aplicado em método, constructor ou field — não em assembly.
 // Esta classe preserva os tipos de Controller para Native AOT sem usar [assembly: DynamicDependency].
+// IMPORTANTE: PreserveControllers() deve ser chamado durante o startup para que as DynamicDependency
+// tenham efeito — um método privado nunca chamado é trimado pelo AOT junto com seus atributos.
 internal static class AotControllerPreservation
 {
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Query.TestGet.TestGetEndpoint))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Command.UserLogin.UserLoginEndpoint))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(ClaudeDotNetPlayground.Features.Query.WeatherConditionsGet.WeatherConditionsGetEndpoint))]
-    private static void PreserveControllers() { }
+    internal static void PreserveControllers() { }
 }

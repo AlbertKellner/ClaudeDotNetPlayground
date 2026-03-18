@@ -112,15 +112,72 @@ Este arquivo documenta todos os erros de Bash encontrados durante sessões de tr
 
 ---
 
-## Resultado Final
+---
 
-Após a aplicação de todas as correções:
+## Erro 8 — Controllers não encontrados no modo AOT (404 em todos os endpoints de controller)
+
+| Campo | Valor |
+|---|---|
+| **Número** | 8 |
+| **Data** | 2026-03-18 |
+| **Comando executado** | `curl -s -X POST http://localhost:8080/login ...` |
+| **Erro retornado** | `HTTP 404` + log: `Request reached the end of the middleware pipeline without being handled by application code` |
+| **Causa** | `AotControllerPreservation.PreserveControllers()` era `private` e nunca chamado. Em Native AOT, métodos privados não chamados são removidos pelo linker junto com seus atributos `[DynamicDependency]`. Sem as `DynamicDependency` ativas, os tipos de Controller eram trimados e `app.MapControllers()` não encontrava nenhuma rota. |
+| **Novo comando / solução** | Tornar `PreserveControllers()` `internal` e chamar `AotControllerPreservation.PreserveControllers()` explicitamente em `Program.cs` antes de `app.Run()`. Isso garante que o método seja reachable e que as `DynamicDependency` sejam respeitadas pelo linker AOT. |
+
+---
+
+## Erro 9 — Jwt:Secret não encontrada no container de runtime (HTTP 500 no /login)
+
+| Campo | Valor |
+|---|---|
+| **Número** | 9 |
+| **Data** | 2026-03-18 |
+| **Comando executado** | `curl -s -X POST http://localhost:8080/login ...` |
+| **Erro retornado** | `HTTP 500` + exceção: `System.InvalidOperationException: Jwt:Secret is not configured.` |
+| **Causa** | O `Dockerfile` copiava apenas o binário nativo: `COPY --from=build /app/publish/ClaudeDotNetPlayground .`. O arquivo `appsettings.json` (que contém `Jwt:Secret`, `OpenMeteo:BaseAddress`, etc.) estava na pasta `/app/publish/` do estágio de build mas não era copiado para o estágio de runtime. |
+| **Novo comando / solução** | Alterar o `Dockerfile` para copiar todo o diretório de publicação: `COPY --from=build /app/publish/ .` (barra no final inclui todos os arquivos do diretório, incluindo `appsettings.json`). |
+
+---
+
+## Erro 10 — UntrustedRoot SSL no container de runtime ao chamar Open-Meteo (HTTP 500 no /weather-conditions)
+
+| Campo | Valor |
+|---|---|
+| **Número** | 10 |
+| **Data** | 2026-03-18 |
+| **Comando executado** | `curl -s http://localhost:8080/weather-conditions -H "Authorization: Bearer ..."` |
+| **Erro retornado** | `HTTP 500` + exceção: `System.Security.Authentication.AuthenticationException: The remote certificate is invalid because of errors in the certificate chain: UntrustedRoot` |
+| **Causa** | O estágio `build` do Dockerfile instala a CA customizada do proxy (via `EXTRA_CA_CERT`) usando `update-ca-certificates`. O estágio `runtime` (`mcr.microsoft.com/dotnet/runtime-deps:10.0`) é uma imagem separada que não herda as CAs instaladas no estágio de build. Ao fazer chamadas HTTPS para `api.open-meteo.com` via proxy com inspeção TLS, o runtime não confiava na CA do proxy. |
+| **Novo comando / solução** | Adicionar ao estágio `runtime` do `Dockerfile`: `COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt`. Isso copia o bundle de certificados completo (incluindo a CA customizada instalada no build) para o container de runtime, sem necessitar de acesso à internet ou `apt-get` no estágio de runtime. |
+
+---
+
+## Resultado Final (Sessão 2026-03-17 — Infrastructure)
+
+Após a aplicação de todas as correções (Erros 1–7):
 
 - `GET http://localhost:8080/health` → `200 Healthy`
 - Datadog Agent: `API key ending with 5a286: API Key valid`
 - `Dropped: 0`, `Retried: 0`
 - `Series Flushed: 466+`
 - Todos os checks do agente: `[OK]`
+
+---
+
+## Resultado Final (Sessão 2026-03-18 — AOT Publish Validation)
+
+Após a aplicação das correções dos Erros 8–10:
+
+- `GET http://localhost:8080/health` → `200 Degraded` (Datadog 403 é comportamento esperado neste ambiente)
+- `POST http://localhost:8080/login` (válido) → `200` com JWT
+- `POST http://localhost:8080/login` (inválido) → `401`
+- `GET http://localhost:8080/test` (com auth) → `200 "funcionando"`
+- `GET http://localhost:8080/test` (sem auth) → `401`
+- `GET http://localhost:8080/weather-conditions` (com auth) → `200` com payload Open-Meteo
+- `GET http://localhost:8080/weather-conditions` (sem auth) → `401`
+- 54/54 testes passando em modo debug
+- Aplicação em modo Native AOT totalmente funcional
 
 ---
 
