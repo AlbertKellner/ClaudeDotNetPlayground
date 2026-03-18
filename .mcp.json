@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "datadog": {
+      "type": "url",
+      "url": "https://mcp.datadoghq.com/api/unstable/mcp-server/mcp?toolsets=core"
+    }
+  }
+}
