@@ -17,6 +17,7 @@ Estas dependências devem estar pré-instaladas no container. O script `scripts/
 | CA do proxy TLS | — | Copiar certificado para `/usr/local/share/ca-certificates/` e executar `update-ca-certificates` |
 | `base64` | qualquer | Pré-instalado na maioria das imagens (coreutils) |
 | `curl` | qualquer | `apt-get install curl` |
+| `gh` (GitHub CLI) | qualquer estável | `apt-get install gh` (via repositório oficial: https://cli.github.com/packages) |
 
 ---
 
@@ -99,7 +100,10 @@ docker info >/dev/null 2>&1 && echo "OK" || echo "FALHOU"
 # 3. CA do proxy
 ls /usr/local/share/ca-certificates/swp-ca-production.crt
 
-# 4. Variáveis obrigatórias (ver required-vars.md)
+# 4. GitHub CLI
+gh --version >/dev/null 2>&1 && echo "OK" || echo "FALHOU"
+
+# 5. Variáveis obrigatórias (ver required-vars.md)
 echo "DD_API_KEY=${DD_API_KEY:-(AUSENTE)}"
 echo "HTTP_PROXY=${HTTP_PROXY:-(não definido)}"
 ```

@@ -16,6 +16,7 @@
 #   2. Docker daemon em execução
 #   3. ~/.docker/config.json com proxy HTTP configurado
 #   4. Certificado CA do proxy disponível
+#   5. GitHub CLI (gh) instalado
 #
 # Ver: scripts/required-vars.md   — variáveis e secrets a cadastrar na ferramenta externa
 #      scripts/container-setup.md — dependências de sistema do container
@@ -194,6 +195,19 @@ check_dotnet() {
 }
 
 # =============================================================================
+# 6. Verificar GitHub CLI (gh)
+# =============================================================================
+check_gh_cli() {
+  if command -v gh >/dev/null 2>&1; then
+    local gh_version
+    gh_version="$(gh --version 2>/dev/null | head -1 | awk '{print $3}')"
+    print_item "OK" "GitHub CLI (gh)" "versão ${gh_version}"
+  else
+    print_item "WARN" "GitHub CLI (gh)" "não encontrado — criação automática de PRs não funcionará"
+  fi
+}
+
+# =============================================================================
 # Execução principal
 # =============================================================================
 main() {
@@ -209,6 +223,7 @@ main() {
   setup_docker_proxy
   check_ca_cert
   check_dotnet
+  check_gh_cli
 
   print_summary
 
