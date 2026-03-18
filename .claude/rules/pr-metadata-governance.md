@@ -114,6 +114,40 @@ Todo PR deve ter pelo menos uma label de tipo e uma de impacto:
 
 ---
 
+## Política de Verificação e Criação Automática de PR
+
+### Princípio:
+> Todo trabalho commitado deve ter um PR associado. A verificação e criação de PR é a última etapa obrigatória da codificação de qualquer tarefa.
+
+### Quando se aplica:
+Esta política é ativada automaticamente **após a criação do último commit** de qualquer tarefa, como passo 10 do pipeline de validação pré-commit definido em `CLAUDE.md`.
+
+### Workflow obrigatório:
+
+1. **Verificar se já existe PR aberto** para o branch atual:
+   ```bash
+   gh pr list --head <branch-atual> --state open --json number,title,url
+   ```
+
+2. **Se não existir PR aberto**:
+   - Criar o PR seguindo o formato obrigatório de título (Semantic Commit)
+   - Preencher a descrição com as três seções obrigatórias
+   - Adicionar as labels correspondentes
+   - Reportar a URL do PR criado no relatório final
+
+3. **Se já existir PR aberto**:
+   - Revisar o título — atualizar se a nova mudança alterar o escopo ou foco
+   - Revisar a descrição — incorporar as mudanças do novo commit
+   - Atualizar labels se o tipo ou impacto da mudança se alterou
+   - Reportar a URL do PR atualizado no relatório final
+
+### Regras:
+- O assistente **não deve perguntar** ao usuário se deve criar o PR — a criação é automática quando não existe PR aberto
+- O push para o branch remoto deve ocorrer **antes** da verificação/criação do PR (o PR depende do branch remoto estar atualizado)
+- Se o push falhar, o PR não deve ser criado — registrar o erro e reportar
+
+---
+
 ## Política de Consistência
 
 - A descrição é a **fonte de verdade textual** do PR
@@ -139,3 +173,4 @@ Todo PR deve ter pelo menos uma label de tipo e uma de impacto:
 | Data | Mudança | Referência |
 |---|---|---|
 | 2026-03-18 | Criado: governança de metadados de PR | Instrução do usuário |
+| 2026-03-18 | Adicionado: política de verificação e criação automática de PR após último commit | Instrução do usuário |
