@@ -92,18 +92,25 @@ builder.Services
             })
     })
     .ConfigureHttpClient(c =>
-        c.BaseAddress = new Uri(builder.Configuration["OpenMeteo:BaseAddress"]!))
+        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:OpenMeteo:BaseUrl"]!))
     .AddResilienceHandler("open-meteo", resilienceBuilder =>
     {
+        var maxRetryAttempts = builder.Configuration.GetValue<int>(
+            "ExternalApi:OpenMeteo:WeatherConditionsGet:MaxRetryAttempts", 3);
+        var delaySeconds = builder.Configuration.GetValue<double>(
+            "ExternalApi:OpenMeteo:WeatherConditionsGet:DelaySeconds", 3);
+        var backoffType = builder.Configuration.GetValue<DelayBackoffType>(
+            "ExternalApi:OpenMeteo:WeatherConditionsGet:BackoffType", DelayBackoffType.Exponential);
+
         resilienceBuilder.AddRetry(new HttpRetryStrategyOptions
         {
-            MaxRetryAttempts = 3,
-            Delay = TimeSpan.FromSeconds(3),
-            BackoffType = DelayBackoffType.Exponential,
+            MaxRetryAttempts = maxRetryAttempts,
+            Delay = TimeSpan.FromSeconds(delaySeconds),
+            BackoffType = backoffType,
             UseJitter = false
         });
 
-        resilienceBuilder.AddTimeout(TimeSpan.FromSeconds(3));
+        resilienceBuilder.AddTimeout(TimeSpan.FromSeconds(delaySeconds));
     });
 
 builder.Services.AddScoped<IOpenMeteoApiClient, OpenMeteoApiClient>();
