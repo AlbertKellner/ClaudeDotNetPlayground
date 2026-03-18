@@ -102,8 +102,14 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 
 A estrutura de implementação do projeto segue **Vertical Slice Architecture** com segregação **Command/Query**.
 
+Todos os projetos ficam contidos na pasta `src/` na raiz do repositório. A solution (`.slnx`) fica na raiz de `src/`. Cada pasta de projeto tem exatamente o mesmo nome do projeto que contém, sendo permitido apenas um projeto por pasta.
+
 ```
 src/
+├── Albert.Playground.ECS.AOT.slnx          # Solution file
+├── Albert.Playground.ECS.AOT.UnitTest/      # Projeto de testes unitários
+│   └── (espelha estrutura do projeto principal: Features/, Infra/, Shared/, TestHelpers/)
+│
 └── <NomeDoProjeto>/
     ├── Features/
     │   ├── Query/
@@ -231,3 +237,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-17 | Infra/HealthChecks/ adicionada: DatadogAgentHealthCheck implementa RN-005 | Instrução do usuário |
 | 2026-03-17 | wiki/ atualizada: Feature-WeatherConditionsGet.md adicionada à lista | Revisão de governança |
 | 2026-03-18 | Infra/Json/, Infra/ModelBinding/, Infra/ModelValidation/ documentadas: presentes no código mas ausentes do registro estrutural | Revisão de governança |
+| 2026-03-18 | Reorganização: solution movida para `src/`; projeto de testes movido de `tests/` para `src/`; pasta `tests/` removida; todos os projetos agora em `src/` | Instrução do usuário |
