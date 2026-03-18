@@ -207,7 +207,7 @@ public record TodoItemInsertInput
 
 **Problema**: `try-catch` genérico espalhado em Endpoints e UseCases viola SRP (P010, DA-006) e esconde a origem real dos erros, dificultando diagnóstico e manutenção.
 
-**Solução**: Implementar `IExceptionHandler` (ASP.NET Core 8) como handler centralizado, registrado em `Shared/Middleware/`. O handler:
+**Solução**: Implementar `IExceptionHandler` (ASP.NET Core 8) como handler centralizado, registrado em `Infra/ExceptionHandling/`. O handler:
 - Captura toda exceção não tratada que escape da pipeline.
 - Loga o erro com contexto completo via `ILogger`.
 - Retorna resposta padronizada em formato **Problem Details** (RFC 7807 / RFC 9110).
@@ -215,10 +215,12 @@ public record TodoItemInsertInput
 
 **Estrutura**:
 ```
-Shared/
-└── Middleware/
+Infra/
+└── ExceptionHandling/
     └── GlobalExceptionHandler.cs
 ```
+
+> **Nota**: A localização original era `Shared/Middleware/`. Foi movido para `Infra/ExceptionHandling/` por DA-011 (criação da pasta `Infra/` para componentes de infraestrutura transversal). PAD-008 descreve o padrão; DA-010 e DA-011 detalham a decisão e a localização.
 
 **Registro em `Program.cs`**:
 ```csharp
@@ -266,4 +268,5 @@ app.UseExceptionHandler();
 | Bootstrap | Estrutura criada sem padrões específicos | — |
 | 2026-03-15 | PAD-001 a PAD-007 criados: Vertical Slice, Command/Query, Minimal API, UseCase, Repository, Validação, Shared | Instruções do usuário |
 | 2026-03-15 | PAD-003 atualizado: Minimal API substituída por Controller com Action; anti-padrão adicionado | DA-008 |
-| 2026-03-15 | PAD-008 criado: tratamento centralizado de exceções via IExceptionHandler em Shared/Middleware/ | DA-010, P010 |
+| 2026-03-15 | PAD-008 criado: tratamento centralizado de exceções via IExceptionHandler; localização inicial Shared/Middleware/ | DA-010, P010 |
+| 2026-03-18 | PAD-008 "Solução" corrigido: localização atualizada de Shared/Middleware/ para Infra/ExceptionHandling/ conforme DA-011 | DA-011 |

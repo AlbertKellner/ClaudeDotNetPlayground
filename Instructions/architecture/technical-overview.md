@@ -59,6 +59,11 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 | TokenService | `Infra/Security/TokenService.cs` | Implementação JWT HS256: geração e validação de Bearer Token |
 | AuthenticateFilter | `Infra/Security/AuthenticateFilter.cs` | IAsyncActionFilter: valida Bearer Token, retorna 401 se inválido, enriquece logs com UserId e UserName |
 | AuthenticateAttribute | `Infra/Security/AuthenticateAttribute.cs` | TypeFilterAttribute: decorador aplicado nos Controllers para ativar AuthenticateFilter via DI |
+| AppJsonContext | `Infra/Json/AppJsonContext.cs` | JsonSerializerContext source-generated para serialização AOT-compatível; inserido no TypeInfoResolverChain do MVC |
+| NullModelBinderProvider | `Infra/ModelBinding/NullModelBinderProvider.cs` | Substitui providers de model binding incompatíveis com AOT (TryParse, FloatingPoint) por implementação no-op |
+| FallbackSimpleTypeModelBinderProvider | `Infra/ModelBinding/FallbackSimpleTypeModelBinderProvider.cs` | Substitui SimpleTypeModelBinderProvider por versão AOT-compatível |
+| EnhancedModelMetadataActivator | `Infra/ModelBinding/EnhancedModelMetadataActivator.cs` | Workaround AOT: ativa IsEnhancedModelMetadataSupported antes do primeiro request via chamada explícita em startup |
+| NoOpObjectModelValidator | `Infra/ModelValidation/NoOpObjectModelValidator.cs` | Substitui IObjectModelValidator padrão (reflection-based) por implementação vazia AOT-compatível |
 
 ---
 
@@ -155,3 +160,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-18 | Dockerfile corrigido: COPY da pasta de publicação completa (incluindo appsettings.json) + propagação de CA cert do build para runtime stage | Erro 9, Erro 10 |
 | 2026-03-18 | AotControllerPreservation.PreserveControllers() tornado internal e chamado explicitamente em Program.cs; resolve trim de Controllers em Native AOT | Erro 8 |
 | 2026-03-18 | CI/CD: job `healthcheck` dividido em dois jobs paralelos — `healthcheck-debug` (dotnet run) e `healthcheck-publish` (binário AOT); ambos com `needs: unit-tests` | Instrução do usuário |
+| 2026-03-18 | Componentes Infra AOT adicionados à tabela: AppJsonContext, NullModelBinderProvider, FallbackSimpleTypeModelBinderProvider, EnhancedModelMetadataActivator, NoOpObjectModelValidator | Revisão de governança |

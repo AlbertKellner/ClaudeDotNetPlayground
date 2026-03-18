@@ -154,3 +154,4 @@ curl http://localhost:8080/health
 | `GET /health` | [Verificação de disponibilidade](Feature-Health) |
 | `POST /login` | [Autenticação de usuário](Feature-UserLogin) |
 | `GET /test` | [Endpoint protegido](Feature-TestGet) |
+| `GET /weather-conditions` | [Condições climáticas de São Paulo](Feature-WeatherConditionsGet) |

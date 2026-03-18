@@ -13,21 +13,27 @@ Cada funcionalidade é implementada como uma **Slice vertical isolada**, contend
 ```
 src/ClaudeDotNetPlayground/
 ├── Features/
-│   ├── Command/                     # Slices de escrita (alteram estado)
+│   ├── Command/                          # Slices de escrita (alteram estado)
 │   │   └── UserLogin/
-│   │       ├── UserLoginEndpoint/   # Controller + Action
-│   │       ├── UserLoginUseCase/    # Orquestração da lógica de negócio
-│   │       └── UserLoginModels/     # Contratos de entrada e saída
-│   └── Query/                       # Slices de leitura (não alteram estado)
-│       └── TestGet/
-│           ├── TestGetEndpoint/     # Controller + Action
-│           └── TestGetUseCase/      # Orquestração da lógica de negócio
+│   │       ├── UserLoginEndpoint/        # Controller + Action
+│   │       ├── UserLoginUseCase/         # Orquestração da lógica de negócio
+│   │       └── UserLoginModels/          # Contratos de entrada e saída
+│   └── Query/                            # Slices de leitura (não alteram estado)
+│       ├── TestGet/
+│       │   ├── TestGetEndpoint/          # Controller + Action
+│       │   └── TestGetUseCase/           # Orquestração da lógica de negócio
+│       └── WeatherConditionsGet/
+│           ├── WeatherConditionsGetEndpoint/  # Controller + Action
+│           └── WeatherConditionsGetUseCase/   # Orquestração da lógica de negócio
 ├── Infra/
-│   ├── Correlation/                 # Utilitário de GUID v7
-│   ├── ExceptionHandling/           # Handler centralizado de exceções
-│   ├── Middlewares/                 # Middlewares transversais
-│   └── Security/                    # Componentes de autenticação JWT
-└── Shared/                          # Abstrações compartilhadas entre Slices
+│   ├── Correlation/                      # Utilitário de GUID v7
+│   ├── ExceptionHandling/                # Handler centralizado de exceções
+│   ├── HealthChecks/                     # Verificação do Datadog Agent
+│   ├── Middlewares/                      # Middlewares transversais
+│   └── Security/                         # Componentes de autenticação JWT
+└── Shared/                               # Abstrações compartilhadas entre Slices
+    └── ExternalApi/
+        └── OpenMeteo/                    # Cliente HTTP para API Open-Meteo (Refit + Polly)
 ```
 
 ---
@@ -61,11 +67,16 @@ Requisição HTTP
                 Retorna 500 Problem Details
             └── Controller / Action (Endpoint)
                     ├── [sem autenticação] POST /login → UserLoginUseCase
-                    ├── [sem autenticação] GET /health → ASP.NET HealthChecks
-                    └── [com autenticação] GET /test → AuthenticateFilter
-                                                           Valida Bearer Token
-                                                           Enriquece logs com UserId e UserName
-                                                       └── TestGetUseCase
+                    ├── [sem autenticação] GET /health → ASP.NET HealthChecks (+ DatadogAgentHealthCheck)
+                    ├── [com autenticação] GET /test → AuthenticateFilter
+                    │                                      Valida Bearer Token
+                    │                                      Enriquece logs com UserId e UserName
+                    │                                  └── TestGetUseCase
+                    └── [com autenticação] GET /weather-conditions → AuthenticateFilter
+                                                                          Valida Bearer Token
+                                                                          Enriquece logs com UserId e UserName
+                                                                      └── WeatherConditionsGetUseCase
+                                                                              └── OpenMeteoApiClient (Refit + Polly)
 ```
 
 ---
@@ -118,3 +129,4 @@ Para execução local: copie `.env.example` para `.env`, preencha `DD_API_KEY` e
 | [Health Check](Feature-Health) | — | `GET /health` |
 | [Login de Usuário](Feature-UserLogin) | Command | `POST /login` |
 | [Test Get](Feature-TestGet) | Query | `GET /test` |
+| [Condições Climáticas](Feature-WeatherConditionsGet) | Query | `GET /weather-conditions` |

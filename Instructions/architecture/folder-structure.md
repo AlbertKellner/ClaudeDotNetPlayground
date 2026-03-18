@@ -24,6 +24,7 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   ├── Feature-Health.md
 │   ├── Feature-UserLogin.md
 │   ├── Feature-TestGet.md
+│   ├── Feature-WeatherConditionsGet.md
 │   ├── Infra-Correlation-ID.md
 │   ├── Infra-Authentication.md
 │   ├── Infra-Exception-Handling.md
@@ -141,8 +142,18 @@ src/
     │    │    └── GuidV7.cs                    # Geração (Guid.CreateVersion7) e validação de GUID v7 (uso interno de Infra)
     │    ├── ExceptionHandling/
     │    │    └── GlobalExceptionHandler.cs   # Handler centralizado de exceções (IExceptionHandler + Problem Details RFC 7807)
+    │    ├── HealthChecks/
+    │    │    └── DatadogAgentHealthCheck.cs  # Verifica disponibilidade do Datadog Agent via HTTP (RN-005)
+    │    ├── Json/
+    │    │    └── AppJsonContext.cs            # JsonSerializerContext source-generated para serialização AOT-compatível da aplicação
     │    ├── Middlewares/
     │    │    └── CorrelationIdMiddleware.cs   # Garante GUID v7 por request; enriquece Serilog LogContext; opaco para Features
+    │    ├── ModelBinding/
+    │    │    ├── NullModelBinderProvider.cs           # Substituição de providers incompatíveis com AOT (TryParse, FloatingPoint)
+    │    │    ├── EnhancedModelMetadataActivator.cs    # Workaround AOT: ativa IsEnhancedModelMetadataSupported antes do primeiro request
+    │    │    └── FallbackSimpleTypeModelBinderProvider.cs  # Substitui SimpleTypeModelBinderProvider para compatibilidade AOT
+    │    ├── ModelValidation/
+    │    │    └── NoOpObjectModelValidator.cs  # Substitui IObjectModelValidator padrão (reflection-based) por implementação AOT-compatível
     │    └── Security/
     │         ├── ITokenService.cs             # Contrato de geração e validação de JWT
     │         ├── AuthenticatedUser.cs         # Modelo do usuário autenticado (Id, UserName)
@@ -215,3 +226,6 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-15 | Infra/Security/ criada com ITokenService, AuthenticatedUser, TokenService, AuthenticateFilter, AuthenticateAttribute | DA-013 |
 | 2026-03-15 | wiki/ criada na raiz: 12 arquivos-fonte da GitHub Wiki; Instructions/wiki/ criada com wiki-governance.md | Instrução do usuário |
 | 2026-03-16 | Shared/ExternalApi/ documentada: padrão de integração HTTP externa com Refit + Polly (DA-017); primeira integração: Open-Meteo | Instrução do usuário |
+| 2026-03-17 | Infra/HealthChecks/ adicionada: DatadogAgentHealthCheck implementa RN-005 | Instrução do usuário |
+| 2026-03-17 | wiki/ atualizada: Feature-WeatherConditionsGet.md adicionada à lista | Revisão de governança |
+| 2026-03-18 | Infra/Json/, Infra/ModelBinding/, Infra/ModelValidation/ documentadas: presentes no código mas ausentes do registro estrutural | Revisão de governança |
