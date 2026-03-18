@@ -86,13 +86,13 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 ### DA-014 — Idioma de Pull Requests: Português Brasileiro Obrigatório
 **Data**: 2026-03-15
 **Status**: Ativo
-**Decisão**: Todo conteúdo de pull request — título, descrição e seções do corpo — deve ser escrito em português brasileiro. O repositório expõe um template de PR em português para guiar colaboradores e um workflow de CI valida que título e corpo foram preenchidos.
+**Decisão**: Todo conteúdo de pull request — título, descrição e seções do corpo — deve ser escrito em português brasileiro. O repositório expõe um template de PR em português para guiar colaboradores.
 **Motivação**: Manter consistência com P006 (linguagem e comunicação) e garantir que mudanças de código sejam documentadas de forma compreensível para o time. Pull requests são artefatos de comunicação; a regra de idioma se aplica a eles da mesma forma que se aplica às respostas do agente.
 **Alternativas consideradas**: Validação semântica automática de idioma via API externa — descartada por introduzir dependência externa e complexidade desproporcional ao benefício. Ausência de validação — descartada: regra sem enforcement técnico tende a ser ignorada.
-**Trade-offs**: A validação automatizada é estrutural (título e corpo não vazios, mínimo de caracteres), não semântica. Conteúdo redigido em outro idioma não seria bloqueado automaticamente pelo workflow — a regra é reforçada por governança, template e revisão humana.
+**Trade-offs**: A validação automatizada é estrutural (título e corpo não vazios, mínimo de caracteres), não semântica. Conteúdo redigido em outro idioma não seria bloqueado automaticamente — a regra é reforçada por governança, template e revisão humana.
 **Consequências**:
 - `.github/pull_request_template.md` criado com estrutura de seções em português.
-- `.github/workflows/pr-language-check.yml` criado: valida que título (≥ 5 chars) e corpo (≥ 20 chars) do PR não estão vazios.
+- `.github/workflows/pr-language-check.yml` foi criado e posteriormente removido (2026-03-17) durante reorganização dos workflows de CI/CD — a regra permanece ativa via governança e template.
 - P006 registra este princípio como regra obrigatória.
 - DA-007 atualizado para referenciar PRs explicitamente.
 
@@ -202,7 +202,7 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - `.env` (gitignored): valores reais para execução local.
 - GitHub Environment `ClaudeCode` criado com secret `DD_API_KEY`.
 - `ci.yml` atualizado: todos os jobs declaram `environment: ClaudeCode`; jobs `run` e `healthcheck` iniciam o Datadog Agent container; `DD_ENV` diferente por job (`build`, `ci`).
-- Job `docker-build` adicionado ao CI: valida que o Dockerfile compila corretamente.
+- Job `docker-build` foi adicionado ao CI e posteriormente removido em 2026-03-17 durante reorganização dos workflows (ver histórico de `technical-overview.md`).
 
 ---
 
@@ -257,3 +257,5 @@ Ao adicionar uma nova decisão:
 | 2026-03-15 | DA-007 atualizado: PRs explicitamente incluídos na regra de idioma. DA-014 criada: template de PR em português + workflow de validação | P006, instrução do usuário |
 | 2026-03-16 | DA-016 criada: containerização Docker + Datadog Agent; GitHub Environment ClaudeCode; DD_ENV por contexto | Instrução do usuário |
 | 2026-03-16 | DA-017 criada: padrão Shared/ExternalApi para integrações HTTP externas com Refit + Polly; primeira integração: Open-Meteo | Instrução do usuário |
+| 2026-03-18 | DA-014 atualizado: nota sobre remoção do pr-language-check.yml em 2026-03-17 adicionada | Revisão de governança |
+| 2026-03-18 | DA-016 atualizado: nota sobre remoção do job docker-build em 2026-03-17 adicionada | Revisão de governança |

@@ -215,10 +215,12 @@ public record TodoItemInsertInput
 
 **Estrutura**:
 ```
-Shared/
-└── Middleware/
+Infra/
+└── ExceptionHandling/
     └── GlobalExceptionHandler.cs
 ```
+
+> **Nota**: A localização original era `Shared/Middleware/`. Foi movido para `Infra/ExceptionHandling/` por DA-011 (criação da pasta `Infra/` para componentes de infraestrutura transversal). PAD-008 descreve o padrão; DA-010 e DA-011 detalham a decisão e a localização.
 
 **Registro em `Program.cs`**:
 ```csharp
