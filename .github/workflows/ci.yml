@@ -44,7 +44,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: published-app
-          path: src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/ClaudeDotNetPlayground
+          path: |
+            src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/
+            !src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/*.dbg
           if-no-files-found: error
 
   run:
