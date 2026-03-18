@@ -58,7 +58,10 @@ Regra de negócio relacionada: [RN-003](Business-Rules#rn-003---proteção-de-en
 
 ## Testes Automatizados
 
-Nenhum teste automatizado presente no repositório.
+| Arquivo | Cobertura |
+|---------|-----------|
+| `TestGetEndpointTests.cs` | Logs do endpoint, retorno HTTP 200 com body "funcionando" e HTTP 401 sem token |
+| `TestGetUseCaseTests.cs` | Logs do use case, retorno da string de funcionamento |
 
 ## BDD
 

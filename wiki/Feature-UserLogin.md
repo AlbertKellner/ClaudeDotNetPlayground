@@ -71,7 +71,10 @@ Regra de negócio relacionada: [RN-002](Business-Rules#rn-002---autenticação-d
 
 ## Testes Automatizados
 
-Nenhum teste automatizado presente no repositório.
+| Arquivo | Cobertura |
+|---------|-----------|
+| `UserLoginEndpointTests.cs` | Logs do endpoint, retorno HTTP 200 com token e HTTP 401 com credenciais inválidas |
+| `UserLoginUseCaseTests.cs` | Logs do use case, validação de credenciais, geração de token via ITokenService |
 
 ## BDD
 

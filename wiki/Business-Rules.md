@@ -46,3 +46,14 @@ A aplicação expõe um endpoint autenticado que retorna as condições climáti
 - **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
 - **Comportamento:** retorna `HTTP 200` com o payload completo da Open-Meteo; coordenadas de São Paulo e campos consultados são fixos na implementação
 - **Documentação completa:** [Feature: Condições Climáticas de São Paulo](Feature-WeatherConditionsGet)
+
+---
+
+## RN-005 — Health Check com verificação do Datadog Agent
+
+O endpoint de health check verifica a disponibilidade da aplicação e do Datadog Agent.
+
+- **Endpoint:** `GET /health`
+- **Autenticação:** não exigida
+- **Comportamento:** retorna `HTTP 200 Healthy` quando ambos estão disponíveis; `HTTP 200 Degraded` quando o Datadog Agent responde com status inesperado; `HTTP 503 Unhealthy` quando o Datadog Agent está inacessível
+- **Documentação completa:** [Feature: Health Check](Feature-Health)

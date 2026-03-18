@@ -107,4 +107,5 @@ curl http://localhost:5000/test \
 ## Relação com Features
 
 - [Login de Usuário](Feature-UserLogin) — endpoint que gera o token
-- [Test Get](Feature-TestGet) — exemplo de endpoint protegido
+- [Test Get](Feature-TestGet) — endpoint protegido por `[Authenticate]`
+- [Condições Climáticas de São Paulo](Feature-WeatherConditionsGet) — endpoint protegido por `[Authenticate]`
