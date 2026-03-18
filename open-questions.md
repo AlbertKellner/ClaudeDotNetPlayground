@@ -65,5 +65,5 @@ Este arquivo contém **apenas** dúvidas e ambiguidades **ainda abertas**.
 ## Referências Cruzadas
 
 - `assumptions-log.md` — premissas adotadas relacionadas a estas dúvidas
-- `.claude/rules/ambiguity-handling.md` — regras de como tratar estas dúvidas
+- `.claude/rules/governance-policies.md` §4 — políticas de tratamento de ambiguidades
 - `.claude/skills/resolve-ambiguity/SKILL.md` — workflow de resolução

@@ -79,26 +79,6 @@ Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Da
 
 ---
 
-## Pipeline de Execução Obrigatório
-
-Para toda mensagem do usuário, siga internamente esta sequência:
-
-1. Interpretar semanticamente a mensagem
-2. Normalizar a intenção do usuário
-3. Classificar a solicitação
-4. Identificar arquivos de governança relevantes
-5. Ler a governança relevante antes de agir
-6. Verificar ambiguidades, dúvidas materiais ou lacunas
-7. Classificar trechos técnicos enviados pelo usuário
-8. Registrar dúvidas e premissas quando necessário
-9. Atualizar ou remover dúvidas/premissas resolvidas pela nova mensagem
-10. Atualizar a governança primeiro quando houver nova definição durável
-11. Propagar impactos entre artefatos relacionados
-12. Implementar apenas depois que a governança estiver alinhada
-13. Relatar: intenção interpretada, arquivos consultados, arquivos alterados, snippets classificados, premissas adotadas, conflitos, dúvidas registradas, dúvidas resolvidas, fonte de verdade ativa
-
----
-
 ## Imports de Governança
 
 @Instructions/operating-model.md
@@ -116,22 +96,20 @@ Para toda mensagem do usuário, siga internamente esta sequência:
 
 ### Rules operacionais ativas
 
-@.claude/rules/natural-language-normalization.md
-@.claude/rules/technical-ingestion.md
-@.claude/rules/business-ingestion.md
+@.claude/rules/governance-policies.md
 @.claude/rules/source-of-truth-priority.md
-@.claude/rules/implementation-alignment.md
-@.claude/rules/ambiguity-handling.md
-@.claude/rules/snippet-handling.md
 @.claude/rules/architecture-governance.md
 @.claude/rules/naming-governance.md
 @.claude/rules/folder-governance.md
-@.claude/rules/change-propagation.md
-@.claude/rules/repository-context-evolution.md
 @.claude/rules/bash-error-logging.md
 @.claude/rules/environment-readiness.md
 @.claude/rules/endpoint-validation.md
 @.claude/rules/pr-metadata-governance.md
+@.claude/rules/instruction-review.md
+
+### Meta-governança
+
+@REVIEW.md
 
 ---
 

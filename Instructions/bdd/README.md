@@ -91,4 +91,4 @@ Quando um cenário BDD é criado ou alterado:
 
 - `Instructions/business/business-rules.md` — regras que os cenários especificam
 - `Instructions/contracts/` — contratos que os cenários validam
-- `.claude/rules/business-ingestion.md` — política de quando criar BDD
+- `.claude/rules/governance-policies.md` — políticas de governança consolidadas

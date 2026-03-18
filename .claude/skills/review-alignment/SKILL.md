@@ -86,9 +86,8 @@ Ativar esta skill quando:
 - Confirmação explícita do que está consistente
 
 ## Arquivos de Governança Relacionados
-- `.claude/rules/source-of-truth-priority.md`
-- `.claude/rules/change-propagation.md`
-- `.claude/rules/ambiguity-handling.md`
+- `.claude/rules/source-of-truth-priority.md` — hierarquia de prioridade entre fontes
+- `.claude/rules/governance-policies.md` — políticas de propagação (§3) e ambiguidade (§4)
 - `Instructions/operating-model.md`
 - Todos os arquivos de `Instructions/`
 - `open-questions.md`

@@ -27,7 +27,7 @@ Ativar esta skill sempre que a mensagem do usuário contiver:
 1. SEPARAR TRECHO DO CONTEXTO NARRATIVO
    - Identificar o trecho técnico na mensagem
    - Identificar o texto narrativo ao redor (intenção, contexto, instrução)
-   - Processar o texto narrativo com natural-language-normalization.md
+   - Processar o texto narrativo com governance-policies.md §1 (normalização de linguagem)
 
 2. CLASSIFICAR O TRECHO
    Analisar os sinais na mensagem:
@@ -104,9 +104,8 @@ Ativar esta skill sempre que a mensagem do usuário contiver:
 - Conflitos reportados sem substituição silenciosa
 
 ## Arquivos de Governança Relacionados
-- `.claude/rules/snippet-handling.md`
-- `.claude/rules/ambiguity-handling.md`
-- `.claude/rules/source-of-truth-priority.md`
+- `.claude/rules/governance-policies.md` — políticas de classificação de snippets (§5) e ambiguidade (§4)
+- `.claude/rules/source-of-truth-priority.md` — hierarquia de prioridade entre fontes
 - `Instructions/snippets/README.md`
 - `Instructions/snippets/canonical-snippets.md`
 - `open-questions.md`

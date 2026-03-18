@@ -115,12 +115,10 @@ Esta rule se aplica a **qualquer comando Bash que retorne erro**, incluindo:
 
 - Se o erro revelar uma premissa de ambiente → registrar também em `assumptions-log.md`
 - Se o erro gerar dúvida bloqueante → registrar também em `open-questions.md`
-- Se o erro exigir mudança em `docker-compose.yml`, `Dockerfile` ou outro artefato → propagar via `change-propagation.md`
+- Se o erro exigir mudança em `docker-compose.yml`, `Dockerfile` ou outro artefato → propagar via `governance-policies.md` §3
 
 ---
 
 ## Relação com Outras Rules
 
-- `ambiguity-handling.md` — quando o erro gerar dúvida material sobre como proceder
-- `change-propagation.md` — quando a solução do erro implicar mudança em artefatos relacionados
-- `implementation-alignment.md` — esta rule é executada durante o passo de implementação
+- `governance-policies.md` — políticas de ambiguidade (§4) e propagação (§3) aplicáveis a erros

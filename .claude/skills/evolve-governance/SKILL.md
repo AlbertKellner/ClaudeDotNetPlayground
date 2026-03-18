@@ -79,10 +79,12 @@ Ativar esta skill quando:
 
 ## Arquivos de Governança Relacionados
 - Todos os arquivos de `Instructions/`
-- `.claude/rules/repository-context-evolution.md`
+- `.claude/rules/governance-policies.md` — políticas de contexto (§2) e propagação (§3)
+- `.claude/rules/instruction-review.md` — meta-regra de revisão ativada após evolução
 - `open-questions.md`
 - `assumptions-log.md`
 - `CLAUDE.md`
+- `REVIEW.md`
 
 ## Nota sobre Invocação
 Esta skill deve ser ativada periodicamente, especialmente após acúmulo de interações que geraram muitas dúvidas, premissas ou definições. O assistente pode sugerir proativamente uma evolução da governança quando identificar sinais de desatualização ou inconsistência.

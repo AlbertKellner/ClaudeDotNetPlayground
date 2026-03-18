@@ -54,14 +54,14 @@ Ativar esta skill quando a mensagem do usuário:
    - Há lacunas que impedem implementação segura?
    - Há conflito entre fontes de verdade?
    - A solicitação introduz nova definição durável?
-   → Ver: .claude/rules/ambiguity-handling.md
+   → Ver: .claude/rules/governance-policies.md §4
 
 5. CLASSIFICAR TRECHOS TÉCNICOS (se houver)
    - Normativo → copiar na íntegra
    - Ilustrativo → adaptar ao contexto
    - Preferencial → seguir a abordagem
    - Contextual → usar como apoio
-   → Ver: .claude/rules/snippet-handling.md
+   → Ver: .claude/rules/governance-policies.md §5
 
 6. REGISTRAR DÚVIDAS E PREMISSAS
    - Dúvidas materiais → open-questions.md
@@ -70,11 +70,11 @@ Ativar esta skill quando a mensagem do usuário:
 
 7. ATUALIZAR A GOVERNANÇA PRIMEIRO (se necessário)
    - Se houver nova definição durável → atualizar governança antes do código
-   → Ver: .claude/rules/implementation-alignment.md (Passo 7)
+   → Política: governança antes de implementação (CLAUDE.md)
 
 8. AVALIAR PROPAGAÇÃO
    - Quais artefatos relacionados são afetados?
-   → Ver: .claude/rules/change-propagation.md
+   → Ver: .claude/rules/governance-policies.md §3
 
 9. IMPLEMENTAR
    - Seguir as fontes de verdade do repositório
@@ -103,12 +103,9 @@ Ativar esta skill quando a mensagem do usuário:
 - Dúvidas e premissas registradas quando necessário
 
 ## Arquivos de Governança Relacionados
-- `.claude/rules/implementation-alignment.md`
-- `.claude/rules/natural-language-normalization.md`
-- `.claude/rules/ambiguity-handling.md`
-- `.claude/rules/snippet-handling.md`
-- `.claude/rules/source-of-truth-priority.md`
-- `.claude/rules/change-propagation.md`
+- `.claude/rules/governance-policies.md` — políticas de normalização, ambiguidade, snippets, propagação e contexto
+- `.claude/rules/source-of-truth-priority.md` — hierarquia de prioridade entre fontes
+- `.claude/rules/instruction-review.md` — meta-regra de revisão de instruções
 - `Instructions/operating-model.md`
 - `open-questions.md`
 - `assumptions-log.md`

@@ -47,15 +47,11 @@ open-questions.md
 
 ## O Que os Arquivos Gerados Contêm
 
-- **Pipeline obrigatório** de 13 passos para toda mensagem (`CLAUDE.md`, `implementation-alignment.md`)
-- **Regras explícitas** de tratamento de linguagem natural imperfeita (`natural-language-normalization.md`)
-- **Política completa de ambiguidades** com distinção bloqueante/não-bloqueante, registro e resolução (`ambiguity-handling.md`)
-- **Classificação de snippets** em 4 categorias com regras de preservação e adaptação (`snippet-handling.md`)
+- **Pipeline obrigatório** de validação pré-commit com 10 passos (`CLAUDE.md`)
+- **Políticas consolidadas** de normalização, contexto, propagação, ambiguidade e snippets (`governance-policies.md`)
 - **Hierarquia de prioridade** entre fontes de verdade com regras de conflito (`source-of-truth-priority.md`)
-- **Propagação de mudanças** com mapa transversal por tipo de artefato (`change-propagation.md`)
-- **Política de governança primeiro** com definição de "definição durável" (`implementation-alignment.md`)
-- **Evolução específica** do contexto do repositório com proteção contra regressão (`repository-context-evolution.md`)
-- **6 skills operacionais** com workflows internos completos para cada tipo de solicitação
+- **Meta-governança** com checklist de revisão obrigatória para instruções (`REVIEW.md`, `instruction-review.md`)
+- **7 skills operacionais** com workflows internos completos para cada tipo de solicitação
 - **Estrutura durável** em todos os arquivos de `Instructions/` — prontos para receber conteúdo específico do domínio
 
 ---

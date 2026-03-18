@@ -98,5 +98,5 @@ Este arquivo contém **apenas** premissas **ainda ativas** ou ainda não confirm
 ## Referências Cruzadas
 
 - `open-questions.md` — dúvidas relacionadas às premissas
-- `.claude/rules/ambiguity-handling.md` — regras sobre quando criar premissas
+- `.claude/rules/governance-policies.md` §4 — políticas de ambiguidade e premissas
 - `Instructions/business/assumptions.md` — premissas de negócio específicas
