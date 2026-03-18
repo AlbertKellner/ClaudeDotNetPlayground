@@ -131,8 +131,8 @@ O namespace de todos os componentes de uma Slice (Endpoint, UseCase, Repository,
 
 ```
 Pasta física:   Features/Query/TestGet/TestGetUseCase/TestGetUseCase.cs
-Namespace:      ClaudeDotNetPlayground.Features.Query.TestGet   ← para na Feature
-Proibido:       ClaudeDotNetPlayground.Features.Query.TestGet.TestGetUseCase
+Namespace:      Albert.Playground.ECS.AOT.Api.Features.Query.TestGet   ← para na Feature
+Proibido:       Albert.Playground.ECS.AOT.Api.Features.Query.TestGet.TestGetUseCase
 ```
 
 **Motivação**: o sufixo da subpasta (ex: `TestGetUseCase`) coincide com o nome da classe, criando colisão `Namespace.Tipo`. A convenção de namespace parar na Feature elimina essa colisão estruturalmente.
@@ -148,9 +148,68 @@ Proibido:       ClaudeDotNetPlayground.Features.Query.TestGet.TestGetUseCase
 
 ---
 
+## Nomenclatura de Solution e Projetos
+
+### Estrutura da Solution
+
+A solution deve seguir a estrutura:
+
+```
+Empresa.Produto.Funcionalidade
+```
+
+Ou, quando necessário para detalhar melhor o contexto:
+
+```
+Empresa.Produto.Funcionalidade.Subfuncionalidade
+```
+
+**Regras:**
+- Usar sempre o apelido da empresa, seguido do nome do produto e da funcionalidade
+- A subfuncionalidade deve ser acrescentada apenas quando necessária para diferenciar ou detalhar o contexto funcional
+- Remover acentuações e espaços de todos os elementos
+- Escrever nomes compostos em PascalCase
+- Separar cada elemento com ponto
+- Quando o elemento for uma sigla, preservá-lo em letras maiúsculas, sem expansão
+- Quando a funcionalidade ou subfuncionalidade representar uma ação, usar linguagem imperativa
+
+### Estrutura dos Projetos
+
+Os projetos da solution devem seguir exatamente a nomenclatura da solution e acrescentar, ao final, um último elemento que explicite o recurso tecnológico:
+
+```
+Empresa.Produto.Funcionalidade.RecursoTecnologico
+Empresa.Produto.Funcionalidade.Subfuncionalidade.RecursoTecnologico
+```
+
+**Recursos tecnológicos aceitos:**
+
+| Sufixo | Tipo de projeto |
+|---|---|
+| `Api` | Projeto de API web |
+| `Lambda` | Projeto de função Lambda |
+| `Front` | Projeto de front-end |
+| `UnitTest` | Projeto de testes unitários |
+| `IntegrationTest` | Projeto de testes de integração |
+
+### Nomenclatura Atual deste Repositório
+
+| Artefato | Nome |
+|---|---|
+| Solution | `Albert.Playground.ECS.AOT` |
+| Projeto API | `Albert.Playground.ECS.AOT.Api` |
+| Projeto de testes unitários | `Albert.Playground.ECS.AOT.UnitTest` |
+| Namespace root (API) | `Albert.Playground.ECS.AOT.Api` |
+| Namespace root (testes) | `Albert.Playground.ECS.AOT.UnitTest` |
+
+---
+
 ## Abreviações Permitidas
 
-> **Pendente de definição.** Abreviações aceitas no repositório serão listadas aqui quando estabelecidas.
+| Abreviação | Significado | Contexto |
+|---|---|---|
+| `ECS` | Elastic Container Service | Nome da funcionalidade na solution |
+| `AOT` | Ahead-Of-Time (Native AOT compilation) | Subfuncionalidade na solution |
 
 Regra: só usar abreviações registradas aqui. Sem abreviações não documentadas.
 

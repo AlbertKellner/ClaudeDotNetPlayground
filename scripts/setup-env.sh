@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# setup-env.sh — Bootstrap de Ambiente para ClaudeDotNetPlayground
+# setup-env.sh — Bootstrap de Ambiente para Albert.Playground.ECS.AOT
 # =============================================================================
 # MODELO DECLARATIVO — não execute diretamente.
 # Copie este script para a ferramenta externa de configuração de container.

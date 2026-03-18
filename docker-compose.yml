@@ -1,7 +1,7 @@
 services:
   app:
     build:
-      context: src/ClaudeDotNetPlayground
+      context: src/Albert.Playground.ECS.AOT.Api
       dockerfile: Dockerfile
       args:
         EXTRA_CA_CERT: ${EXTRA_CA_CERT:-}
@@ -10,7 +10,7 @@ services:
     depends_on:
       - datadog-agent
     labels:
-      com.datadoghq.ad.logs: '[{"source": "dotnet", "service": "claudedotnetplayground"}]'
+      com.datadoghq.ad.logs: '[{"source": "dotnet", "service": "albert-playground-ecs-aot-api"}]'
 
   datadog-agent:
     image: registry.datadoghq.com/agent:7
@@ -27,7 +27,7 @@ services:
       - DD_ENV=${DD_ENV:-local}
       - DD_LOGS_ENABLED=true
       - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
-      - DD_HOSTNAME=claudedotnetplayground-local
+      - DD_HOSTNAME=albert-playground-ecs-aot-local
       - DD_CONVERT_DD_SITE_FQDN_ENABLED=false
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro

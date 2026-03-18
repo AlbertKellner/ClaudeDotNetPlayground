@@ -1,4 +1,4 @@
-# ClaudeDotNetPlayground
+# Albert.Playground.ECS.AOT
 
 API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native AOT**. Implementa autenticação por **JWT Bearer Token**, logging estruturado com **Serilog** e arquitetura **Vertical Slice**.
 

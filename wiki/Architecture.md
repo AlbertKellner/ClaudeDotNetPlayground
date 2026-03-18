@@ -11,7 +11,7 @@ Cada funcionalidade é implementada como uma **Slice vertical isolada**, contend
 ## Estrutura de Pastas
 
 ```
-src/ClaudeDotNetPlayground/
+src/Albert.Playground.ECS.AOT.Api/
 ├── Features/
 │   ├── Command/                          # Slices de escrita (alteram estado)
 │   │   └── UserLogin/

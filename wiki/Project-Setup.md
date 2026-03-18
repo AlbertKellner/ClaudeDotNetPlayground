@@ -57,13 +57,13 @@ Controla o nível mínimo de log emitido pela aplicação.
 ### Build padrão
 
 ```bash
-dotnet build src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj
+dotnet build src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
 ```
 
 ### Publicação com Native AOT (modo de produção)
 
 ```bash
-dotnet publish src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj \
+dotnet publish src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj \
   -c Release \
   -r linux-x64 \
   --self-contained
@@ -71,7 +71,7 @@ dotnet publish src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj \
 
 O binário publicado será gerado em:
 ```
-src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/ClaudeDotNetPlayground
+src/Albert.Playground.ECS.AOT.Api/bin/Release/net10.0/linux-x64/publish/Albert.Playground.ECS.AOT.Api
 ```
 
 ---
@@ -81,13 +81,13 @@ src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/ClaudeDotNetPla
 ### Via .NET CLI
 
 ```bash
-dotnet run --project src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj
+dotnet run --project src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
 ```
 
 ### Via binário publicado (Native AOT)
 
 ```bash
-ASPNETCORE_URLS=http://localhost:5000 ./ClaudeDotNetPlayground
+ASPNETCORE_URLS=http://localhost:5000 ./Albert.Playground.ECS.AOT.Api
 ```
 
 ---
