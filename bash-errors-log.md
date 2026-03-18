@@ -181,6 +181,32 @@ Após a aplicação das correções dos Erros 8–10:
 
 ---
 
+## Erro 11 — gh CLI não encontrado ao tentar criar PR
+
+| Campo | Valor |
+|---|---|
+| **Número** | 11 |
+| **Data** | 2026-03-18 |
+| **Comando executado** | `gh pr create --title "feat(mcp): ..." --body "..."` |
+| **Erro retornado** | `/bin/bash: line 23: gh: command not found` |
+| **Causa** | O GitHub CLI (`gh`) não estava instalado no container. O pipeline de validação pré-commit (passo 10) depende de `gh` para criar PRs automaticamente, mas essa dependência não estava listada nos pré-requisitos de ambiente (`scripts/container-setup.md`, `scripts/setup-env.sh`). |
+| **Novo comando / solução** | Instalar `gh` via repositório oficial: `curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \| dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \| tee /etc/apt/sources.list.d/github-cli.list && apt-get update && apt-get install gh`. Scripts de ambiente (`setup-env.sh`, `container-setup.md`) atualizados para incluir `gh` como dependência. |
+
+---
+
+## Erro 12 — gh pr create falha por remote apontar para proxy local
+
+| Campo | Valor |
+|---|---|
+| **Número** | 12 |
+| **Data** | 2026-03-18 |
+| **Comando executado** | `gh pr create --repo AlbertKellner/ClaudeDotNetPlayground --title "..." --body "..."` |
+| **Erro retornado** | `could not resolve remote "origin": none of the git remotes configured for this repository point to a known GitHub host. To tell gh about a new GitHub host, please use 'gh auth login'` |
+| **Causa** | O remote `origin` aponta para um proxy local (`http://127.0.0.1:40021/git/...`), não para `github.com`. O `gh pr create` precisa resolver o remote para um host GitHub conhecido. |
+| **Novo comando / solução** | Usar `gh api` diretamente (que sempre fala com `api.github.com`) em vez de `gh pr create`: `gh api repos/AlbertKellner/ClaudeDotNetPlayground/pulls -f title="..." -f head="..." -f base="main" -f body="..."`. Autenticação via variável de ambiente `GH_TOKEN` já disponível. |
+
+---
+
 ## Referências
 
 - `docker-compose.yml` — arquivo principal afetado pelas correções
