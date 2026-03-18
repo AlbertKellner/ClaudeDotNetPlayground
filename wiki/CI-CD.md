@@ -88,7 +88,7 @@ Valida os endpoints principais com a aplicação rodando como **binário Native 
 **Passos:**
 1. Download do artefato `published-app`
 2. Inicialização do Datadog Agent container (`DD_ENV=ci`) se `DD_API_KEY` estiver disponível
-3. Inicialização do binário `ClaudeDotNetPlayground` e aguarda readiness via `GET /health`
+3. Inicialização do binário `Albert.Playground.ECS.AOT.Api` e aguarda readiness via `GET /health`
 4. Chamada explícita a `GET /health` e verificação do HTTP status (esperado: 200)
 5. Obtenção de Bearer Token via `POST /login` (credenciais: Albert/albert123)
 6. Chamada a `GET /weather-conditions` com o token obtido e verificação do HTTP status (esperado: 200)

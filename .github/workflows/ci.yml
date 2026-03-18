@@ -31,11 +31,11 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Restore dependencies
-        run: dotnet restore src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj
+        run: dotnet restore src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
 
       - name: Build (Native AOT publish)
         run: |
-          dotnet publish src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj \
+          dotnet publish src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj \
             -c Release \
             -r linux-x64 \
             --self-contained
@@ -45,8 +45,8 @@ jobs:
         with:
           name: published-app
           path: |
-            src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/
-            !src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/*.dbg
+            src/Albert.Playground.ECS.AOT.Api/bin/Release/net10.0/linux-x64/publish/
+            !src/Albert.Playground.ECS.AOT.Api/bin/Release/net10.0/linux-x64/publish/*.dbg
           if-no-files-found: error
 
   run:
@@ -88,13 +88,13 @@ jobs:
 
       - name: Run application and verify startup
         run: |
-          chmod +x ./app/ClaudeDotNetPlayground
+          chmod +x ./app/Albert.Playground.ECS.AOT.Api
 
           ASPNETCORE_URLS=http://localhost:5000 \
           Datadog__AgentUrl=http://localhost:8126 \
           Jwt__Secret=super-secret-key-for-development-only-change-in-production \
           OpenMeteo__BaseAddress=https://api.open-meteo.com \
-          ./app/ClaudeDotNetPlayground > run.log 2>&1 &
+          ./app/Albert.Playground.ECS.AOT.Api > run.log 2>&1 &
           APP_PID=$!
 
           echo "Application started with PID $APP_PID"
@@ -155,10 +155,10 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Restore dependencies
-        run: dotnet restore tests/ClaudeDotNetPlayground.Tests/ClaudeDotNetPlayground.Tests.csproj
+        run: dotnet restore tests/Albert.Playground.ECS.AOT.UnitTest/Albert.Playground.ECS.AOT.UnitTest.csproj
 
       - name: Run unit tests
-        run: dotnet test tests/ClaudeDotNetPlayground.Tests/ClaudeDotNetPlayground.Tests.csproj --verbosity normal
+        run: dotnet test tests/Albert.Playground.ECS.AOT.UnitTest/Albert.Playground.ECS.AOT.UnitTest.csproj --verbosity normal
 
   healthcheck-debug:
     name: Validar Health Check (Debug)
@@ -176,7 +176,7 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Restore dependencies
-        run: dotnet restore src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj
+        run: dotnet restore src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
 
       - name: Start Datadog Agent
         env:
@@ -206,7 +206,7 @@ jobs:
         run: |
           ASPNETCORE_URLS=http://localhost:5000 \
           Datadog__AgentUrl=http://localhost:8126 \
-          dotnet run --project src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj > run.log 2>&1 &
+          dotnet run --project src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj > run.log 2>&1 &
           APP_PID=$!
           echo "APP_PID=$APP_PID" >> $GITHUB_ENV
 
@@ -362,13 +362,13 @@ jobs:
 
       - name: Start application (Publish) and wait for readiness
         run: |
-          chmod +x ./app/ClaudeDotNetPlayground
+          chmod +x ./app/Albert.Playground.ECS.AOT.Api
 
           ASPNETCORE_URLS=http://localhost:5000 \
           Datadog__AgentUrl=http://localhost:8126 \
           Jwt__Secret=super-secret-key-for-development-only-change-in-production \
           OpenMeteo__BaseAddress=https://api.open-meteo.com \
-          ./app/ClaudeDotNetPlayground > run.log 2>&1 &
+          ./app/Albert.Playground.ECS.AOT.Api > run.log 2>&1 &
           APP_PID=$!
           echo "APP_PID=$APP_PID" >> $GITHUB_ENV
 
