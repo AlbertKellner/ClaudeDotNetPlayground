@@ -83,7 +83,19 @@ Ativar esta skill quando a mensagem do usuário:
    - Aplicar snippets normativos na íntegra
    - Adaptar exemplos ilustrativos conforme contexto
 
-10. RELATAR
+10. VALIDAR (Pipeline Pré-Commit)
+    - Executar o pipeline de validação pré-commit definido em CLAUDE.md
+    - Inclui: build, run debug, testes, docker compose, health check, validação de endpoints
+    - Realizar commit e push para o branch de trabalho
+
+11. CRIAR PULL REQUEST
+    - Após commit e push, criar PR via `gh pr create`
+    - Título: seguir formato Semantic Commit conforme `.claude/rules/pr-metadata-governance.md`
+    - Descrição: preencher as três seções obrigatórias (Motivos, Plano de execução, O que foi realizado)
+    - Labels: aplicar labels de tipo e impacto conforme `.claude/rules/pr-metadata-governance.md`
+    - Se PR já existir para o branch: atualizar título e descrição via `gh pr edit`
+
+12. RELATAR
     - Intenção interpretada
     - Arquivos de governança consultados
     - Arquivos alterados (governança + implementação)
@@ -94,6 +106,7 @@ Ativar esta skill quando a mensagem do usuário:
     - Dúvidas registradas
     - Dúvidas resolvidas por esta mensagem
     - O que passa a valer como fonte de verdade ativa
+    - URL do Pull Request criado ou atualizado
 ```
 
 ## Saídas Esperadas
