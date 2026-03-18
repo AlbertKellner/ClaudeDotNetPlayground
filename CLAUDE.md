@@ -131,6 +131,7 @@ Para toda mensagem do usuário, siga internamente esta sequência:
 @.claude/rules/bash-error-logging.md
 @.claude/rules/environment-readiness.md
 @.claude/rules/endpoint-validation.md
+@.claude/rules/pr-metadata-governance.md
 
 ---
 
