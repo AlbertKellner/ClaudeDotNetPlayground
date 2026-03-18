@@ -25,7 +25,12 @@ FROM mcr.microsoft.com/dotnet/runtime-deps:10.0 AS runtime
 
 WORKDIR /app
 
-COPY --from=build /app/publish/ClaudeDotNetPlayground .
+COPY --from=build /app/publish/ .
+
+# Copiar bundle de certificados CA do estágio de build.
+# Inclui qualquer CA customizada instalada via EXTRA_CA_CERT (ex: proxy TLS de sandbox).
+# Necessário para que chamadas HTTPS externas (Open-Meteo) funcionem em ambientes com inspeção TLS.
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production

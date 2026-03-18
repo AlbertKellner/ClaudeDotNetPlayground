@@ -22,7 +22,8 @@ public sealed class GlobalExceptionHandler(IProblemDetailsService problemDetails
             {
                 Status = StatusCodes.Status500InternalServerError,
                 Title = "An unexpected error occurred",
-                Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1"
+                Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1",
+                Detail = $"{exception.GetType().FullName}: {exception.Message}{Environment.NewLine}{exception.StackTrace}"
             }
         });
 

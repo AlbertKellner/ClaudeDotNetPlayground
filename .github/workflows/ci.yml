@@ -44,7 +44,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: published-app
-          path: src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/ClaudeDotNetPlayground
+          path: |
+            src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/
+            !src/ClaudeDotNetPlayground/bin/Release/net10.0/linux-x64/publish/*.dbg
           if-no-files-found: error
 
   run:
@@ -88,7 +90,11 @@ jobs:
         run: |
           chmod +x ./app/ClaudeDotNetPlayground
 
-          ASPNETCORE_URLS=http://localhost:5000 Datadog__AgentUrl=http://localhost:8126 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
+          ASPNETCORE_URLS=http://localhost:5000 \
+          Datadog__AgentUrl=http://localhost:8126 \
+          Jwt__Secret=super-secret-key-for-development-only-change-in-production \
+          OpenMeteo__BaseAddress=https://api.open-meteo.com \
+          ./app/ClaudeDotNetPlayground > run.log 2>&1 &
           APP_PID=$!
 
           echo "Application started with PID $APP_PID"
@@ -154,8 +160,171 @@ jobs:
       - name: Run unit tests
         run: dotnet test tests/ClaudeDotNetPlayground.Tests/ClaudeDotNetPlayground.Tests.csproj --verbosity normal
 
-  healthcheck:
-    name: Validar Health Check
+  healthcheck-debug:
+    name: Validar Health Check (Debug)
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    environment: ClaudeCode
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj
+
+      - name: Start Datadog Agent
+        env:
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+        run: |
+          if [ -n "$DD_API_KEY" ]; then
+            docker run -d \
+              --name dd-agent \
+              -p 8126:8126 \
+              -e DD_API_KEY="$DD_API_KEY" \
+              -e DD_SITE="datadoghq.com" \
+              -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
+              -e DD_ENV=ci \
+              -e DD_LOGS_ENABLED=true \
+              -e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true \
+              -v /var/run/docker.sock:/var/run/docker.sock:ro \
+              -v /proc/:/host/proc/:ro \
+              -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
+              -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
+              registry.datadoghq.com/agent:7
+            echo "Datadog Agent started (DD_ENV=ci)"
+          else
+            echo "DD_API_KEY not set — skipping Datadog Agent"
+          fi
+
+      - name: Start application (Debug) and wait for readiness
+        run: |
+          ASPNETCORE_URLS=http://localhost:5000 \
+          Datadog__AgentUrl=http://localhost:8126 \
+          dotnet run --project src/ClaudeDotNetPlayground/ClaudeDotNetPlayground.csproj > run.log 2>&1 &
+          APP_PID=$!
+          echo "APP_PID=$APP_PID" >> $GITHUB_ENV
+
+          echo "Application (Debug) started with PID $APP_PID"
+          echo "Waiting for application to be ready..."
+
+          STARTED=false
+          for i in $(seq 1 30); do
+            sleep 2
+
+            if ! kill -0 $APP_PID 2>/dev/null; then
+              echo ""
+              echo "❌ Application process exited unexpectedly after $((i * 2))s"
+              echo ""
+              echo "=== Application Output ==="
+              cat run.log
+              exit 1
+            fi
+
+            if curl -sf http://localhost:5000/health > /dev/null 2>&1; then
+              STARTED=true
+              break
+            fi
+
+            echo "  Attempt $i/30 — not ready yet..."
+          done
+
+          if [ "$STARTED" = "false" ]; then
+            echo ""
+            echo "❌ Application failed to start within 60 seconds"
+            echo ""
+            echo "=== Application Output ==="
+            cat run.log
+            kill $APP_PID 2>/dev/null || true
+            exit 1
+          fi
+
+          echo "Application is ready"
+
+      - name: Call health check endpoint
+        run: |
+          echo "Calling GET http://localhost:5000/health ..."
+          echo ""
+
+          HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" http://localhost:5000/health)
+          RESPONSE=$(cat /tmp/health_response.txt)
+
+          echo "=== Health Check Result ==="
+          echo "Status: $HTTP_STATUS"
+          echo "Body:   $RESPONSE"
+          echo ""
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Health check passed — application is healthy"
+          else
+            echo "❌ Health check failed — application returned HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+      - name: Call weather conditions endpoint
+        run: |
+          echo "Obtaining JWT token via POST http://localhost:5000/login ..."
+          echo ""
+
+          LOGIN_RESPONSE=$(curl -s -o /tmp/login_response.txt -w "%{http_code}" \
+            -X POST http://localhost:5000/login \
+            -H "Content-Type: application/json" \
+            -d '{"userName":"Albert","password":"albert123"}')
+
+          echo "Login status: $LOGIN_RESPONSE"
+
+          if [ "$LOGIN_RESPONSE" != "200" ]; then
+            echo "❌ Login failed with HTTP $LOGIN_RESPONSE"
+            cat /tmp/login_response.txt
+            exit 1
+          fi
+
+          TOKEN=$(cat /tmp/login_response.txt | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+          if [ -z "$TOKEN" ]; then
+            echo "❌ Token not found in login response"
+            cat /tmp/login_response.txt
+            exit 1
+          fi
+
+          echo "✅ Token obtained"
+          echo ""
+          echo "Calling GET http://localhost:5000/weather-conditions ..."
+          echo ""
+
+          HTTP_STATUS=$(curl -s -o /tmp/weather_response.txt -w "%{http_code}" \
+            -H "Authorization: Bearer $TOKEN" \
+            http://localhost:5000/weather-conditions)
+
+          RESPONSE=$(cat /tmp/weather_response.txt)
+
+          echo "=== Weather Conditions Result ==="
+          echo "Status: $HTTP_STATUS"
+          echo "Body:   $RESPONSE"
+          echo ""
+
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Weather conditions endpoint passed — returned HTTP 200"
+          else
+            echo "❌ Weather conditions endpoint failed — returned HTTP $HTTP_STATUS"
+            exit 1
+          fi
+
+      - name: Stop application
+        if: always()
+        run: kill $APP_PID 2>/dev/null || true
+
+      - name: Stop Datadog Agent
+        if: always()
+        run: docker rm -f dd-agent 2>/dev/null || true
+
+  healthcheck-publish:
+    name: Validar Health Check (Publish)
     needs: unit-tests
     runs-on: ubuntu-latest
     environment: ClaudeCode
@@ -191,15 +360,19 @@ jobs:
             echo "DD_API_KEY not set — skipping Datadog Agent"
           fi
 
-      - name: Start application and wait for readiness
+      - name: Start application (Publish) and wait for readiness
         run: |
           chmod +x ./app/ClaudeDotNetPlayground
 
-          ASPNETCORE_URLS=http://localhost:5000 Datadog__AgentUrl=http://localhost:8126 ./app/ClaudeDotNetPlayground > run.log 2>&1 &
+          ASPNETCORE_URLS=http://localhost:5000 \
+          Datadog__AgentUrl=http://localhost:8126 \
+          Jwt__Secret=super-secret-key-for-development-only-change-in-production \
+          OpenMeteo__BaseAddress=https://api.open-meteo.com \
+          ./app/ClaudeDotNetPlayground > run.log 2>&1 &
           APP_PID=$!
           echo "APP_PID=$APP_PID" >> $GITHUB_ENV
 
-          echo "Application started with PID $APP_PID"
+          echo "Application (Publish) started with PID $APP_PID"
           echo "Waiting for application to be ready..."
 
           STARTED=false

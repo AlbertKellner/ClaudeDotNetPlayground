@@ -18,7 +18,7 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Persistência | A definir por Feature | — |
 | Mensageria | A definir | — |
 | Containerização | Docker — Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent | DA-016 |
-| CI/CD | GitHub Actions — workflows: Validar Execução (`ci.yml`: Compilação → Execução → unit-tests → Validar Health Check), wiki-publish; GitHub Environment: ClaudeCode | — |
+| CI/CD | GitHub Actions — workflows: Validar Execução (`ci.yml`: Compilação → Execução → unit-tests → Validar Health Check (Debug) \|\| Validar Health Check (Publish)), wiki-publish; GitHub Environment: ClaudeCode | — |
 | Observabilidade (logging) | Serilog — Console colorido (AnsiConsoleTheme.Code) + storytelling por classe/método + enrichment por request | DA-011, DA-015, DP-004 parcial |
 | Observabilidade (tracing) | A definir | DP-004 |
 | Observabilidade (métricas) | Datadog Agent (Docker) — métricas de container e host via Docker socket; DogStatsD para métricas customizadas; filtros por env: build, ci, local | DA-016, DP-004 parcial |
@@ -152,3 +152,6 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-17 | Restrição adicionada: toda feature com endpoint deve ser validada via chamada HTTP real antes do commit; geração de token quando necessário | endpoint-validation rule |
 | 2026-03-17 | Workflows de CI/CD reorganizados: pr-language-check e docker-build removidos; CI renomeado para "Validar Execução"; jobs renomeados para Compilação, Execução e Validar Health Check; unit-tests inserido na cadeia sequencial entre Execução e Validar Health Check | — |
 | 2026-03-17 | Restrições adicionadas: validação em modo debug (dotnet run + dotnet test) como gate obrigatório antes do docker compose up -d (publish Release/AOT); health check pós-publish explicitamente separado da validação debug | Pipeline pré-commit |
+| 2026-03-18 | Dockerfile corrigido: COPY da pasta de publicação completa (incluindo appsettings.json) + propagação de CA cert do build para runtime stage | Erro 9, Erro 10 |
+| 2026-03-18 | AotControllerPreservation.PreserveControllers() tornado internal e chamado explicitamente em Program.cs; resolve trim de Controllers em Native AOT | Erro 8 |
+| 2026-03-18 | CI/CD: job `healthcheck` dividido em dois jobs paralelos — `healthcheck-debug` (dotnet run) e `healthcheck-publish` (binário AOT); ambos com `needs: unit-tests` | Instrução do usuário |
