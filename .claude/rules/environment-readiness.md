@@ -160,6 +160,4 @@ Nesses casos, o agente atualiza o script e emite o sinal padronizado (ver Parte 
 ## Relação com Outras Rules
 
 - `bash-error-logging.md` — registra erros APÓS ocorrerem; esta rule previne que ocorram
-- `implementation-alignment.md` — esta rule complementa o Passo 0 do pipeline de validação pré-commit
-- `ambiguity-handling.md` — se um pré-requisito de ambiente for ambíguo, aplicar lógica de premissa conservadora e registrar
-- `repository-context-evolution.md` — o script `setup-env.sh` e os pré-requisitos identificados são contexto acumulado e durável deste repositório
+- `governance-policies.md` — políticas de ambiguidade (§4) e contexto do repositório (§2) aplicáveis a ambiente

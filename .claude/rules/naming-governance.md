@@ -31,7 +31,7 @@ Quando o usuário introduzir uma nova convenção de nomenclatura:
 3. Se for terminologia de negócio → atualizar `Instructions/glossary/ubiquitous-language.md`
 4. Se for convenção técnica → atualizar `Instructions/architecture/naming-conventions.md`
 5. Verificar impacto em artefatos existentes que usam a nomenclatura antiga
-6. Propagar a mudança quando necessário (ver `change-propagation.md`)
+6. Propagar a mudança quando necessário (ver `governance-policies.md` §3)
 
 ---
 
@@ -95,7 +95,5 @@ Quando uma convenção de nomenclatura for alterada:
 ## Relação com Outras Rules
 
 - `source-of-truth-priority.md` — terminologia de negócio prevalece sobre convenção técnica em conflito
-- `technical-ingestion.md` — convenções técnicas de nomenclatura são processadas por esta via
-- `business-ingestion.md` — terminologia de negócio é processada por esta via e registrada no glossário
-- `change-propagation.md` — mudanças de nomenclatura devem ser propagadas via esta rule
+- `governance-policies.md` — políticas de propagação (§3) e classificação de snippets (§5) usadas por esta rule
 - `folder-governance.md` — nomes de pastas seguem as convenções registradas aqui

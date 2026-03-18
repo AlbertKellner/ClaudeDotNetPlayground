@@ -114,6 +114,5 @@ Qualquer adição ou reorganização desta estrutura deve ser:
 ## Relação com Outras Rules
 
 - `architecture-governance.md` — mudanças estruturais são decisões arquiteturais
-- `technical-ingestion.md` — entradas técnicas que afetam estrutura são roteadas para esta rule
 - `naming-governance.md` — nomes de pastas seguem as convenções de nomenclatura registradas
-- `change-propagation.md` — mudanças estruturais devem ser propagadas para artefatos relacionados
+- `governance-policies.md` §3 — mudanças estruturais devem ser propagadas para artefatos relacionados

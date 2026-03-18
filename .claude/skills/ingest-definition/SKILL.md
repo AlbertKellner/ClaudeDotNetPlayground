@@ -78,12 +78,9 @@ Ativar esta skill quando a mensagem do usuário:
 - Dúvidas ou conflitos registrados se existirem
 
 ## Arquivos de Governança Relacionados
-- `.claude/rules/business-ingestion.md`
-- `.claude/rules/technical-ingestion.md`
-- `.claude/rules/natural-language-normalization.md`
-- `.claude/rules/change-propagation.md`
-- `.claude/rules/source-of-truth-priority.md`
-- `.claude/rules/ambiguity-handling.md`
+- `.claude/rules/governance-policies.md` — políticas de normalização (§1), propagação (§3), ambiguidade (§4) e snippets (§5)
+- `.claude/rules/source-of-truth-priority.md` — hierarquia de prioridade entre fontes
+- `.claude/rules/architecture-governance.md` — governança de decisões e princípios técnicos
 - `Instructions/operating-model.md`
 - `open-questions.md`
 - `assumptions-log.md`

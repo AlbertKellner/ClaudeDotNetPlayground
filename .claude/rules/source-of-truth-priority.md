@@ -111,7 +111,5 @@ Se uma convenção técnica de nomenclatura conflitar com a terminologia de neg�
 
 ## Relação com Outras Rules
 
-- `ambiguity-handling.md` usa esta rule quando há múltiplas interpretações conflitantes.
-- `implementation-alignment.md` usa esta rule para decidir qual fonte seguir durante a implementação.
-- `change-propagation.md` deve ser ativada após a resolução de um conflito para propagar a atualização.
-- `naming-governance.md` está subordinada a esta rule nos casos de conflito com negócio ou contratos.
+- `governance-policies.md` — políticas de ambiguidade (§4) e propagação (§3) usam esta rule para resolver conflitos
+- `naming-governance.md` está subordinada a esta rule nos casos de conflito com negócio ou contratos

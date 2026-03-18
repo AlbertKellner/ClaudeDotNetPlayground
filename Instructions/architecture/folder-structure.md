@@ -33,29 +33,31 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   └── _Sidebar.md
 │
 ├── .claude/
-│   ├── rules/                          # Comportamento operacional do assistente
-│   │   ├── ambiguity-handling.md
+│   ├── rules/                          # Políticas operacionais (o quê)
 │   │   ├── architecture-governance.md
-│   │   ├── business-ingestion.md
-│   │   ├── change-propagation.md
+│   │   ├── bash-error-logging.md
+│   │   ├── endpoint-validation.md
+│   │   ├── environment-readiness.md
 │   │   ├── folder-governance.md
-│   │   ├── implementation-alignment.md
+│   │   ├── governance-policies.md       # Consolidação: normalização, contexto, propagação, ambiguidade, snippets
+│   │   ├── instruction-review.md        # Meta-regra: revisão obrigatória via REVIEW.md
 │   │   ├── naming-governance.md
-│   │   ├── natural-language-normalization.md
-│   │   ├── repository-context-evolution.md
-│   │   ├── snippet-handling.md
-│   │   ├── source-of-truth-priority.md
-│   │   └── technical-ingestion.md
+│   │   ├── pr-metadata-governance.md
+│   │   └── source-of-truth-priority.md
 │   │
-│   ├── skills/                         # Skills operacionais
+│   ├── skills/                         # Workflows operacionais (como)
 │   │   ├── apply-user-snippet/
 │   │   ├── evolve-governance/
 │   │   ├── implement-request/
 │   │   ├── ingest-definition/
 │   │   ├── resolve-ambiguity/
-│   │   └── review-alignment/
+│   │   ├── review-alignment/
+│   │   └── review-instructions/         # Executa REVIEW.md
 │   │
-│   └── hooks/                          # Scripts de enforcement
+│   ├── hooks/                          # Scripts de enforcement
+│   │   ├── instruction-change-detector.sh
+│   │   ├── pre-commit-gate.sh
+│   │   └── README.md
 │
 └── Instructions/
     ├── operating-model.md              # Modelo operacional consolidado

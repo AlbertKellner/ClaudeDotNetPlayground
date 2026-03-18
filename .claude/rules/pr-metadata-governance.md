@@ -127,8 +127,8 @@ Todo PR deve ter pelo menos uma label de tipo e uma de impacto:
 
 ## Relação com Outras Rules
 
-- `implementation-alignment.md` — o PR é criado ao final do workflow de implementação
-- `change-propagation.md` — quando o escopo de mudança se expande, o PR deve ser atualizado
+- Skill `implement-request` — o PR é criado ao final do workflow de implementação
+- `governance-policies.md` §3 — quando o escopo de mudança se expande, o PR deve ser atualizado
 - `bash-error-logging.md` — erros encontrados durante validação devem ser refletidos no PR quando relevantes
 - `endpoint-validation.md` — resultados de validação de endpoints devem constar na seção "O que foi realizado"
 

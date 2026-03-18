@@ -66,6 +66,6 @@ snippets/
 
 ## Referências Cruzadas
 
-- `.claude/rules/snippet-handling.md` — regras de classificação e tratamento de snippets
+- `.claude/rules/governance-policies.md` §5 — políticas de classificação e tratamento de snippets
 - `.claude/skills/apply-user-snippet/SKILL.md` — skill que processa trechos do usuário
 - `Instructions/operating-model.md` — modelo operacional que contextualiza snippets

@@ -87,8 +87,8 @@ Ativar esta skill quando:
 - Registros de dúvidas e premissas limpos após resolução
 
 ## Arquivos de Governança Relacionados
-- `.claude/rules/ambiguity-handling.md`
-- `.claude/rules/source-of-truth-priority.md`
+- `.claude/rules/governance-policies.md` — políticas de ambiguidade (§4) e premissas
+- `.claude/rules/source-of-truth-priority.md` — hierarquia de prioridade entre fontes
 - `open-questions.md`
 - `assumptions-log.md`
 - Arquivos de `Instructions/` relevantes para a dúvida em questão

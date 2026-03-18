@@ -1,43 +1,35 @@
-# Hooks de Governança
+# Hooks do Claude Code
 
 ## Propósito
 
-Esta pasta contém scripts placeholder e configurações que reforçam o modelo operacional deste repositório.
+Esta pasta contém os hooks de enforcement do Claude Code para este repositório. Hooks são scripts executados automaticamente antes ou depois de operações de ferramentas.
 
-Os hooks aqui definidos são **placeholders genéricos** porque a stack tecnológica do repositório ainda não está determinada no momento do bootstrap.
+---
 
-## Por Que São Placeholders
+## Hooks Ativos
 
-Os hooks de enforcement real dependem da stack concreta do repositório:
-- Hooks de linting dependem da linguagem (ESLint, Flake8, RuboCop, etc.)
-- Hooks de teste dependem do framework (Jest, pytest, RSpec, etc.)
-- Hooks de validação de schema dependem do tipo de contrato (OpenAPI validator, JSON Schema validator, etc.)
-- Hooks de consistência de governança dependem dos formatos escolhidos
+| Hook | Tipo | Matcher | Propósito |
+|---|---|---|---|
+| `instruction-change-detector.sh` | PostToolUse | Write\|Edit | Detecta mudanças em arquivos de governança e emite lembrete de revisão via REVIEW.md |
+| `pre-commit-gate.sh` | Manual | — | Gate de validação: dotnet build + dotnet test antes de commit |
 
-**Não inventamos enforcement específico de stack antes de saber a stack.**
+---
 
-## Como Adaptar Quando a Stack For Conhecida
+## Configuração
 
-1. Identificar a stack do repositório (linguagem, framework, ferramentas de CI)
-2. Substituir os scripts placeholder pelos hooks reais correspondentes
-3. Testar os hooks no ambiente de desenvolvimento
-4. Registrar a decisão de tooling em `Instructions/decisions/`
-5. Atualizar `Instructions/architecture/engineering-principles.md` com as práticas de qualidade adotadas
+Os hooks são configurados em `.claude/settings.json` na seção `hooks`. Apenas `instruction-change-detector.sh` é acionado automaticamente. O `pre-commit-gate.sh` é referência para execução manual no pipeline pré-commit.
 
-## Hooks Disponíveis
+---
 
-| Arquivo | Propósito | Gatilho Pretendido |
+## Relação com Governança
+
+- `instruction-change-detector.sh` → ativa `.claude/rules/instruction-review.md` → executa `REVIEW.md`
+- `pre-commit-gate.sh` → implementa parte do pipeline de validação pré-commit definido em `CLAUDE.md`
+
+---
+
+## Histórico de Mudanças
+
+| Data | Mudança | Referência |
 |---|---|---|
-| `governance-change-detector.sh` | Detecta mudanças em arquivos de governança | Pre-commit |
-| `governance-first-reminder.sh` | Lembra o modelo "governança antes de implementação" | Pre-commit |
-| `alignment-check.sh` | Sinaliza inconsistências entre artefatos | Pre-commit / CI |
-| `governance-consistency.sh` | Valida coerência mínima após mudanças de governança | Post-commit / CI |
-| `ambiguity-guard.sh` | Verifica se dúvidas bloqueantes estão registradas | Pre-commit |
-| `assumptions-tracker.sh` | Monitora premissas registradas sem resolução | CI |
-| `canonical-snippets-guard.sh` | Verifica preservação de snippets normativos | Pre-commit |
-| `settings.json` | Configuração de hooks para Claude Code | Configuração |
-
-## Integração com Claude Code
-
-O arquivo `settings.json` contém configuração de hooks para o Claude Code.
-Ajuste conforme o comportamento desejado para este repositório.
+| 2026-03-18 | Criado: hooks reais substituindo placeholders | Reestruturação de governança |

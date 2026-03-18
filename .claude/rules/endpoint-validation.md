@@ -152,8 +152,7 @@ Todas as chamadas de validação devem usar `http://localhost:8080` como base UR
 
 - `environment-readiness.md` — a aplicação deve estar em execução (passo 2 e 3 do pipeline) antes desta rule ser ativada
 - `bash-error-logging.md` — erros de chamada HTTP devem ser registrados neste log
-- `implementation-alignment.md` — esta rule compõe o passo 9 (implementar) e o passo 10 (relatar) do workflow de implementação
-- `change-propagation.md` — se a validação revelar comportamento incorreto, propagar a correção antes de prosseguir
+- `governance-policies.md` §3 — se a validação revelar comportamento incorreto, propagar a correção antes de prosseguir
 
 ---
 

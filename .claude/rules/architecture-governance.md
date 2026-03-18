@@ -93,7 +93,6 @@ Se uma decisão arquitetural impede ou compromete o comportamento esperado do si
 
 ## Relação com Outras Rules
 
-- `technical-ingestion.md` usa esta rule para classificar e roteador entradas técnicas
+- `governance-policies.md` — políticas de propagação (§3) e normalização (§1) usadas por esta rule
 - `source-of-truth-priority.md` define que arquitetura está subordinada a BDD e regras de negócio quando há conflito
-- `change-propagation.md` deve ser ativada quando uma mudança arquitetural afeta múltiplos artefatos
 - `naming-governance.md` e `folder-governance.md` são subordinadas a esta rule para decisões estruturais
