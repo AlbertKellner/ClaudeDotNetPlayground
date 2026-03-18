@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/Albert.Playground.ECS.AOT.UnitTest/Albert.Playground.ECS.AOT.UnitTest.csproj" />
-  </Folder>
-</Solution>

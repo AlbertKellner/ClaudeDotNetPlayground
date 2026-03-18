@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Albert.Playground.ECS.AOT.Api\Albert.Playground.ECS.AOT.Api.csproj" />
+    <ProjectReference Include="..\Albert.Playground.ECS.AOT.Api\Albert.Playground.ECS.AOT.Api.csproj" />
   </ItemGroup>
 
 </Project>
