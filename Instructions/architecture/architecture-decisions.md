@@ -172,6 +172,21 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - JWT secret configurado via `appsettings.json` (`Jwt:Secret`).
 - Token expira em 1 hora. Claims: `"id"` (int) e `"userName"` (string).
 
+### DA-015 — Padrão de Logging Estruturado: Storytelling por Classe e Método
+**Data**: 2026-03-15
+**Status**: Ativo
+**Decisão**: Todos os logs da aplicação seguem o padrão `[NomeDaClasse][NomeDoMétodo] DescriçãoBreve` em linguagem imperativa. Todo método registra log de entrada (o que será executado + parâmetros) e log de saída (o que está sendo retornado). Loops têm log antes e depois. Toda instrução `logger.Log*()` tem linha em branco acima e abaixo no código (isolamento visual). O console usa `AnsiConsoleTheme.Code` com template `[{Timestamp}] [{CorrelationId}] [{UserName}] {Message:lj}{NewLine}{Exception}`.
+**Motivação**: Rastreabilidade completa do fluxo de execução em produção sem necessidade de debugger. O formato storytelling permite reconstruir a narrativa de qualquer request a partir dos logs estruturados.
+**Alternativas consideradas**: Logs ad hoc por preferência individual — descartado por inconsistência e dificuldade de filtragem. Logs apenas em pontos de erro — descartado por perda de contexto de execução normal.
+**Trade-offs**: Mais verbosidade de código nos métodos. Compensado pelo ganho de rastreabilidade em produção.
+**Consequências**:
+- Prefixo `[NomeDaClasse][NomeDoMétodo]` é obrigatório em todos os logs de todas as classes.
+- Texto descritivo após o prefixo deve ser imperativo, breve e objetivo.
+- Template de console com `CorrelationId` e `UserName` é normativo (SNP-001).
+- Testes validam tipo do evento + conteúdo parcial via `Contains`.
+- `Program.cs` tem um log por bloco lógico de registros DI, não por instrução individual.
+**ADR completo**: SNP-001 em `Instructions/snippets/canonical-snippets.md` documenta o snippet canônico completo deste padrão.
+
 ### DA-017 — Padrão de Integração HTTP Externa: Shared/ExternalApi
 **Data**: 2026-03-16
 **Status**: Ativo
@@ -259,3 +274,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-16 | DA-017 criada: padrão Shared/ExternalApi para integrações HTTP externas com Refit + Polly; primeira integração: Open-Meteo | Instrução do usuário |
 | 2026-03-18 | DA-014 atualizado: nota sobre remoção do pr-language-check.yml em 2026-03-17 adicionada | Revisão de governança |
 | 2026-03-18 | DA-016 atualizado: nota sobre remoção do job docker-build em 2026-03-17 adicionada | Revisão de governança |
+| 2026-03-18 | DA-015 criada: padrão de logging estruturado storytelling — referenciada por technical-overview.md e SNP-001 mas ausente do registro | Revisão de governança |
