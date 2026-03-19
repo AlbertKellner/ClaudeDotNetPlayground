@@ -87,8 +87,11 @@ Aplicar este checklist antes de qualquer operação Docker para verificar se o a
 | 3 | Docker daemon em execução | `ls /var/run/docker.sock` | Socket presente |
 | 4 | `~/.docker/config.json` com proxy | `grep -q proxies ~/.docker/config.json && echo ok` | Saída `ok` |
 | 5 | CA do proxy disponível no host | `ls /usr/local/share/ca-certificates/swp-ca-production.crt` | Arquivo presente |
+| 6 | `DD_APP_KEY` no host (MCP Datadog) | `env \| grep DD_APP_KEY` | Linha não vazia retornada |
+| 7 | `.mcp.json` presente e configurado | `ls .mcp.json && grep -q mcpServers .mcp.json && echo ok` | Saída `ok` |
+| 8 | `GH_TOKEN` no host (GitHub API) | `env \| grep GH_TOKEN` | Linha não vazia retornada |
 
-**Todos os 5 pré-requisitos devem estar satisfeitos antes de executar `docker compose up`.**
+**Os pré-requisitos 1–5 devem estar satisfeitos antes de executar `docker compose up`.** Os pré-requisitos 6–8 são necessários para recursos operacionais do assistente (MCP e GitHub) e devem ser validados antes de usar os recursos correspondentes.
 
 Se algum pré-requisito estiver ausente → seguir o protocolo da Parte 1 (atualizar script + sinalizar usuário). O agente não deve tentar corrigir o ambiente manualmente.
 
@@ -161,3 +164,4 @@ Nesses casos, o agente atualiza o script e emite o sinal padronizado (ver Parte 
 
 - `bash-error-logging.md` — registra erros APÓS ocorrerem; esta rule previne que ocorram
 - `governance-policies.md` — políticas de ambiguidade (§4) e contexto do repositório (§2) aplicáveis a ambiente
+- `Instructions/architecture/technical-overview.md` — seção "Recursos Operacionais do Assistente" lista os recursos que dependem dos pré-requisitos 6–8
