@@ -115,7 +115,7 @@ Cada regra segue a estrutura:
 **Ação**: O sistema consulta a API do GitHub (`GET /orgs/WebMotors/teams/IntegrationRepos/repos`) utilizando um Personal Access Token configurado. Para cada repositório retornado, registra no arquivo JSON: nome do repositório, descrição, URL Git (`.git`), data da última modificação e um campo de última sincronização local iniciado em branco. Cada repositório encontrado é registrado no log. Retorna HTTP 200 com a lista completa de repositórios.
 **Exceções**: Nenhuma.
 **Dependências**: RN-003 (autenticação obrigatória).
-**BDD relacionado**: Nenhum no momento.
+**BDD relacionado**: `Instructions/bdd/repositories-get-all.feature`
 **Contrato relacionado**: Nenhum no momento.
 **Workflows relacionados**: Nenhum.
 **Status**: Ativo
@@ -128,7 +128,7 @@ Cada regra segue a estrutura:
 **Ação**: O sistema lê o arquivo JSON de repositórios. Para cada repositório: se a pasta local já existe com repositório Git, executa `git pull`; caso contrário, executa `git clone`. A pasta raiz de armazenamento é configurável (padrão: `c:/usuarios/albert/git`). Cada repositório fica em pasta própria com nome correspondente ao nome do repositório no JSON. Após cada sincronização bem-sucedida, grava no JSON a data e hora atuais no formato 24 horas (dd/MM/yyyy HH:mm:ss). Para sucesso, gera log com nível information; para falha, gera log com nível error. Retorna HTTP 200 com contadores de sucesso/erro e detalhes por repositório.
 **Exceções**: Se o arquivo JSON não existir, retorna resultado vazio sem erro HTTP.
 **Dependências**: RN-003 (autenticação obrigatória), RN-006 (arquivo JSON gerado pela busca).
-**BDD relacionado**: Nenhum no momento.
+**BDD relacionado**: `Instructions/bdd/repositories-sync-all.feature`
 **Contrato relacionado**: Nenhum no momento.
 **Workflows relacionados**: Nenhum.
 **Status**: Ativo
