@@ -12,6 +12,7 @@ O script `scripts/setup-env.sh` assume que essas entradas já existem no ambient
 |---|---|---|---|
 | `DD_API_KEY` | **Sim** | Datadog → Organization Settings → API Keys | Datadog Agent não autentica. `/health` retorna `Unhealthy`. Build e run da aplicação funcionam, mas sem observabilidade. |
 | `DD_APP_KEY` | **Sim** | Datadog → Organization Settings → Application Keys | Conexão MCP do Datadog não autentica. O servidor MCP fica inacessível para o Claude Code. |
+| `GH_TOKEN` | **Sim** | GitHub → Settings → Developer Settings → Personal Access Tokens | Assistente não consegue criar, atualizar ou consultar Pull Requests via `gh api`. Pipeline pré-commit (passo 10) falha ao tentar criar PR. |
 
 ---
 

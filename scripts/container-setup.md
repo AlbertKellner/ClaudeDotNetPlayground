@@ -105,6 +105,8 @@ gh --version >/dev/null 2>&1 && echo "OK" || echo "FALHOU"
 
 # 5. Variáveis obrigatórias (ver required-vars.md)
 echo "DD_API_KEY=${DD_API_KEY:-(AUSENTE)}"
+echo "DD_APP_KEY=${DD_APP_KEY:-(AUSENTE — necessário para MCP Datadog)}"
+echo "GH_TOKEN=${GH_TOKEN:-(AUSENTE — necessário para GitHub API)}"
 echo "HTTP_PROXY=${HTTP_PROXY:-(não definido)}"
 ```
 

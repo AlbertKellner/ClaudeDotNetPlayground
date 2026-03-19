@@ -113,6 +113,27 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 
 ---
 
+## Recursos Operacionais do Assistente
+
+Recursos externos disponíveis para o assistente durante o desenvolvimento, configurados via `.mcp.json` ou variáveis de ambiente do container.
+
+| Recurso | Tipo | Configuração | Variáveis Requeridas | Capacidade |
+|---|---|---|---|---|
+| Datadog MCP | MCP Server (HTTP) | `.mcp.json` → `datadog` | `DD_API_KEY`, `DD_APP_KEY` | Acesso a logs de todos os ambientes (local, CI, produção) via ferramentas MCP do Datadog |
+| GitHub API | CLI + Token | `gh` CLI + `GH_TOKEN` | `GH_TOKEN` | Criação, atualização e consulta de Pull Requests; manipulação de issues e releases via `gh api` |
+
+### Como Novos Recursos São Registrados
+
+Quando o usuário disponibilizar um novo recurso operacional (MCP server, integração, token):
+1. Registrar nesta tabela com tipo, configuração, variáveis e capacidade
+2. Atualizar `scripts/required-vars.md` com as variáveis necessárias
+3. Atualizar `.claude/rules/environment-readiness.md` com o item de validação correspondente
+4. Se for MCP server: atualizar `.mcp.json` com a configuração do servidor
+
+*Referência: `Instructions/operating-model.md` — ferramentas e recursos MCP são definições duráveis*
+
+---
+
 ## Restrições Técnicas Conhecidas
 
 - Todo código deve compilar sem erros (`dotnet build`) antes de qualquer commit.
@@ -161,3 +182,4 @@ O Controller não contém lógica de negócio — apenas orquestra request/respo
 | 2026-03-18 | AotControllerPreservation.PreserveControllers() tornado internal e chamado explicitamente em Program.cs; resolve trim de Controllers em Native AOT | Erro 8 |
 | 2026-03-18 | CI/CD: job `healthcheck` dividido em dois jobs paralelos — `healthcheck-debug` (dotnet run) e `healthcheck-publish` (binário AOT); ambos com `needs: unit-tests` | Instrução do usuário |
 | 2026-03-18 | Componentes Infra AOT adicionados à tabela: AppJsonContext, NullModelBinderProvider, FallbackSimpleTypeModelBinderProvider, EnhancedModelMetadataActivator, NoOpObjectModelValidator | Revisão de governança |
+| 2026-03-19 | Seção "Recursos Operacionais do Assistente" adicionada: Datadog MCP e GitHub API registrados como recursos disponíveis; protocolo de registro de novos recursos definido | Lacuna de governança identificada |
