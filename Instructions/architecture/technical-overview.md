@@ -157,7 +157,7 @@ Quando o usuário disponibilizar um novo recurso operacional (MCP server, integr
 - `Shared/` não pode depender de Features.
 - Lógica de negócio não pode estar em Endpoints nem em Repositories.
 - Validação de payload deve estar no objeto `Input` de cada Slice (em `<Feature>Models/`), não em repositórios ou componentes de persistência.
-- Models de Input e Output de cada Feature devem residir exclusivamente em `<Feature>Models/` dentro da própria Slice. Não podem ser compartilhados via `Shared/`. Models de APIs externas em `Shared/ExternalApi/*/Models/` e models de dados compartilhados em `Shared/Repositories/` não são afetados por esta restrição (DA-020).
+- Models de Input e Output de cada Feature devem residir exclusivamente em `<Feature>Models/` dentro da própria Slice. Não podem ser compartilhados via `Shared/`. Features não devem usar models de `Shared/` (incluindo `Shared/ExternalApi/*/Models/`) como tipo de retorno de seus Use Cases ou Endpoints — devem possuir seu próprio Output model em `<Feature>Models/` e mapear os dados internamente. Models de APIs externas em `Shared/ExternalApi/*/Models/` permanecem como contratos do cliente HTTP; models de dados compartilhados em `Shared/Repositories/` permanecem como models de persistência compartilhada (DA-020).
 
 ---
 

@@ -246,15 +246,16 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 ### DA-020 — Isolamento de Models de Feature: Input e Output não compartilhados via Shared
 **Data**: 2026-03-19
 **Status**: Ativo
-**Decisão**: Models de Input e Output de cada Feature devem residir exclusivamente em `<Feature>Models/` dentro da própria Slice. Não podem ser colocados em `Shared/` nem em qualquer localização fora da Feature.
-**Motivação**: Reforça o isolamento da Vertical Slice Architecture (DA-005). Models de Feature fazem parte do contrato da Slice — compartilhá-los via `Shared/` criaria acoplamento oculto entre Slices e violaria a independência de cada Slice.
-**Alternativas consideradas**: Permitir compartilhamento de models entre Slices via `Shared/` — rejeitado por criar dependências implícitas entre Features.
-**Trade-offs**: Pode haver duplicação mínima de campos entre models de Features distintas, mas a independência entre Slices é mais valiosa que a eliminação de duplicação.
+**Decisão**: Models de Input e Output de cada Feature devem residir exclusivamente em `<Feature>Models/` dentro da própria Slice. Não podem ser colocados em `Shared/` nem em qualquer localização fora da Feature. Features também não devem usar models de `Shared/` (incluindo `Shared/ExternalApi/*/Models/`) como tipo de retorno de seus Use Cases ou Endpoints. Se a Feature consome uma API externa via Shared, deve possuir seu próprio Output model no `<Feature>Models/` e mapear os dados internamente.
+**Motivação**: Reforça o isolamento da Vertical Slice Architecture (DA-005). Models de Feature fazem parte do contrato da Slice — compartilhá-los via `Shared/` criaria acoplamento oculto entre Slices e violaria a independência de cada Slice. Usar models de `Shared/ExternalApi/` diretamente como Output da Feature acopla o contrato do endpoint ao contrato da API externa.
+**Alternativas consideradas**: Permitir compartilhamento de models entre Slices via `Shared/` — rejeitado por criar dependências implícitas entre Features. Permitir reuso de models de APIs externas como Output de Features — rejeitado por acoplar o contrato da Feature ao contrato da API externa.
+**Trade-offs**: Pode haver duplicação mínima de campos entre models de Features e models de APIs externas, mas a independência entre Slices e a separação de contratos são mais valiosas que a eliminação de duplicação.
 **Consequências**:
 - Restrição adicionada a `technical-overview.md` seção "Restrições Técnicas Conhecidas".
 - PAD-007 atualizado em `patterns.md` com proibição explícita.
 - `folder-structure.md` atualizado com regra de residência de models.
-- **Não afeta**: models de APIs externas em `Shared/ExternalApi/*/Models/` (DA-017) e models de dados compartilhados em `Shared/Repositories/`.
+- Models de APIs externas permanecem em `Shared/ExternalApi/*/Models/` (DA-017) como contratos do cliente HTTP, mas não podem ser usados diretamente como Output de Features.
+- Models de dados compartilhados em `Shared/Repositories/` permanecem como models de persistência compartilhada.
 
 ---
 

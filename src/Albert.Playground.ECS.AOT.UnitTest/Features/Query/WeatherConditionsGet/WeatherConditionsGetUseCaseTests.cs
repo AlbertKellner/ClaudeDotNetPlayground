@@ -59,6 +59,21 @@ public sealed class WeatherConditionsGetUseCaseTests
     }
 
     [Fact]
+    public async Task ExecuteAsync_DeveRegistrarLogInformationAoMapear()
+    {
+        var fakeClient = new FakeOpenMeteoApiClient();
+        var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
+        var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
+
+        await useCase.ExecuteAsync();
+
+        var logs = fakeLogger.GetSnapshot();
+        Assert.Contains(logs, l =>
+            l.Level == LogLevel.Information &&
+            l.Message.Contains("Mapear"));
+    }
+
+    [Fact]
     public async Task ExecuteAsync_DeveRegistrarLogInformationNoRetorno()
     {
         var fakeClient = new FakeOpenMeteoApiClient();
@@ -95,8 +110,10 @@ public sealed class WeatherConditionsGetUseCaseTests
 
         var result = await useCase.ExecuteAsync();
 
-        Assert.IsType<OpenMeteoOutput>(result);
+        Assert.IsType<WeatherConditionsGetOutput>(result);
         Assert.Equal("America/Sao_Paulo", result.Timezone);
+        Assert.Equal(-23.5475, result.Latitude);
+        Assert.Equal(-46.6361, result.Longitude);
     }
 
     [Fact]

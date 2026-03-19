@@ -82,7 +82,7 @@ Todo código novo ou alterado deve seguir o princípio de **Responsabilidade Ún
 - **Use Cases** (dentro das Slices em `Features/`): orquestração da lógica de negócio da Slice. Não acessa infraestrutura diretamente — depende de interfaces.
 - **Repositories**: apenas acesso a dados. Responsável por materializar e trabalhar com objetos de domínio tipados a partir de dados brutos (banco, API externa, etc.).
 - **Models/DTOs** (`<Feature>Models/`): modelagem de Input e Output especializada por Slice. Validação de payload fica no objeto Input — não em repositórios nem em outros componentes.
-- **Shared**: abstrações, utilitários, clientes, helpers e persistência genérica reutilizáveis entre Slices. Sem lógica especializada para uma única Slice. Models de Input e Output de Features não podem residir em `Shared/` — pertencem exclusivamente a `<Feature>Models/` (DA-020).
+- **Shared**: abstrações, utilitários, clientes, helpers e persistência genérica reutilizáveis entre Slices. Sem lógica especializada para uma única Slice. Models de Input e Output de Features não podem residir em `Shared/` — pertencem exclusivamente a `<Feature>Models/` (DA-020). Features também não devem usar models de `Shared/` (incluindo `Shared/ExternalApi/*/Models/`) como tipo de retorno de seus Use Cases ou Endpoints — se a Feature consome uma API externa via Shared, deve possuir seu próprio Output model e mapear os dados internamente (DA-020).
 
 #### Isolamento entre Slices:
 - Nenhuma Slice pode se comunicar diretamente com outra Slice.
