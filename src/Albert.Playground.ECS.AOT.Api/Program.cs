@@ -16,6 +16,7 @@ using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.OpenMeteo;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
 using Refit;
+using Albert.Playground.ECS.AOT.Api.Infra.Logging;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -33,11 +34,30 @@ var builder = WebApplication.CreateBuilder(args);
 Log.Information("[Program] Configurar Serilog com console colorido e enrichment por request");
 
 builder.Host.UseSerilog((ctx, services, config) =>
+{
     config
         .ReadFrom.Configuration(ctx.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
-        .WriteTo.Console(theme: AnsiConsoleTheme.Code, outputTemplate: OutputTemplate));
+        .WriteTo.Console(theme: AnsiConsoleTheme.Code, outputTemplate: OutputTemplate);
+
+    var ddApiKey = Environment.GetEnvironmentVariable("DD_API_KEY");
+    var ddDirectLogs = ctx.Configuration.GetValue<bool>("Datadog:DirectLogs", false);
+
+    if (!string.IsNullOrEmpty(ddApiKey) && ddDirectLogs)
+    {
+        var ddEnv = Environment.GetEnvironmentVariable("DD_ENV") ?? "local";
+        var ddHost = Environment.GetEnvironmentVariable("DD_HOSTNAME") ?? Environment.MachineName;
+
+        config.WriteTo.Sink(new DatadogHttpSink(
+            apiKey: ddApiKey,
+            service: "albert-playground-ecs-aot-api",
+            host: ddHost,
+            env: ddEnv));
+
+        Log.Information("[Program] Datadog HTTP Sink ativado — logs enviados diretamente ao Datadog. Env={Env}, Host={Host}", ddEnv, ddHost);
+    }
+});
 
 Log.Information("[Program] Registrar dependências de infraestrutura");
 
