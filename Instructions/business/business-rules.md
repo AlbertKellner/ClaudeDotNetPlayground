@@ -109,6 +109,32 @@ Cada regra segue a estrutura:
 
 ---
 
+### RN-006 — Busca de repositórios do team IntegrationRepos no GitHub
+**Enunciado**: A aplicação deve expor um endpoint autenticado que consulta a API do GitHub para listar todos os repositórios acessíveis ao team "IntegrationRepos" da organização "WebMotors", salvando o resultado em um arquivo JSON.
+**Condição**: Quando uma requisição GET autenticada é recebida no endpoint `/repositories`.
+**Ação**: O sistema consulta a API do GitHub (`GET /orgs/WebMotors/teams/IntegrationRepos/repos`) utilizando um Personal Access Token configurado. Para cada repositório retornado, registra no arquivo JSON: nome do repositório, descrição, URL Git (`.git`), data da última modificação e um campo de última sincronização local iniciado em branco. Cada repositório encontrado é registrado no log. Retorna HTTP 200 com a lista completa de repositórios.
+**Exceções**: Nenhuma.
+**Dependências**: RN-003 (autenticação obrigatória).
+**BDD relacionado**: `Instructions/bdd/repositories-get-all.feature`
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
+### RN-007 — Sincronização local de repositórios
+**Enunciado**: A aplicação deve expor um endpoint autenticado que lê o arquivo JSON gerado pela busca de repositórios e sincroniza localmente cada repositório, clonando novos e atualizando existentes.
+**Condição**: Quando uma requisição POST autenticada é recebida no endpoint `/repositories/sync`.
+**Ação**: O sistema lê o arquivo JSON de repositórios. Para cada repositório: se a pasta local já existe com repositório Git, executa `git pull`; caso contrário, executa `git clone`. A pasta raiz de armazenamento é configurável (padrão: `c:/usuarios/albert/git`). Cada repositório fica em pasta própria com nome correspondente ao nome do repositório no JSON. Após cada sincronização bem-sucedida, grava no JSON a data e hora atuais no formato 24 horas (dd/MM/yyyy HH:mm:ss). Para sucesso, gera log com nível information; para falha, gera log com nível error. Retorna HTTP 200 com contadores de sucesso/erro e detalhes por repositório.
+**Exceções**: Se o arquivo JSON não existir, retorna resultado vazio sem erro HTTP.
+**Dependências**: RN-003 (autenticação obrigatória), RN-006 (arquivo JSON gerado pela busca).
+**BDD relacionado**: `Instructions/bdd/repositories-sync-all.feature`
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
 ## Regras Substituídas ou Depreciadas
 
 > Nenhuma regra substituída no momento.
@@ -141,3 +167,5 @@ Cada regra segue a estrutura:
 | 2026-03-15 | RN-003 criada: proteção de endpoints por Bearer Token com enriquecimento de logs | Instrução do usuário |
 | 2026-03-16 | RN-004 criada: consulta de condições climáticas de São Paulo via Open-Meteo, payload completo | Instrução do usuário |
 | 2026-03-17 | RN-005 criada: health check inclui verificação do Datadog Agent via HTTP | Instrução do usuário |
+| 2026-03-19 | RN-006 criada: busca de repositórios do team IntegrationRepos via API GitHub | Instrução do usuário |
+| 2026-03-19 | RN-007 criada: sincronização local de repositórios com clone/pull e registro de data | Instrução do usuário |

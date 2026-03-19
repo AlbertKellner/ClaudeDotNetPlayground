@@ -175,9 +175,12 @@ src/
          │         ├── I<Servico>Api.cs             # Interface Refit (contrato HTTP; rota hardcoded)
          │         ├── I<Servico>ApiClient.cs       # Interface de serviço (Features injetam este contrato)
          │         ├── <Servico>ApiClient.cs        # Implementação: usa I<Servico>Api; aplica logging SNP-001
+         │         ├── <Servico>AuthenticationHandler.cs  # DelegatingHandler (quando API requer auth)
          │         └── Models/
          │              ├── <Servico>Input.cs       # Parâmetros da requisição à API
          │              └── <Servico>Output.cs      # Modelo completo da resposta da API + JsonSerializerContext
+         ├── Repositories/                          # Modelos compartilhados de persistência em arquivo
+         │    └── RepositoryFileEntry.cs            # Modelo do arquivo JSON de repositórios + JsonSerializerContext
          ├── <Abstrações e interfaces genéricas reutilizáveis entre Slices>
          ├── <Utilitários e helpers>
          └── <Configurações de infraestrutura compartilhada>
@@ -238,3 +241,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-17 | wiki/ atualizada: Feature-WeatherConditionsGet.md adicionada à lista | Revisão de governança |
 | 2026-03-18 | Infra/Json/, Infra/ModelBinding/, Infra/ModelValidation/ documentadas: presentes no código mas ausentes do registro estrutural | Revisão de governança |
 | 2026-03-18 | Reorganização: solution movida para `src/`; projeto de testes movido de `tests/` para `src/`; pasta `tests/` removida; todos os projetos agora em `src/` | Instrução do usuário |
+| 2026-03-19 | Shared/ExternalApi/GitHub/ criada (integração GitHub API); Shared/Repositories/ criada (modelo JSON compartilhado); Features RepositoriesGetAll e RepositoriesSyncAll adicionadas | DA-019, RN-006, RN-007 |
