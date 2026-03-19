@@ -1,8 +1,8 @@
 services:
   app:
     build:
-      context: src/Albert.Playground.ECS.AOT.Api
-      dockerfile: Dockerfile
+      context: src
+      dockerfile: Albert.Playground.ECS.AOT.Api/Dockerfile
       args:
         EXTRA_CA_CERT: ${EXTRA_CA_CERT:-}
     ports:

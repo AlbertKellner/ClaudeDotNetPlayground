@@ -7,7 +7,6 @@ using Albert.Playground.ECS.AOT.Api.Infra.Json;
 using Albert.Playground.ECS.AOT.Api.Infra.ModelBinding;
 using Albert.Playground.ECS.AOT.Api.Infra.ModelValidation;
 using Albert.Playground.ECS.AOT.Api.Infra.Middlewares;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Albert.Playground.ECS.AOT.Api.Infra.HealthChecks;
