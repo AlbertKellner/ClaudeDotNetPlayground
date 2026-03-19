@@ -232,6 +232,30 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - `AuthenticateFilter` armazena `AuthenticatedUser` em `HttpContext.Items` para acesso pela camada de cache via `IHttpContextAccessor`.
 - `IMemoryCache` e `IHttpContextAccessor` registrados no DI.
 
+### DA-019 — Integração GitHub API com Refit + Polly e Persistência em Arquivo JSON
+**Data**: 2026-03-19
+**Status**: Ativo
+**Decisão**: A integração com a API do GitHub segue o mesmo padrão de `Shared/ExternalApi/` (DA-017): interface Refit, resiliência Polly v8, e um `DelegatingHandler` dedicado (`GitHubAuthenticationHandler`) para injetar Bearer PAT, User-Agent e Accept no pipeline HTTP. Os dados de repositórios são persistidos em arquivo JSON local com modelo compartilhado (`RepositoryFileEntry`) em `Shared/Repositories/`.
+**Motivação**: Consistência com o padrão já estabelecido em DA-017 para integrações HTTP externas. Persistência em arquivo JSON atende ao requisito sem necessidade de banco de dados.
+**Consequências**:
+- `Shared/ExternalApi/GitHub/` criada com `IGitHubApi`, `IGitHubApiClient`, `GitHubApiClient`, `GitHubAuthenticationHandler`.
+- `Shared/ExternalApi/GitHub/Models/GitHubRepositoryOutput.cs` criada com modelo de resposta e `GitHubJsonContext`.
+- `Shared/Repositories/RepositoryFileEntry.cs` criada com modelo compartilhado e `RepositoryFileJsonContext`.
+- Features `RepositoriesGetAll` e `RepositoriesSyncAll` criadas em `Features/Query/` e `Features/Command/` respectivamente.
+
+### DA-020 — Isolamento de Models de Feature: Input e Output não compartilhados via Shared
+**Data**: 2026-03-19
+**Status**: Ativo
+**Decisão**: Models de Input e Output de cada Feature devem residir exclusivamente em `<Feature>Models/` dentro da própria Slice. Não podem ser colocados em `Shared/` nem em qualquer localização fora da Feature.
+**Motivação**: Reforça o isolamento da Vertical Slice Architecture (DA-005). Models de Feature fazem parte do contrato da Slice — compartilhá-los via `Shared/` criaria acoplamento oculto entre Slices e violaria a independência de cada Slice.
+**Alternativas consideradas**: Permitir compartilhamento de models entre Slices via `Shared/` — rejeitado por criar dependências implícitas entre Features.
+**Trade-offs**: Pode haver duplicação mínima de campos entre models de Features distintas, mas a independência entre Slices é mais valiosa que a eliminação de duplicação.
+**Consequências**:
+- Restrição adicionada a `technical-overview.md` seção "Restrições Técnicas Conhecidas".
+- PAD-007 atualizado em `patterns.md` com proibição explícita.
+- `folder-structure.md` atualizado com regra de residência de models.
+- **Não afeta**: models de APIs externas em `Shared/ExternalApi/*/Models/` (DA-017) e models de dados compartilhados em `Shared/Repositories/`.
+
 ---
 
 ## Decisões Pendentes
@@ -289,3 +313,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-18 | DA-016 atualizado: nota sobre remoção do job docker-build em 2026-03-17 adicionada | Revisão de governança |
 | 2026-03-18 | DA-015 criada: padrão de logging estruturado storytelling — referenciada por technical-overview.md e SNP-001 mas ausente do registro | Revisão de governança |
 | 2026-03-19 | DA-018 criada: Memory Cache para endpoints GET com Decorator Pattern; reestruturação de ExternalApi config em HttpRequest/CircuitBreaker/EndpointCache | Instrução do usuário |
+| 2026-03-19 | DA-020 criada: isolamento de models de Feature — Input e Output não compartilhados via Shared | Instrução do usuário |
