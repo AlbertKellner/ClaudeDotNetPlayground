@@ -67,6 +67,7 @@ Antes de qualquer commit, executar obrigatoriamente esta sequência:
 8. `docker compose down` — parar todos os containers
 9. Somente então realizar o commit
 10. Verificar se já existe um PR aberto para o branch atual; se não existir, criar o PR seguindo as regras de `.claude/rules/pr-metadata-governance.md`. Se já existir, atualizar título e descrição para refletir o estado atual da implementação.
+11. Acompanhar a execução das GitHub Actions vinculadas ao PR. Aguardar a conclusão de todos os jobs. Se algum job falhar, analisar os logs do CI (considerando apenas os registros de erro emitidos no horário da execução da pipeline), diagnosticar a causa raiz, corrigir, e reiniciar o ciclo a partir do passo apropriado. Ver `.claude/rules/pr-metadata-governance.md` para a política completa.
 
 **O Passo 0 é obrigatório e não deve ser pulado.** Previne o ciclo de falhas em cascata documentado em `bash-errors-log.md`. Ver `.claude/rules/environment-readiness.md` para o protocolo completo.
 
