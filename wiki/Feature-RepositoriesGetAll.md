@@ -67,4 +67,8 @@ Retry exponencial com Polly v8, configurável via `ExternalApi:GitHub:CircuitBre
 
 ## BDD
 
-Nenhum cenário BDD definido para esta funcionalidade.
+Cenários definidos em `Instructions/bdd/repositories-get-all.feature` (RN-006, RN-003):
+
+- **Autenticação**: não deve permitir acesso sem autenticação; não deve permitir acesso com token inválido
+- **Fluxo principal**: deve retornar a lista de repositórios do team IntegrationRepos; deve registrar cada repositório no log; deve persistir os repositórios no arquivo JSON
+- **Borda**: deve retornar lista vazia quando o team não possui repositórios

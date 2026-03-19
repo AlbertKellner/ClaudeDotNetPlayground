@@ -146,6 +146,20 @@ Isso inclui:
 ### Quando CI/CD mudar:
 1. Atualizar `CI-CD.md`
 
+### Quando cenários BDD forem criados ou alterados:
+1. Atualizar a seção "BDD" da página `Feature-[Nome].md` correspondente
+2. Atualizar `Business-Rules.md` se a regra de negócio agora possui BDD referenciado
+
+### Quando regras de negócio forem criadas ou alteradas:
+1. Atualizar `Business-Rules.md`
+2. Atualizar a seção "Comportamento" da página `Feature-[Nome].md` correspondente
+
+### Quando contratos forem criados ou alterados:
+1. Atualizar as seções "Contrato de Entrada" e "Contrato de Saída" da página `Feature-[Nome].md` correspondente
+
+### Quando testes forem criados ou alterados:
+1. Atualizar a seção "Testes Automatizados" da página `Feature-[Nome].md` correspondente
+
 ---
 
 ## Fonte Canônica e Publicação
@@ -181,3 +195,4 @@ Toda a documentação da Wiki deve ser escrita em **português brasileiro**.
 |------|---------|-----------|
 | 2026-03-15 | Criado: governança inicial da GitHub Wiki | Instrução do usuário |
 | 2026-03-15 | Publicação alterada para automática via wiki-publish.yml | Instrução do usuário |
+| 2026-03-19 | Adicionado: gatilhos de atualização da wiki para BDD, regras de negócio, contratos e testes | Instrução do usuário |

@@ -81,4 +81,12 @@ Retorna Problem Details (RFC 7807).
 
 ## BDD
 
-Nenhum cenário BDD definido para esta funcionalidade.
+Cenários definidos em `Instructions/bdd/repositories-sync-all.feature` (RN-007, RN-006, RN-003):
+
+- **Autenticação**: não deve permitir sincronização sem autenticação; não deve permitir sincronização com token inválido
+- **Clone**: deve clonar repositório quando a pasta local não existe
+- **Pull**: deve atualizar repositório quando a pasta já existe com Git
+- **Registro de data**: deve gravar data/hora da sincronização no JSON após sucesso
+- **Contadores**: deve retornar contadores de sucesso/erro com detalhes por repositório
+- **Logging**: deve registrar log information para sucesso; deve registrar log error para falha
+- **Borda**: deve retornar resultado vazio quando JSON não existe; deve retornar resultado vazio quando JSON existe mas está vazio

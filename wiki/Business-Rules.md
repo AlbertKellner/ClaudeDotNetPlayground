@@ -67,6 +67,7 @@ A aplicação expõe um endpoint autenticado que consulta a API do GitHub para l
 - **Endpoint:** `GET /repositories`
 - **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
 - **Comportamento:** consulta a API GitHub, mapeia os repositórios para um arquivo JSON com nome, descrição, URL Git, data de modificação e campo de sincronização em branco; cada repositório é registrado no log
+- **BDD:** 7 cenários definidos em `Instructions/bdd/repositories-get-all.feature`
 - **Documentação completa:** [Feature: Busca de Repositórios](Feature-RepositoriesGetAll)
 
 ---
@@ -78,4 +79,5 @@ A aplicação expõe um endpoint autenticado que lê o arquivo JSON gerado pela 
 - **Endpoint:** `POST /repositories/sync`
 - **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
 - **Comportamento:** para cada repositório no JSON, clona se ainda não existe ou executa pull se já clonado; atualiza o campo de última sincronização com data/hora no formato 24h; log info para sucesso, log error para falhas
+- **BDD:** 11 cenários definidos em `Instructions/bdd/repositories-sync-all.feature`
 - **Documentação completa:** [Feature: Sincronização de Repositórios](Feature-RepositoriesSyncAll)
