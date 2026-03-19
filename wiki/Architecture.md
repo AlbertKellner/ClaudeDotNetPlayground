@@ -102,6 +102,61 @@ Os componentes de `Infra/` são transparentes para as Features:
 
 ---
 
+## Memory Cache
+
+A aplicação implementa **Memory Cache** para endpoints GET que consomem APIs externas, reduzindo chamadas desnecessárias e melhorando o tempo de resposta.
+
+### Estratégia
+
+| Aspecto | Implementação |
+|---------|--------------|
+| **Escopo do cache** | Por usuário autenticado |
+| **Chave de cache** | `{NomeDoServico}:{NomeDoEndpoint}:{userId}` — definida no código, não configurável via JSON |
+| **Duração** | Configurável via `appsettings.json` (padrão: 10 segundos) |
+| **Tipo de expiração** | Absoluta (fixa) — ao expirar, o próximo request faz nova chamada HTTP |
+| **Tecnologia** | `IMemoryCache` (`Microsoft.Extensions.Caching.Memory`) |
+
+### Configuração (`appsettings.json`)
+
+A configuração de APIs externas é organizada em três agrupamentos por responsabilidade:
+
+```json
+"ExternalApi": {
+    "<Servico>": {
+        "HttpRequest": { ... },
+        "CircuitBreaker": { ... },
+        "EndpointCache": {
+            "<NomeDoEndpoint>": {
+                "DurationSeconds": 10,
+                "ExpirationType": "Absolute"
+            }
+        }
+    }
+}
+```
+
+| Agrupamento | Responsabilidade |
+|-------------|-----------------|
+| **HttpRequest** | Propriedades do cliente HTTP (Refit): URL base |
+| **CircuitBreaker** | Propriedades de resiliência (Polly): retry, delay, backoff |
+| **EndpointCache** | Propriedades de Memory Cache por endpoint: duração, tipo de expiração |
+
+### Fluxo de Cache
+
+```
+Request autenticado
+    └── CachedOpenMeteoApiClient
+            ├── Cache hit → retorna resposta cacheada (sem chamada HTTP)
+            └── Cache miss → OpenMeteoApiClient → API externa
+                                └── Armazena resposta no cache
+```
+
+### Implementação Arquitetural — Decorator Pattern
+
+O cache é implementado como um **decorator** (`CachedOpenMeteoApiClient`) que envolve o cliente HTTP original (`OpenMeteoApiClient`). Ambos implementam `IOpenMeteoApiClient`. As Features injetam apenas a interface — o decorator é transparente.
+
+---
+
 ## Observabilidade
 
 ### Datadog Agent (Docker)

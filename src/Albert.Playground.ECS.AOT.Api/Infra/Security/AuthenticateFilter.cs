@@ -6,6 +6,8 @@ namespace Albert.Playground.ECS.AOT.Api.Infra.Security;
 
 public sealed class AuthenticateFilter(ITokenService tokenService, ILogger<AuthenticateFilter> logger) : IAsyncActionFilter
 {
+    public const string AuthenticatedUserItemKey = "AuthenticatedUser";
+
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         logger.LogInformation("[AuthenticateFilter][OnActionExecutionAsync] Validar Bearer Token da requisição");
@@ -43,6 +45,8 @@ public sealed class AuthenticateFilter(ITokenService tokenService, ILogger<Authe
             { StatusCode = StatusCodes.Status401Unauthorized };
             return;
         }
+
+        context.HttpContext.Items[AuthenticatedUserItemKey] = user;
 
         using (LogContext.PushProperty("UserId", user.Id))
         using (LogContext.PushProperty("UserName", user.UserName))
