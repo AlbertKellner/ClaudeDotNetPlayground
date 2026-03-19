@@ -207,6 +207,19 @@ Após a aplicação das correções dos Erros 8–10:
 
 ---
 
+## Erro 13 — weather-conditions retorna 500 no CI (job Publish) — ArgumentNullException em OpenMeteo BaseUrl
+
+| Campo | Valor |
+|---|---|
+| **Número** | 13 |
+| **Data** | 2026-03-19 |
+| **Comando executado** | `curl -H "Authorization: Bearer $TOKEN" http://localhost:5000/weather-conditions` (no job `healthcheck-publish` do CI) |
+| **Erro retornado** | `HTTP 500` — `System.ArgumentNullException: Value cannot be null. (Parameter 'uriString')` na linha `c.BaseAddress = new Uri(builder.Configuration["ExternalApi:OpenMeteo:BaseUrl"]!)` |
+| **Causa** | Dois problemas combinados: (1) O binário publicado era executado com `./app/Albert.Playground.ECS.AOT.Api` mas o CWD era a raiz do workspace do GitHub Actions, não `./app/`. O .NET busca `appsettings.json` no CWD (`Directory.GetCurrentDirectory()`), logo o arquivo não era encontrado. (2) A env var `OpenMeteo__BaseAddress` passada no CI mapeia para `OpenMeteo:BaseAddress`, mas o código lê `ExternalApi:OpenMeteo:BaseUrl` — chaves completamente diferentes. Nenhuma das duas fontes fornecia o valor correto. |
+| **Novo comando / solução** | Adicionar `cd ./app` antes de executar o binário nos jobs `run` e `healthcheck-publish` do CI, garantindo que `appsettings.json` (presente no artefato de publish) seja encontrado pelo .NET. Removida a env var `OpenMeteo__BaseAddress` (incorreta e desnecessária com o appsettings.json disponível). |
+
+---
+
 ## Referências
 
 - `docker-compose.yml` — arquivo principal afetado pelas correções

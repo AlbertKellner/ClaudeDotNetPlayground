@@ -148,6 +148,51 @@ Esta política é ativada automaticamente **após a criação do último commit*
 
 ---
 
+## Política de Acompanhamento de GitHub Actions
+
+### Princípio:
+> Código pushado não está validado até que o CI confirme. O acompanhamento das Actions é a etapa final obrigatória do pipeline.
+
+### Quando se aplica:
+Esta política é ativada automaticamente **após o push e a criação/atualização do PR**, como passo 11 do pipeline de validação pré-commit definido em `CLAUDE.md`.
+
+### Workflow obrigatório:
+
+1. **Identificar a execução ativa** vinculada ao PR/branch:
+   ```bash
+   gh api repos/<owner>/<repo>/actions/runs --jq '.workflow_runs[:1] | .[].id'
+   ```
+
+2. **Acompanhar os jobs** até a conclusão de todos:
+   ```bash
+   gh api repos/<owner>/<repo>/actions/runs/<run-id>/jobs --jq '.jobs[] | {name, status, conclusion}'
+   ```
+   - Polling a cada 30–90 segundos até que todos os jobs tenham `status: completed`
+
+3. **Se todos os jobs passarem** (`conclusion: success`):
+   - Reportar o resultado final com a lista de jobs e seus status
+   - A tarefa está concluída
+
+4. **Se algum job falhar** (`conclusion: failure`):
+   - Obter os logs do job que falhou:
+     ```bash
+     gh api repos/<owner>/<repo>/actions/runs/<run-id>/jobs --jq '.jobs[] | select(.conclusion == "failure") | {name, id}'
+     ```
+   - Analisar os logs considerando **apenas os registros de erro emitidos no horário de execução da pipeline** — ignorar logs antigos ou de execuções anteriores
+   - Diagnosticar a causa raiz
+   - Corrigir o código, testes ou configuração de CI conforme necessário
+   - Reiniciar o pipeline de validação pré-commit a partir do passo apropriado (build, test ou commit dependendo do que foi alterado)
+   - Registrar o erro em `bash-errors-log.md` se for um erro novo
+   - Repetir o ciclo de acompanhamento até que todos os jobs passem
+
+### Regras:
+- O assistente **não deve encerrar a tarefa** enquanto houver jobs em execução ou falhando — a tarefa só está concluída quando todos os jobs passam
+- Erros de CI devem ser tratados com a mesma diligência que erros locais
+- Se o erro for intermitente (flaky test, timeout de rede), documentar e tentar novamente antes de investigar profundamente
+- Se o erro exigir mudança em arquivo de governança, ativar a meta-regra de revisão de instruções (`instruction-review.md`)
+
+---
+
 ## Política de Consistência
 
 - A descrição é a **fonte de verdade textual** do PR
@@ -174,3 +219,4 @@ Esta política é ativada automaticamente **após a criação do último commit*
 |---|---|---|
 | 2026-03-18 | Criado: governança de metadados de PR | Instrução do usuário |
 | 2026-03-18 | Adicionado: política de verificação e criação automática de PR após último commit | Instrução do usuário |
+| 2026-03-19 | Adicionado: política de acompanhamento de GitHub Actions pós-PR com análise de logs e correção de falhas | Instrução do usuário |
