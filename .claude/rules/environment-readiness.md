@@ -74,6 +74,8 @@ O script foi atualizado nesta sessão. Copie o conteúdo atualizado de scripts/s
 
 5. **Não prosseguir** com operações que dependem do pré-requisito ausente até que o usuário confirme que o ambiente foi reconfigurado.
 
+**Para detalhes operacionais** (portas, URLs, comandos, credenciais de teste, troubleshooting de problemas recorrentes), consultar `scripts/operational-runbook.md`.
+
 ---
 
 ## Parte 2: Checklist de Pré-requisitos
@@ -90,8 +92,9 @@ Aplicar este checklist antes de qualquer operação Docker para verificar se o a
 | 6 | `DD_APP_KEY` no host (MCP Datadog) | `env \| grep DD_APP_KEY` | Linha não vazia retornada |
 | 7 | `.mcp.json` presente e configurado | `ls .mcp.json && grep -q mcpServers .mcp.json && echo ok` | Saída `ok` |
 | 8 | `GH_TOKEN` no host (GitHub API) | `env \| grep GH_TOKEN` | Linha não vazia retornada |
+| 9 | .NET SDK disponível no PATH | `dotnet --version` | Versão 10.x retornada |
 
-**Os pré-requisitos 1–5 devem estar satisfeitos antes de executar `docker compose up`.** Os pré-requisitos 6–8 são necessários para recursos operacionais do assistente (MCP e GitHub) e devem ser validados antes de usar os recursos correspondentes.
+**Os pré-requisitos 1–5 devem estar satisfeitos antes de executar `docker compose up`.** Os pré-requisitos 6–8 são necessários para recursos operacionais do assistente (MCP e GitHub) e devem ser validados antes de usar os recursos correspondentes. O pré-requisito 9 deve estar satisfeito antes de qualquer operação `dotnet` (build, run, test).
 
 Se algum pré-requisito estiver ausente → seguir o protocolo da Parte 1 (atualizar script + sinalizar usuário). O agente não deve tentar corrigir o ambiente manualmente.
 
@@ -160,8 +163,40 @@ Nesses casos, o agente atualiza o script e emite o sinal padronizado (ver Parte 
 
 ---
 
+## Parte 5: Conversão de Problemas Recorrentes em Pré-requisitos
+
+### Princípio
+
+> Todo problema recorrente de ambiente que dependa de preparação local deve ser convertido em pré-requisito verificável, referência no runbook ou procedimento padrão. A recorrência de um problema significa que a prevenção existente é insuficiente.
+
+### Workflow
+
+Quando um problema de ambiente ocorrer mais de uma vez em sessões distintas:
+
+1. **Registrar** o erro em `bash-errors-log.md` (obrigatório pela rule `bash-error-logging.md`)
+2. **Classificar** o problema:
+   - **Prevenível por checklist**: adicionar novo item à Parte 2 (checklist de pré-requisitos)
+   - **Prevenível por configuração**: atualizar `scripts/setup-env.sh` (Parte 4)
+   - **Prevenível por documentação**: adicionar à tabela de problemas recorrentes em `scripts/operational-runbook.md`
+   - **Já corrigido no código**: manter apenas no log histórico (`bash-errors-log.md`)
+3. **Atualizar** o artefato correspondente na mesma sessão em que o problema recorrer
+4. **Sinalizar** ao usuário se a correção exigir reconfiguração da ferramenta externa
+
+### Critérios para Cada Tipo de Conversão
+
+| Tipo de Problema | Onde Converter | Exemplo |
+|---|---|---|
+| Ausência de variável ou secret | Checklist (Parte 2) + `required-vars.md` | DD_API_KEY ausente |
+| Ausência de dependência de sistema | `container-setup.md` + `setup-env.sh` | gh CLI não instalado |
+| Configuração incorreta ou faltante | `setup-env.sh` + `operational-runbook.md` | Proxy não configurado no Docker |
+| Erro de código/build já corrigido | Apenas `bash-errors-log.md` | Controllers não preservados no AOT |
+| Dúvida operacional frequente | `operational-runbook.md` | Qual porta a aplicação usa? |
+
+---
+
 ## Relação com Outras Rules
 
-- `bash-error-logging.md` — registra erros APÓS ocorrerem; esta rule previne que ocorram
+- `bash-error-logging.md` — registra erros APÓS ocorrerem; esta rule previne que ocorram e converte recorrências em pré-requisitos
 - `governance-policies.md` — políticas de ambiguidade (§4) e contexto do repositório (§2) aplicáveis a ambiente
 - `Instructions/architecture/technical-overview.md` — seção "Recursos Operacionais do Assistente" lista os recursos que dependem dos pré-requisitos 6–8
+- `scripts/operational-runbook.md` — ponto de entrada unificado para informações operacionais referenciadas por esta rule
