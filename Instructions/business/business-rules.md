@@ -109,6 +109,19 @@ Cada regra segue a estrutura:
 
 ---
 
+### RN-006 — Cache em memória para endpoints GET de APIs externas
+**Enunciado**: Endpoints GET que consomem APIs externas via Refit devem implementar Memory Cache utilizando o ID do usuário autenticado como chave de cache. O tempo de cache deve ser configurável via appsettings.json; a chave de cache deve ser definida diretamente no código, não no arquivo de configuração.
+**Condição**: Quando uma requisição GET autenticada é recebida em um endpoint que consome API externa via Refit.
+**Ação**: O sistema verifica se existe resposta em cache para o usuário. Se existir (cache hit), retorna a resposta cacheada sem chamar a API externa. Se não existir (cache miss), consulta a API externa, armazena a resposta no cache com expiração fixa (AbsoluteExpiration) configurável, e retorna a resposta.
+**Exceções**: Nenhuma.
+**Dependências**: RN-003 (autenticação obrigatória para obtenção do userId).
+**BDD relacionado**: Nenhum no momento.
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
 ## Regras Substituídas ou Depreciadas
 
 > Nenhuma regra substituída no momento.

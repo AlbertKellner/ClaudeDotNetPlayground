@@ -61,6 +61,8 @@ builder.Host.UseSerilog((ctx, services, config) =>
 
 Log.Information("[Program] Registrar dependências de infraestrutura");
 
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddControllers(options =>
@@ -112,15 +114,15 @@ builder.Services
             })
     })
     .ConfigureHttpClient(c =>
-        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:OpenMeteo:BaseUrl"]!))
+        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:OpenMeteo:HttpRequest:BaseUrl"]!))
     .AddResilienceHandler("open-meteo", resilienceBuilder =>
     {
         var maxRetryAttempts = builder.Configuration.GetValue<int>(
-            "ExternalApi:OpenMeteo:WeatherConditionsGet:MaxRetryAttempts", 3);
+            "ExternalApi:OpenMeteo:CircuitBreaker:MaxRetryAttempts", 3);
         var delaySeconds = builder.Configuration.GetValue<double>(
-            "ExternalApi:OpenMeteo:WeatherConditionsGet:DelaySeconds", 3);
+            "ExternalApi:OpenMeteo:CircuitBreaker:DelaySeconds", 3);
         var backoffType = builder.Configuration.GetValue<DelayBackoffType>(
-            "ExternalApi:OpenMeteo:WeatherConditionsGet:BackoffType", DelayBackoffType.Exponential);
+            "ExternalApi:OpenMeteo:CircuitBreaker:BackoffType", DelayBackoffType.Exponential);
 
         resilienceBuilder.AddRetry(new HttpRetryStrategyOptions
         {

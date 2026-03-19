@@ -85,6 +85,16 @@ Conforme [RN-004](Business-Rules):
 - Os campos de condição atual consultados são: `temperature_2m`, `relative_humidity_2m`, `apparent_temperature`, `is_day`, `precipitation`, `rain`, `showers`, `weather_code`, `cloud_cover`, `wind_speed_10m`, `wind_direction_10m`
 - O payload retornado pela Open-Meteo é entregue integralmente ao cliente, sem filtragem ou redução de campos
 
+### Cache em Memória
+
+Conforme [RN-006](Business-Rules):
+
+- A resposta da API Open-Meteo é cacheada em memória por usuário
+- A chave de cache é `WeatherConditionsGet:{userId}` (definida no código, não em configuração)
+- O tempo de expiração padrão é 10 segundos, configurável em `appsettings.json` (`ExternalApi:OpenMeteo:EndpointCache:WeatherConditionsGet:DurationSeconds`)
+- O tipo de renovação é fixo (AbsoluteExpiration): ao expirar, o cache é reciclado
+- Chamadas repetidas dentro do período de cache retornam a resposta cacheada sem consultar a API externa
+
 ### Resiliência
 
 A integração com a API Open-Meteo usa Polly v8 com:
@@ -102,7 +112,7 @@ A integração com a API Open-Meteo usa Polly v8 com:
 |---------|-----------|
 | `WeatherConditionsGetEndpointTests.cs` | Logs do endpoint, retorno HTTP 200 com payload correto |
 | `WeatherConditionsGetUseCaseTests.cs` | Logs do use case, retorno de `OpenMeteoOutput` sem mapeamento parcial |
-| `OpenMeteoApiClientTests.cs` | Logs do cliente, delegação correta para a interface Refit |
+| `OpenMeteoApiClientTests.cs` | Logs do cliente, delegação correta para a interface Refit, cache hit/miss por usuário |
 
 ## BDD
 

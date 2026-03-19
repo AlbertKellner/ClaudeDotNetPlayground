@@ -44,6 +44,8 @@ public sealed class AuthenticateFilter(ITokenService tokenService, ILogger<Authe
             return;
         }
 
+        context.HttpContext.Items["AuthenticatedUser"] = user;
+
         using (LogContext.PushProperty("UserId", user.Id))
         using (LogContext.PushProperty("UserName", user.UserName))
         {
