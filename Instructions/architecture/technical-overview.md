@@ -157,6 +157,7 @@ Quando o usuário disponibilizar um novo recurso operacional (MCP server, integr
 - `Shared/` não pode depender de Features.
 - Lógica de negócio não pode estar em Endpoints nem em Repositories.
 - Validação de payload deve estar no objeto `Input` de cada Slice (em `<Feature>Models/`), não em repositórios ou componentes de persistência.
+- Models de Input e Output de cada Feature devem residir exclusivamente em `<Feature>Models/` dentro da própria Slice. Não podem ser compartilhados via `Shared/`. Models de APIs externas em `Shared/ExternalApi/*/Models/` e models de dados compartilhados em `Shared/Repositories/` não são afetados por esta restrição (DA-020).
 
 ---
 
@@ -195,3 +196,4 @@ Quando o usuário disponibilizar um novo recurso operacional (MCP server, integr
 | 2026-03-19 | Seção "Recursos Operacionais do Assistente" adicionada: Datadog MCP e GitHub API registrados como recursos disponíveis; protocolo de registro de novos recursos definido | Lacuna de governança identificada |
 | 2026-03-19 | Memory Cache adicionado à stack; CachedOpenMeteoApiClient adicionado aos componentes; AuthenticateFilter atualizado para armazenar AuthenticatedUser em HttpContext.Items; configuração ExternalApi reestruturada em HttpRequest/CircuitBreaker/EndpointCache | DA-018 |
 | 2026-03-19 | Integração GitHub API adicionada: Refit + Polly + DelegatingHandler para PAT; Shared/ExternalApi/GitHub/ criada; Shared/Repositories/ criada; Features RepositoriesGetAll e RepositoriesSyncAll implementadas; RN-006, RN-007 | DA-019, RN-006, RN-007 |
+| 2026-03-19 | Restrição adicionada: models de Input e Output de Features devem residir exclusivamente em `<Feature>Models/`, não em Shared | DA-020 |

@@ -196,6 +196,7 @@ public record TodoItemInsertInput
 - Conter lógica especializada para uma única Slice.
 - Depender de Features.
 - Conter regras de negócio.
+- Conter Models de Input ou Output de Features (estes pertencem exclusivamente a `<Feature>Models/` — DA-020).
 
 *Referência: DA-004*
 
@@ -249,6 +250,7 @@ app.UseExceptionHandler();
 | Namespace com chaves em C# | Inconsistência com o padrão do projeto | Usar file-scoped namespace |
 | Tipos explícitos onde `var` resolve | Verbosidade desnecessária | Usar `var` com nome de variável autoexplicativo |
 | Controller com múltiplas responsabilidades de Slices distintas | Quebra o isolamento da Vertical Slice | Um Controller por Slice, na pasta `<Feature>Endpoint/` |
+| Models de Input/Output de Feature em `Shared/` | Cria acoplamento oculto entre Slices; viola isolamento da Vertical Slice | Manter em `<Feature>Models/` dentro da Slice (DA-020) |
 
 ---
 
@@ -270,3 +272,4 @@ app.UseExceptionHandler();
 | 2026-03-15 | PAD-003 atualizado: Minimal API substituída por Controller com Action; anti-padrão adicionado | DA-008 |
 | 2026-03-15 | PAD-008 criado: tratamento centralizado de exceções via IExceptionHandler; localização inicial Shared/Middleware/ | DA-010, P010 |
 | 2026-03-18 | PAD-008 "Solução" corrigido: localização atualizada de Shared/Middleware/ para Infra/ExceptionHandling/ conforme DA-011 | DA-011 |
+| 2026-03-19 | PAD-007 atualizado: proibição explícita de models de Feature em Shared; anti-padrão adicionado | DA-020 |

@@ -194,6 +194,7 @@ src/
 - `<NomeDaFeature>Output.cs` existe apenas quando há retorno estruturado.
 - `<NomeDaFeature>Entity.cs` existe apenas quando a Slice materializa objetos de domínio tipados.
 - `Scripts/` e `<NomeDaFeature>.sql` existem apenas quando a Slice acessa banco de dados via SQL.
+- `<NomeDaFeature>Input.cs` e `<NomeDaFeature>Output.cs` pertencem exclusivamente a `<Feature>Models/` da Slice. Não devem ser movidos ou duplicados em `Shared/`. Models em `Shared/ExternalApi/*/Models/` são models de APIs externas (não de Features) e seguem regras próprias (DA-017). Models em `Shared/Repositories/` são models de dados compartilhados e não se confundem com models de Features (DA-020).
 
 ---
 
@@ -242,3 +243,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-18 | Infra/Json/, Infra/ModelBinding/, Infra/ModelValidation/ documentadas: presentes no código mas ausentes do registro estrutural | Revisão de governança |
 | 2026-03-18 | Reorganização: solution movida para `src/`; projeto de testes movido de `tests/` para `src/`; pasta `tests/` removida; todos os projetos agora em `src/` | Instrução do usuário |
 | 2026-03-19 | Shared/ExternalApi/GitHub/ criada (integração GitHub API); Shared/Repositories/ criada (modelo JSON compartilhado); Features RepositoriesGetAll e RepositoriesSyncAll adicionadas | DA-019, RN-006, RN-007 |
+| 2026-03-19 | Regra de residência de models adicionada: Input e Output de Features exclusivamente em `<Feature>Models/`, não em Shared | DA-020 |

@@ -82,7 +82,7 @@ Todo código novo ou alterado deve seguir o princípio de **Responsabilidade Ún
 - **Use Cases** (dentro das Slices em `Features/`): orquestração da lógica de negócio da Slice. Não acessa infraestrutura diretamente — depende de interfaces.
 - **Repositories**: apenas acesso a dados. Responsável por materializar e trabalhar com objetos de domínio tipados a partir de dados brutos (banco, API externa, etc.).
 - **Models/DTOs** (`<Feature>Models/`): modelagem de Input e Output especializada por Slice. Validação de payload fica no objeto Input — não em repositórios nem em outros componentes.
-- **Shared**: abstrações, utilitários, clientes, helpers e persistência genérica reutilizáveis entre Slices. Sem lógica especializada para uma única Slice.
+- **Shared**: abstrações, utilitários, clientes, helpers e persistência genérica reutilizáveis entre Slices. Sem lógica especializada para uma única Slice. Models de Input e Output de Features não podem residir em `Shared/` — pertencem exclusivamente a `<Feature>Models/` (DA-020).
 
 #### Isolamento entre Slices:
 - Nenhuma Slice pode se comunicar diretamente com outra Slice.
@@ -230,3 +230,4 @@ O endpoint `/health` é a verificação canônica de disponibilidade da aplicaç
 | 2026-03-15 | P012 atualizado: pré-commit inclui execução e verificação de HealthCheck; P013 adicionado: HealthCheck obrigatório em /health | Instrução do usuário |
 | 2026-03-15 | P014 adicionado: compilação AOT obrigatória; trade-off com Controllers registrado em DA-009 | Instrução do usuário |
 | 2026-03-15 | P006 atualizado: pull requests devem ser escritos em português brasileiro | Instrução do usuário |
+| 2026-03-19 | P009 atualizado: restrição explícita — models de Input/Output de Features não podem residir em Shared | DA-020 |
