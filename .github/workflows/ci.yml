@@ -13,8 +13,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Compilação
+  validar-execucao:
+    name: Compilação, Testes e Validação
     runs-on: ubuntu-latest
     environment: ClaudeCode
 
@@ -31,7 +31,9 @@ jobs:
           dotnet-version: '10.x'
 
       - name: Restore dependencies
-        run: dotnet restore src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
+        run: |
+          dotnet restore src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
+          dotnet restore src/Albert.Playground.ECS.AOT.UnitTest/Albert.Playground.ECS.AOT.UnitTest.csproj
 
       - name: Build (Native AOT publish)
         run: |
@@ -40,157 +42,9 @@ jobs:
             -r linux-x64 \
             --self-contained
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: published-app
-          path: |
-            src/Albert.Playground.ECS.AOT.Api/bin/Release/net10.0/linux-x64/publish/
-            !src/Albert.Playground.ECS.AOT.Api/bin/Release/net10.0/linux-x64/publish/*.dbg
-          if-no-files-found: error
-
-  run:
-    name: Execução
-    needs: build
-    runs-on: ubuntu-latest
-    environment: ClaudeCode
-
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: published-app
-          path: ./app
-
-      - name: Start Datadog Agent
-        env:
-          DD_API_KEY: ${{ secrets.DD_API_KEY }}
-        run: |
-          if [ -n "$DD_API_KEY" ]; then
-            mkdir -p ${{ github.workspace }}/app-logs
-            touch ${{ github.workspace }}/app-logs/run.log
-            docker run -d \
-              --name dd-agent \
-              -p 8126:8126 \
-              -e DD_API_KEY="$DD_API_KEY" \
-              -e DD_SITE="datadoghq.com" \
-              -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
-              -e DD_ENV=ci \
-              -e DD_LOGS_ENABLED=true \
-              -e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true \
-              -e DD_SYSTEM_PROBE_ENABLED=false \
-              -e DD_PROCESS_AGENT_ENABLED=false \
-              -v /var/run/docker.sock:/var/run/docker.sock:ro \
-              -v /proc/:/host/proc/:ro \
-              -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-              -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
-              -v ${{ github.workspace }}/app-logs:/app-logs:ro \
-              -l com.datadoghq.ad.logs='[{"type":"file","path":"/app-logs/run.log","source":"dotnet","service":"albert-playground-ecs-aot-api"}]' \
-              registry.datadoghq.com/agent:7
-            echo "Datadog Agent started (DD_ENV=ci) with file tailing on /app-logs/run.log"
-          else
-            echo "DD_API_KEY not set — skipping Datadog Agent"
-          fi
-
-      - name: Run application and verify startup
-        env:
-          DD_API_KEY: ${{ secrets.DD_API_KEY }}
-        run: |
-          chmod +x ./app/Albert.Playground.ECS.AOT.Api
-          mkdir -p ${{ github.workspace }}/app-logs
-
-          cd ./app
-          ASPNETCORE_URLS=http://localhost:5000 \
-          Datadog__AgentUrl=http://localhost:8126 \
-          Datadog__DirectLogs=true \
-          DD_API_KEY="${DD_API_KEY}" \
-          DD_ENV=ci \
-          DD_HOSTNAME=ci-run \
-          Jwt__Secret=super-secret-key-for-development-only-change-in-production \
-          ./Albert.Playground.ECS.AOT.Api 2>&1 | tee ${{ github.workspace }}/app-logs/run.log &
-          APP_PID=$!
-
-          echo "Application started with PID $APP_PID"
-          echo "Waiting for application to be ready..."
-
-          STARTED=false
-          for i in $(seq 1 30); do
-            sleep 2
-
-            if ! kill -0 $APP_PID 2>/dev/null; then
-              echo ""
-              echo "❌ Application process exited unexpectedly after $((i * 2))s"
-              echo ""
-              echo "=== Application Output ==="
-              cat ${{ github.workspace }}/app-logs/run.log
-              exit 1
-            fi
-
-            if curl -sf http://localhost:5000/health > /dev/null 2>&1; then
-              STARTED=true
-              break
-            fi
-
-            echo "  Attempt $i/30 — not ready yet..."
-          done
-
-          if [ "$STARTED" = "false" ]; then
-            echo ""
-            echo "❌ Application failed to start within 60 seconds"
-            echo ""
-            echo "=== Application Output ==="
-            cat ${{ github.workspace }}/app-logs/run.log
-            kill $APP_PID 2>/dev/null || true
-            exit 1
-          fi
-
-          echo ""
-          echo "✅ Application started successfully"
-          kill $APP_PID 2>/dev/null || true
-
-      - name: Stop Datadog Agent
-        if: always()
-        run: docker rm -f dd-agent 2>/dev/null || true
-
-  unit-tests:
-    name: Teste Unitário
-    needs: run
-    runs-on: ubuntu-latest
-    environment: ClaudeCode
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.x'
-
-      - name: Restore dependencies
-        run: dotnet restore src/Albert.Playground.ECS.AOT.UnitTest/Albert.Playground.ECS.AOT.UnitTest.csproj
-
       - name: Run unit tests
         run: dotnet test src/Albert.Playground.ECS.AOT.UnitTest/Albert.Playground.ECS.AOT.UnitTest.csproj --verbosity normal
 
-  healthcheck-debug:
-    name: Validar Health Check (Debug)
-    needs: unit-tests
-    runs-on: ubuntu-latest
-    environment: ClaudeCode
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.x'
-
-      - name: Restore dependencies
-        run: dotnet restore src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
-
       - name: Start Datadog Agent
         env:
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
@@ -221,196 +75,26 @@ jobs:
             echo "DD_API_KEY not set — skipping Datadog Agent"
           fi
 
-      - name: Start application (Debug) and wait for readiness
+      - name: Start application (Release) and wait for readiness
         env:
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
         run: |
-          ASPNETCORE_URLS=http://localhost:5000 \
-          Datadog__AgentUrl=http://localhost:8126 \
-          Datadog__DirectLogs=true \
-          DD_API_KEY="${DD_API_KEY}" \
-          DD_ENV=ci \
-          DD_HOSTNAME=ci-debug \
-          dotnet run --project src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj 2>&1 | tee ${{ github.workspace }}/app-logs/run.log &
-          APP_PID=$!
-          echo "APP_PID=$APP_PID" >> $GITHUB_ENV
-
-          echo "Application (Debug) started with PID $APP_PID"
-          echo "Waiting for application to be ready..."
-
-          STARTED=false
-          for i in $(seq 1 30); do
-            sleep 2
-
-            if ! kill -0 $APP_PID 2>/dev/null; then
-              echo ""
-              echo "❌ Application process exited unexpectedly after $((i * 2))s"
-              echo ""
-              echo "=== Application Output ==="
-              cat ${{ github.workspace }}/app-logs/run.log
-              exit 1
-            fi
-
-            if curl -sf http://localhost:5000/health > /dev/null 2>&1; then
-              STARTED=true
-              break
-            fi
-
-            echo "  Attempt $i/30 — not ready yet..."
-          done
-
-          if [ "$STARTED" = "false" ]; then
-            echo ""
-            echo "❌ Application failed to start within 60 seconds"
-            echo ""
-            echo "=== Application Output ==="
-            cat ${{ github.workspace }}/app-logs/run.log
-            kill $APP_PID 2>/dev/null || true
-            exit 1
-          fi
-
-          echo "Application is ready"
-
-      - name: Call health check endpoint
-        run: |
-          echo "Calling GET http://localhost:5000/health ..."
-          echo ""
-
-          HTTP_STATUS=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" http://localhost:5000/health)
-          RESPONSE=$(cat /tmp/health_response.txt)
-
-          echo "=== Health Check Result ==="
-          echo "Status: $HTTP_STATUS"
-          echo "Body:   $RESPONSE"
-          echo ""
-
-          if [ "$HTTP_STATUS" = "200" ]; then
-            echo "✅ Health check passed — application is healthy"
-          else
-            echo "❌ Health check failed — application returned HTTP $HTTP_STATUS"
-            exit 1
-          fi
-
-      - name: Call weather conditions endpoint
-        run: |
-          echo "Obtaining JWT token via POST http://localhost:5000/login ..."
-          echo ""
-
-          LOGIN_RESPONSE=$(curl -s -o /tmp/login_response.txt -w "%{http_code}" \
-            -X POST http://localhost:5000/login \
-            -H "Content-Type: application/json" \
-            -d '{"userName":"Albert","password":"albert123"}')
-
-          echo "Login status: $LOGIN_RESPONSE"
-
-          if [ "$LOGIN_RESPONSE" != "200" ]; then
-            echo "❌ Login failed with HTTP $LOGIN_RESPONSE"
-            cat /tmp/login_response.txt
-            exit 1
-          fi
-
-          TOKEN=$(cat /tmp/login_response.txt | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
-
-          if [ -z "$TOKEN" ]; then
-            echo "❌ Token not found in login response"
-            cat /tmp/login_response.txt
-            exit 1
-          fi
-
-          echo "✅ Token obtained"
-          echo ""
-          echo "Calling GET http://localhost:5000/weather-conditions ..."
-          echo ""
-
-          HTTP_STATUS=$(curl -s -o /tmp/weather_response.txt -w "%{http_code}" \
-            -H "Authorization: Bearer $TOKEN" \
-            http://localhost:5000/weather-conditions)
-
-          RESPONSE=$(cat /tmp/weather_response.txt)
-
-          echo "=== Weather Conditions Result ==="
-          echo "Status: $HTTP_STATUS"
-          echo "Body:   $RESPONSE"
-          echo ""
-
-          if [ "$HTTP_STATUS" = "200" ]; then
-            echo "✅ Weather conditions endpoint passed — returned HTTP 200"
-          else
-            echo "❌ Weather conditions endpoint failed — returned HTTP $HTTP_STATUS"
-            exit 1
-          fi
-
-      - name: Stop application
-        if: always()
-        run: kill $APP_PID 2>/dev/null || true
-
-      - name: Stop Datadog Agent
-        if: always()
-        run: docker rm -f dd-agent 2>/dev/null || true
-
-  healthcheck-publish:
-    name: Validar Health Check (Publish)
-    needs: unit-tests
-    runs-on: ubuntu-latest
-    environment: ClaudeCode
-
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: published-app
-          path: ./app
-
-      - name: Start Datadog Agent
-        env:
-          DD_API_KEY: ${{ secrets.DD_API_KEY }}
-        run: |
-          if [ -n "$DD_API_KEY" ]; then
-            mkdir -p ${{ github.workspace }}/app-logs
-            touch ${{ github.workspace }}/app-logs/run.log
-            docker run -d \
-              --name dd-agent \
-              -p 8126:8126 \
-              -e DD_API_KEY="$DD_API_KEY" \
-              -e DD_SITE="datadoghq.com" \
-              -e DD_DOGSTATSD_NON_LOCAL_TRAFFIC=true \
-              -e DD_ENV=ci \
-              -e DD_LOGS_ENABLED=true \
-              -e DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true \
-              -e DD_SYSTEM_PROBE_ENABLED=false \
-              -e DD_PROCESS_AGENT_ENABLED=false \
-              -v /var/run/docker.sock:/var/run/docker.sock:ro \
-              -v /proc/:/host/proc/:ro \
-              -v /sys/fs/cgroup/:/host/sys/fs/cgroup:ro \
-              -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
-              -v ${{ github.workspace }}/app-logs:/app-logs:ro \
-              -l com.datadoghq.ad.logs='[{"type":"file","path":"/app-logs/run.log","source":"dotnet","service":"albert-playground-ecs-aot-api"}]' \
-              registry.datadoghq.com/agent:7
-            echo "Datadog Agent started (DD_ENV=ci) with file tailing on /app-logs/run.log"
-          else
-            echo "DD_API_KEY not set — skipping Datadog Agent"
-          fi
-
-      - name: Start application (Publish) and wait for readiness
-        env:
-          DD_API_KEY: ${{ secrets.DD_API_KEY }}
-        run: |
-          chmod +x ./app/Albert.Playground.ECS.AOT.Api
+          chmod +x src/Albert.Playground.ECS.AOT.Api/bin/Release/net10.0/linux-x64/publish/Albert.Playground.ECS.AOT.Api
           mkdir -p ${{ github.workspace }}/app-logs
 
-          cd ./app
+          cd src/Albert.Playground.ECS.AOT.Api/bin/Release/net10.0/linux-x64/publish
           ASPNETCORE_URLS=http://localhost:5000 \
           Datadog__AgentUrl=http://localhost:8126 \
           Datadog__DirectLogs=true \
           DD_API_KEY="${DD_API_KEY}" \
           DD_ENV=ci \
-          DD_HOSTNAME=ci-publish \
+          DD_HOSTNAME=ci-release \
           Jwt__Secret=super-secret-key-for-development-only-change-in-production \
           ./Albert.Playground.ECS.AOT.Api 2>&1 | tee ${{ github.workspace }}/app-logs/run.log &
           APP_PID=$!
           echo "APP_PID=$APP_PID" >> $GITHUB_ENV
 
-          echo "Application (Publish) started with PID $APP_PID"
+          echo "Application (Release) started with PID $APP_PID"
           echo "Waiting for application to be ready..."
 
           STARTED=false
@@ -446,7 +130,7 @@ jobs:
 
           echo "Application is ready"
 
-      - name: Call health check endpoint
+      - name: Validate health check endpoint
         run: |
           echo "Calling GET http://localhost:5000/health ..."
           echo ""
@@ -466,7 +150,7 @@ jobs:
             exit 1
           fi
 
-      - name: Call weather conditions endpoint
+      - name: Validate authenticated endpoints
         run: |
           echo "Obtaining JWT token via POST http://localhost:5000/login ..."
           echo ""
