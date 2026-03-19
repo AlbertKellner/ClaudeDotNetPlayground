@@ -1,8 +1,6 @@
 using Albert.Playground.ECS.AOT.Api.Infra.ExceptionHandling;
 using Albert.Playground.ECS.AOT.UnitTest.TestHelpers;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace Albert.Playground.ECS.AOT.UnitTest.Infra.ExceptionHandling;

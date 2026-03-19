@@ -13,11 +13,12 @@ RUN if [ -n "${EXTRA_CA_CERT}" ]; then \
     touch /usr/local/share/ca-certificates/proxy-ca.crt; \
   fi
 
-COPY Albert.Playground.ECS.AOT.Api.csproj .
-RUN dotnet restore Albert.Playground.ECS.AOT.Api.csproj
+COPY Directory.Build.props .
+COPY Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj Albert.Playground.ECS.AOT.Api/
+RUN dotnet restore Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
 
-COPY . .
-RUN dotnet publish Albert.Playground.ECS.AOT.Api.csproj \
+COPY Albert.Playground.ECS.AOT.Api/ Albert.Playground.ECS.AOT.Api/
+RUN dotnet publish Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj \
     -c Release \
     -r linux-x64 \
     --self-contained \
