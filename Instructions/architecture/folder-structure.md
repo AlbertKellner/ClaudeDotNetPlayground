@@ -194,7 +194,8 @@ src/
 - `<NomeDaFeature>Output.cs` existe apenas quando há retorno estruturado.
 - `<NomeDaFeature>Entity.cs` existe apenas quando a Slice materializa objetos de domínio tipados.
 - `Scripts/` e `<NomeDaFeature>.sql` existem apenas quando a Slice acessa banco de dados via SQL.
-- `<NomeDaFeature>Input.cs` e `<NomeDaFeature>Output.cs` pertencem exclusivamente a `<Feature>Models/` da Slice. Não devem ser movidos ou duplicados em `Shared/`. Models em `Shared/ExternalApi/*/Models/` são models de APIs externas (não de Features) e seguem regras próprias (DA-017). Models em `Shared/Repositories/` são models de dados compartilhados e não se confundem com models de Features (DA-020).
+- `<NomeDaFeature>Input.cs` e `<NomeDaFeature>Output.cs` pertencem exclusivamente a `<Feature>Models/` da Slice. Não devem ser movidos ou duplicados em `Shared/`. Models em `Shared/ExternalApi/*/Models/` são models de APIs externas (contrato do cliente HTTP, não de Features) e seguem regras próprias (DA-017). Models em `Shared/Repositories/` são models de dados compartilhados e não se confundem com models de Features (DA-020).
+- Features que consomem APIs externas via `Shared/ExternalApi/` devem possuir seu próprio model de Output em `<Feature>Models/`, mesmo que a estrutura espelhe o model da API externa. O model de Shared é o contrato do cliente HTTP; o model da Feature é o contrato do endpoint. Features não devem usar types de `Shared/` como tipo de retorno de seus Use Cases ou Endpoints (DA-020).
 
 ---
 

@@ -251,6 +251,7 @@ app.UseExceptionHandler();
 | Tipos explícitos onde `var` resolve | Verbosidade desnecessária | Usar `var` com nome de variável autoexplicativo |
 | Controller com múltiplas responsabilidades de Slices distintas | Quebra o isolamento da Vertical Slice | Um Controller por Slice, na pasta `<Feature>Endpoint/` |
 | Models de Input/Output de Feature em `Shared/` | Cria acoplamento oculto entre Slices; viola isolamento da Vertical Slice | Manter em `<Feature>Models/` dentro da Slice (DA-020) |
+| Feature que retorna model de `Shared/ExternalApi/` diretamente como Output | Acopla contrato da Feature ao contrato da API externa; mudança na API externa propaga para o endpoint | Criar Output model próprio em `<Feature>Models/` e mapear a partir do model de Shared (DA-020) |
 
 ---
 

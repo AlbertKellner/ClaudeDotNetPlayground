@@ -71,7 +71,7 @@ public sealed class WeatherConditionsGetEndpointTests
         var actionResult = await endpoint.Get(CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
-        var output = Assert.IsType<OpenMeteoOutput>(okResult.Value);
+        var output = Assert.IsType<WeatherConditionsGetOutput>(okResult.Value);
         Assert.Equal("America/Sao_Paulo", output.Timezone);
     }
 
