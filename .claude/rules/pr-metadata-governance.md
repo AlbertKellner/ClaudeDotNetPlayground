@@ -151,10 +151,10 @@ Esta política é ativada automaticamente **após a criação do último commit*
 ## Política de Acompanhamento de GitHub Actions
 
 ### Princípio:
-> Código pushado não está validado até que o CI confirme. O acompanhamento das Actions é a etapa final obrigatória do pipeline.
+> Código pushado não está validado até que o CI confirme. O acompanhamento das Actions é a etapa final obrigatória do pipeline e **condição de encerramento da tarefa**.
 
 ### Quando se aplica:
-Esta política é ativada automaticamente **após o push e a criação/atualização do PR**, como passo 11 do pipeline de validação pré-commit definido em `CLAUDE.md`.
+Esta política é ativada automaticamente **após o push e a criação/atualização do PR**, como passo 11 do pipeline de validação pré-commit definido em `CLAUDE.md`. **Aplica-se a toda tarefa que resulte em push — incluindo tarefas exclusivamente de governança** (sem código, sem build, sem Docker). A ausência de passos 0–8 não dispensa este passo.
 
 ### Workflow obrigatório:
 
@@ -170,8 +170,13 @@ Esta política é ativada automaticamente **após o push e a criação/atualiza�
    - Polling a cada 30–90 segundos até que todos os jobs tenham `status: completed`
 
 3. **Se todos os jobs passarem** (`conclusion: success`):
-   - Reportar o resultado final com a lista de jobs e seus status
-   - A tarefa está concluída
+   - Verificar os logs no Datadog usando os filtros referentes ao pipeline:
+     - Filtrar por `env` correspondente ao contexto de execução (`ci`)
+     - Filtrar por `service` correspondente à aplicação
+     - Filtrar pelo intervalo de tempo da execução do pipeline
+   - Procurar por erros, exceções ou comportamentos anômalos nos logs
+   - Se não houver erros nos logs: reportar o resultado final com a lista de jobs, seus status e a confirmação de logs limpos no Datadog. A tarefa está concluída.
+   - Se houver erros nos logs: diagnosticar, corrigir, registrar em `bash-errors-log.md` e reiniciar o ciclo
 
 4. **Se algum job falhar** (`conclusion: failure`):
    - Obter os logs do job que falhou:
@@ -186,7 +191,8 @@ Esta política é ativada automaticamente **após o push e a criação/atualiza�
    - Repetir o ciclo de acompanhamento até que todos os jobs passem
 
 ### Regras:
-- O assistente **não deve encerrar a tarefa** enquanto houver jobs em execução ou falhando — a tarefa só está concluída quando todos os jobs passam
+- **A tarefa NÃO se encerra com a abertura ou atualização do PR.** O PR é um passo intermediário — a tarefa só está concluída após a validação do pipeline e a conferência dos logs no Datadog.
+- O assistente **não deve encerrar a tarefa** enquanto houver jobs em execução, jobs falhando ou logs no Datadog não verificados.
 - Erros de CI devem ser tratados com a mesma diligência que erros locais
 - Se o erro for intermitente (flaky test, timeout de rede), documentar e tentar novamente antes de investigar profundamente
 - Se o erro exigir mudança em arquivo de governança, ativar a meta-regra de revisão de instruções (`instruction-review.md`)
@@ -220,3 +226,4 @@ Esta política é ativada automaticamente **após o push e a criação/atualiza�
 | 2026-03-18 | Criado: governança de metadados de PR | Instrução do usuário |
 | 2026-03-18 | Adicionado: política de verificação e criação automática de PR após último commit | Instrução do usuário |
 | 2026-03-19 | Adicionado: política de acompanhamento de GitHub Actions pós-PR com análise de logs e correção de falhas | Instrução do usuário |
+| 2026-03-19 | Reforço: acompanhamento de Actions e verificação de logs Datadog tornados condição de encerramento da tarefa; aplicabilidade em tarefas de governança explicitada | Falha observada em sessão |

@@ -67,11 +67,21 @@ Antes de qualquer commit, executar obrigatoriamente esta sequência:
 8. `docker compose down` — parar todos os containers
 9. Somente então realizar o commit
 10. Verificar se já existe um PR aberto para o branch atual; se não existir, criar o PR seguindo as regras de `.claude/rules/pr-metadata-governance.md`. Se já existir, atualizar título e descrição para refletir o estado atual da implementação.
-11. Acompanhar a execução das GitHub Actions vinculadas ao PR. Aguardar a conclusão de todos os jobs. Se algum job falhar, analisar os logs do CI (considerando apenas os registros de erro emitidos no horário da execução da pipeline), diagnosticar a causa raiz, corrigir, e reiniciar o ciclo a partir do passo apropriado. Ver `.claude/rules/pr-metadata-governance.md` para a política completa.
+11. **Checkpoint de encerramento** — a tarefa NÃO se encerra com a abertura ou atualização do PR. Executar obrigatoriamente as seguintes validações antes de considerar a tarefa concluída:
+    1. Acompanhar a execução das GitHub Actions até o término de todos os jobs do pipeline.
+    2. Verificar os logs no Datadog usando os filtros referentes ao pipeline associado ao PR (env, service, timestamp da execução).
+    3. Procurar por falhas, erros ou comportamentos anômalos nos logs.
+    4. Se todos os jobs passarem e não houver erros nos logs: reportar o resultado e encerrar a tarefa.
+    5. Se algum job falhar ou houver erros nos logs: diagnosticar a causa raiz, corrigir, e reiniciar o ciclo a partir do passo apropriado. Registrar o erro em `bash-errors-log.md`.
+    Ver `.claude/rules/pr-metadata-governance.md` para a política completa.
 
 **O Passo 0 é obrigatório e não deve ser pulado.** Previne o ciclo de falhas em cascata documentado em `bash-errors-log.md`. Ver `.claude/rules/environment-readiness.md` para o protocolo completo.
 
 **O Passo 3 é um gate obrigatório.** O `docker compose up -d` (publish Release/AOT) só deve ser executado após todos os testes passarem em modo debug. Testes falhando bloqueiam o commit — corrigir antes de avançar.
+
+**O Passo 11 é obrigatório e encerra a tarefa.** A tarefa só está concluída quando todos os jobs do CI passarem **e** os logs no Datadog forem verificados sem erros. O agente não deve encerrar a interação, apresentar relatório final ou considerar a tarefa finalizada enquanto houver jobs em execução, jobs falhando ou logs não verificados. Ver `.claude/rules/pr-metadata-governance.md` para a política completa.
+
+**Os passos 9–11 são obrigatórios mesmo em tarefas exclusivamente de governança** (sem mudança de código, sem build, sem Docker). Quando a tarefa não altera código da aplicação, os passos 0–8 são inaplicáveis e devem ser omitidos, mas o commit (passo 9), a criação/atualização do PR (passo 10) e o acompanhamento das GitHub Actions (passo 11) continuam obrigatórios.
 
 **`scripts/setup-env.sh` é um modelo declarativo** copiado manualmente pelo usuário em ferramenta externa de configuração de container. O agente não executa esse script — o ambiente deve chegar já pronto. Se um pré-requisito estiver ausente, o agente atualiza o script e sinaliza ao usuário para sincronizar a ferramenta externa.
 
