@@ -56,6 +56,12 @@ Endpoint protegido que retorna uma string de confirmação de funcionamento da a
 
 Regra de negócio relacionada: [RN-003](Business-Rules#rn-003---proteção-de-endpoints-por-bearer-token)
 
+## Endpoints Consumidos
+
+Esta feature não consome endpoints de APIs externas. Retorna diretamente uma string estática de confirmação de funcionamento.
+
+---
+
 ## Testes Automatizados
 
 | Arquivo | Cobertura |

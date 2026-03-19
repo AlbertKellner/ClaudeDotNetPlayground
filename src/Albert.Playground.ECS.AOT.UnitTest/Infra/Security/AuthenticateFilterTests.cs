@@ -122,4 +122,22 @@ public sealed class AuthenticateFilterTests
         var logs = fakeLogger.GetSnapshot();
         Assert.All(logs, l => Assert.Contains("AuthenticateFilter", l.Message));
     }
+
+    [Fact]
+    public async Task OnActionExecutionAsync_ComTokenValido_DeveArmazenarAuthenticatedUserNoHttpContextItems()
+    {
+        var fakeLogger = new FakeLogger<AuthenticateFilter>();
+        var user = new AuthenticatedUser(42, "cacheuser");
+        var filter = new AuthenticateFilter(new FakeTokenService(user), fakeLogger);
+        var context = CreateContext("Bearer token-valido");
+        ActionExecutionDelegate next = () => Task.FromResult<ActionExecutedContext>(null!);
+
+        await filter.OnActionExecutionAsync(context, next);
+
+        Assert.True(context.HttpContext.Items.ContainsKey(AuthenticateFilter.AuthenticatedUserItemKey));
+        var storedUser = context.HttpContext.Items[AuthenticateFilter.AuthenticatedUserItemKey] as AuthenticatedUser;
+        Assert.NotNull(storedUser);
+        Assert.Equal(42, storedUser.Id);
+        Assert.Equal("cacheuser", storedUser.UserName);
+    }
 }

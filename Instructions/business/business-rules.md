@@ -67,9 +67,9 @@ Cada regra segue a estrutura:
 ---
 
 ### RN-004 — Consulta de condições climáticas atuais de São Paulo
-**Enunciado**: A aplicação deve expor um endpoint autenticado para consultar as condições climáticas atuais do município de São Paulo, retornando o payload completo retornado pela API Open-Meteo, sem filtragem, redução de campos ou mapeamento parcial.
+**Enunciado**: A aplicação deve expor um endpoint autenticado para consultar as condições climáticas atuais do município de São Paulo, retornando o payload completo retornado pela API Open-Meteo, sem filtragem, redução de campos ou mapeamento parcial. A resposta deve ser cacheada por usuário autenticado com duração configurável.
 **Condição**: Quando uma requisição GET autenticada é recebida no endpoint de condições climáticas.
-**Ação**: O sistema consulta a API Open-Meteo (`GET /v1/forecast`) com as coordenadas centrais do município de São Paulo conforme indicadas pela Prefeitura de São Paulo (latitude: -23.5475, longitude: -46.6361) e os campos de condição atual definidos. Retorna HTTP 200 com o payload JSON completo da resposta da Open-Meteo, preservando sua estrutura original.
+**Ação**: O sistema verifica o Memory Cache usando o ID do usuário autenticado como chave. Se houver cache válido, retorna a resposta cacheada sem consultar a API externa. Se não houver cache, consulta a API Open-Meteo (`GET /v1/forecast`) com as coordenadas centrais do município de São Paulo conforme indicadas pela Prefeitura de São Paulo (latitude: -23.5475, longitude: -46.6361) e os campos de condição atual definidos, armazena o resultado no cache e retorna HTTP 200 com o payload JSON completo da resposta da Open-Meteo, preservando sua estrutura original.
 **Exceções**: Nenhuma.
 **Dependências**: RN-003 (autenticação obrigatória).
 **BDD relacionado**: Nenhum no momento.

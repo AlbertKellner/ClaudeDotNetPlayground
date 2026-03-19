@@ -96,13 +96,53 @@ A integração com a API Open-Meteo usa Polly v8 com:
 | 3ª | 3 segundos | 12 segundos |
 | 4ª (última) | 3 segundos | — (retorna erro) |
 
+## Endpoints Consumidos
+
+Esta feature consome a API Open-Meteo via Refit com resiliência Polly e Memory Cache.
+
+### `GET /v1/forecast` — Open-Meteo
+
+| Aspecto | Valor |
+|---------|-------|
+| **Serviço** | Open-Meteo |
+| **Rota** | `GET /v1/forecast` |
+| **Interface Refit** | `IOpenMeteoApi` |
+| **Cliente** | `OpenMeteoApiClient` (HTTP) → `CachedOpenMeteoApiClient` (cache) |
+
+#### Configuração HttpRequest
+
+| Propriedade | Caminho no JSON | Valor |
+|-------------|----------------|-------|
+| URL Base | `ExternalApi:OpenMeteo:HttpRequest:BaseUrl` | `https://api.open-meteo.com` |
+
+#### Configuração CircuitBreaker (Polly)
+
+| Propriedade | Caminho no JSON | Valor |
+|-------------|----------------|-------|
+| Tentativas máximas | `ExternalApi:OpenMeteo:CircuitBreaker:MaxRetryAttempts` | `3` |
+| Delay entre tentativas | `ExternalApi:OpenMeteo:CircuitBreaker:DelaySeconds` | `3` |
+| Tipo de backoff | `ExternalApi:OpenMeteo:CircuitBreaker:BackoffType` | `Exponential` |
+
+#### Configuração EndpointCache (Memory Cache)
+
+| Propriedade | Caminho no JSON | Valor |
+|-------------|----------------|-------|
+| Duração do cache | `ExternalApi:OpenMeteo:EndpointCache:WeatherConditionsGet:DurationSeconds` | `10` |
+| Tipo de expiração | `ExternalApi:OpenMeteo:EndpointCache:WeatherConditionsGet:ExpirationType` | `Absolute` |
+| Chave de cache | *(definida no código)* | `OpenMeteo:WeatherConditionsGet:{userId}` |
+
+O cache é por usuário autenticado. Cada usuário tem seu próprio cache de condições climáticas. Ao expirar o tempo configurado, a próxima requisição faz nova chamada HTTP à Open-Meteo e recicla o cache.
+
+---
+
 ## Testes Automatizados
 
 | Arquivo | Cobertura |
 |---------|-----------|
 | `WeatherConditionsGetEndpointTests.cs` | Logs do endpoint, retorno HTTP 200 com payload correto |
 | `WeatherConditionsGetUseCaseTests.cs` | Logs do use case, retorno de `OpenMeteoOutput` sem mapeamento parcial |
-| `OpenMeteoApiClientTests.cs` | Logs do cliente, delegação correta para a interface Refit |
+| `OpenMeteoApiClientTests.cs` | Logs do cliente HTTP, delegação correta para a interface Refit |
+| `CachedOpenMeteoApiClientTests.cs` | Cache hit/miss, isolamento por usuário, logs de cache, armazenamento |
 
 ## BDD
 

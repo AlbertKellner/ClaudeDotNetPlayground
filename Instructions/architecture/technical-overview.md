@@ -15,6 +15,7 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Logging estruturado | Serilog (com Enrich.FromLogContext) | DA-011 |
 | Integração HTTP externa | Refit (`Refit.HttpClientFactory`) — interfaces decoradas com atributos HTTP; implementação source-generated | DA-017 |
 | Resiliência HTTP | Polly v8 via `Microsoft.Extensions.Http.Resilience` — retry exponencial + timeout por tentativa | DA-017 |
+| Memory Cache | `IMemoryCache` (`Microsoft.Extensions.Caching.Memory`) — cache por usuário autenticado; duração e expiração configuráveis via `appsettings.json` seção `EndpointCache` | DA-018 |
 | Persistência | A definir por Feature | — |
 | Mensageria | A definir | — |
 | Containerização | Docker — Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent | DA-016 |
@@ -50,6 +51,7 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 | IOpenMeteoApi | `Shared/ExternalApi/OpenMeteo/IOpenMeteoApi.cs` | Interface Refit para a API Open-Meteo; contrato HTTP com rota `/v1/forecast` hardcoded |
 | IOpenMeteoApiClient | `Shared/ExternalApi/OpenMeteo/IOpenMeteoApiClient.cs` | Interface de serviço; contrato que Features injetam via DI |
 | OpenMeteoApiClient | `Shared/ExternalApi/OpenMeteo/OpenMeteoApiClient.cs` | Implementa IOpenMeteoApiClient; usa IOpenMeteoApi (Refit + Polly via HttpClient); aplica logging SNP-001 |
+| CachedOpenMeteoApiClient | `Shared/ExternalApi/OpenMeteo/CachedOpenMeteoApiClient.cs` | Decorator de IOpenMeteoApiClient; implementa Memory Cache por usuário autenticado com duração configurável; chave de cache definida no código |
 | OpenMeteoInput/Output | `Shared/ExternalApi/OpenMeteo/Models/` | Modelos de entrada (coordenadas + fields) e saída completa da Open-Meteo; inclui OpenMeteoJsonContext para AOT |
 | Exception Handler | `Infra/ExceptionHandling/GlobalExceptionHandler.cs` | Handler centralizado de exceções; retorna Problem Details (RFC 7807) |
 | Correlation ID Middleware | `Infra/Middlewares/CorrelationIdMiddleware.cs` | Garante GUID v7 por request; enriquece logs via Serilog LogContext; completamente opaco para Features |
@@ -57,7 +59,7 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 | ITokenService | `Infra/Security/ITokenService.cs` | Contrato de geração e validação de JWT Bearer Token |
 | AuthenticatedUser | `Infra/Security/AuthenticatedUser.cs` | Modelo de usuário autenticado extraído do token (Id, UserName) |
 | TokenService | `Infra/Security/TokenService.cs` | Implementação JWT HS256: geração e validação de Bearer Token |
-| AuthenticateFilter | `Infra/Security/AuthenticateFilter.cs` | IAsyncActionFilter: valida Bearer Token, retorna 401 se inválido, enriquece logs com UserId e UserName |
+| AuthenticateFilter | `Infra/Security/AuthenticateFilter.cs` | IAsyncActionFilter: valida Bearer Token, retorna 401 se inválido, enriquece logs com UserId e UserName, armazena AuthenticatedUser em HttpContext.Items para acesso por camadas downstream |
 | AuthenticateAttribute | `Infra/Security/AuthenticateAttribute.cs` | TypeFilterAttribute: decorador aplicado nos Controllers para ativar AuthenticateFilter via DI |
 | AppJsonContext | `Infra/Json/AppJsonContext.cs` | JsonSerializerContext source-generated para serialização AOT-compatível; inserido no TypeInfoResolverChain do MVC |
 | NullModelBinderProvider | `Infra/ModelBinding/NullModelBinderProvider.cs` | Substitui providers de model binding incompatíveis com AOT (TryParse, FloatingPoint) por implementação no-op |
@@ -183,3 +185,4 @@ Quando o usuário disponibilizar um novo recurso operacional (MCP server, integr
 | 2026-03-18 | CI/CD: job `healthcheck` dividido em dois jobs paralelos — `healthcheck-debug` (dotnet run) e `healthcheck-publish` (binário AOT); ambos com `needs: unit-tests` | Instrução do usuário |
 | 2026-03-18 | Componentes Infra AOT adicionados à tabela: AppJsonContext, NullModelBinderProvider, FallbackSimpleTypeModelBinderProvider, EnhancedModelMetadataActivator, NoOpObjectModelValidator | Revisão de governança |
 | 2026-03-19 | Seção "Recursos Operacionais do Assistente" adicionada: Datadog MCP e GitHub API registrados como recursos disponíveis; protocolo de registro de novos recursos definido | Lacuna de governança identificada |
+| 2026-03-19 | Memory Cache adicionado à stack; CachedOpenMeteoApiClient adicionado aos componentes; AuthenticateFilter atualizado para armazenar AuthenticatedUser em HttpContext.Items; configuração ExternalApi reestruturada em HttpRequest/CircuitBreaker/EndpointCache | DA-018 |

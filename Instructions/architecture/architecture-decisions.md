@@ -219,6 +219,19 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - `ci.yml` atualizado: todos os jobs declaram `environment: ClaudeCode`; jobs `run` e `healthcheck` iniciam o Datadog Agent container; `DD_ENV` diferente por job (`build`, `ci`).
 - Job `docker-build` foi adicionado ao CI e posteriormente removido em 2026-03-17 durante reorganização dos workflows (ver histórico de `technical-overview.md`).
 
+### DA-018 — Memory Cache para Endpoints GET com Decorator Pattern
+**Data**: 2026-03-19
+**Status**: Ativo
+**Decisão**: Endpoints GET que consomem APIs externas devem implementar Memory Cache usando `IMemoryCache`. O cache usa o ID do usuário autenticado como chave (definida no código, não configurável via JSON). A duração e o tipo de expiração são configuráveis via `appsettings.json` na seção `EndpointCache`.
+**Motivação**: Reduzir chamadas repetidas a APIs externas, melhorar tempo de resposta e respeitar limites de rate limiting de serviços externos.
+**Alternativas consideradas**: Cache no UseCase (rejeitado — mistura responsabilidades), cache inline no OpenMeteoApiClient (rejeitado — viola SRP), distributed cache com Redis (desnecessário para escopo atual).
+**Trade-offs**: Cache por usuário consome mais memória que cache global, mas garante isolamento e evita vazamento de dados entre usuários.
+**Consequências**:
+- Novo decorator `CachedOpenMeteoApiClient` implementa `IOpenMeteoApiClient` e envolve `OpenMeteoApiClient`.
+- Configuração de ExternalApi reestruturada em `HttpRequest`, `CircuitBreaker` e `EndpointCache`.
+- `AuthenticateFilter` armazena `AuthenticatedUser` em `HttpContext.Items` para acesso pela camada de cache via `IHttpContextAccessor`.
+- `IMemoryCache` e `IHttpContextAccessor` registrados no DI.
+
 ---
 
 ## Decisões Pendentes
@@ -275,3 +288,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-18 | DA-014 atualizado: nota sobre remoção do pr-language-check.yml em 2026-03-17 adicionada | Revisão de governança |
 | 2026-03-18 | DA-016 atualizado: nota sobre remoção do job docker-build em 2026-03-17 adicionada | Revisão de governança |
 | 2026-03-18 | DA-015 criada: padrão de logging estruturado storytelling — referenciada por technical-overview.md e SNP-001 mas ausente do registro | Revisão de governança |
+| 2026-03-19 | DA-018 criada: Memory Cache para endpoints GET com Decorator Pattern; reestruturação de ExternalApi config em HttpRequest/CircuitBreaker/EndpointCache | Instrução do usuário |
