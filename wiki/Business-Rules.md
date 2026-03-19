@@ -57,3 +57,25 @@ O endpoint de health check verifica a disponibilidade da aplicação e do Datado
 - **Autenticação:** não exigida
 - **Comportamento:** retorna `HTTP 200 Healthy` quando ambos estão disponíveis; `HTTP 200 Degraded` quando o Datadog Agent responde com status inesperado; `HTTP 503 Unhealthy` quando o Datadog Agent está inacessível
 - **Documentação completa:** [Feature: Health Check](Feature-Health)
+
+---
+
+## RN-006 — Busca de repositórios do team IntegrationRepos
+
+A aplicação expõe um endpoint autenticado que consulta a API do GitHub para listar todos os repositórios acessíveis ao team IntegrationRepos da organização WebMotors, salvando o resultado em arquivo JSON.
+
+- **Endpoint:** `GET /repositories`
+- **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
+- **Comportamento:** consulta a API GitHub, mapeia os repositórios para um arquivo JSON com nome, descrição, URL Git, data de modificação e campo de sincronização em branco; cada repositório é registrado no log
+- **Documentação completa:** [Feature: Busca de Repositórios](Feature-RepositoriesGetAll)
+
+---
+
+## RN-007 — Sincronização local de repositórios
+
+A aplicação expõe um endpoint autenticado que lê o arquivo JSON gerado pela busca e sincroniza localmente cada repositório via clone ou pull.
+
+- **Endpoint:** `POST /repositories/sync`
+- **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
+- **Comportamento:** para cada repositório no JSON, clona se ainda não existe ou executa pull se já clonado; atualiza o campo de última sincronização com data/hora no formato 24h; log info para sucesso, log error para falhas
+- **Documentação completa:** [Feature: Sincronização de Repositórios](Feature-RepositoriesSyncAll)

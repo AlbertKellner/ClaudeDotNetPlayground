@@ -56,6 +56,85 @@ open-questions.md
 
 ---
 
+## Configuração Manual
+
+### 1. GitHub Personal Access Token (PAT)
+
+A feature de busca de repositórios requer um **Personal Access Token (classic)** do GitHub com as seguintes permissões:
+
+- **Scope obrigatório**: `read:org` — permite listar repositórios de teams dentro da organização WebMotors
+
+**Como gerar o token**:
+1. Acesse [GitHub Settings > Developer settings > Personal access tokens > Tokens (classic)](https://github.com/settings/tokens)
+2. Clique em "Generate new token (classic)"
+3. Selecione o scope `read:org`
+4. Gere o token e copie o valor
+
+**Onde configurar o token**:
+
+O token deve ser informado na configuração `ExternalApi:GitHub:HttpRequest:Token`. Existem duas formas:
+
+- **Via `appsettings.json`** (desenvolvimento local):
+  ```json
+  {
+    "ExternalApi": {
+      "GitHub": {
+        "HttpRequest": {
+          "Token": "ghp_seu_token_aqui"
+        }
+      }
+    }
+  }
+  ```
+
+- **Via variável de ambiente** (recomendado para CI/produção):
+  ```
+  ExternalApi__GitHub__HttpRequest__Token=ghp_seu_token_aqui
+  ```
+
+### 2. Permissões no GitHub
+
+O token deve pertencer a um usuário que tenha **acesso ao team IntegrationRepos** dentro da organização **WebMotors**. Sem essa permissão, a API retornará `404 Not Found`.
+
+### 3. Git
+
+A feature de sincronização de repositórios executa comandos `git clone` e `git pull` via `System.Diagnostics.Process`. É obrigatório que o binário `git` esteja instalado e acessível no `PATH` da máquina onde a aplicação será executada.
+
+### 4. Caminhos configuráveis
+
+| Configuração | Descrição | Valor padrão |
+|---|---|---|
+| `Repositories:JsonFilePath` | Caminho do arquivo JSON com a lista de repositórios | `data/repositories.json` |
+| `Repositories:SyncRootPath` | Pasta raiz onde os repositórios serão clonados | `c:/usuarios/albert/git` |
+
+Ambos podem ser sobrescritos via variáveis de ambiente:
+```
+Repositories__JsonFilePath=caminho/repositorios.json
+Repositories__SyncRootPath=/home/user/repos
+```
+
+### 5. Autenticação JWT
+
+Todos os endpoints da aplicação (exceto `/login` e `/health`) exigem autenticação via Bearer Token JWT.
+
+Para obter o token:
+```bash
+curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"userName": "usuario", "password": "senha"}'
+```
+
+Para consumir os endpoints protegidos:
+```bash
+curl http://localhost:8080/repositories \
+  -H "Authorization: Bearer <token>"
+
+curl -X POST http://localhost:8080/repositories/sync \
+  -H "Authorization: Bearer <token>"
+```
+
+---
+
 ## Começando
 
 A partir de agora, qualquer mensagem em linguagem natural é entrada operacional suficiente.

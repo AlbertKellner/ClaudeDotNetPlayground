@@ -19,6 +19,8 @@
 - [Login de Usuário](Feature-UserLogin)
 - [Test Get](Feature-TestGet)
 - [Condições Climáticas](Feature-WeatherConditionsGet)
+- [Busca de Repositórios](Feature-RepositoriesGetAll)
+- [Sincronização de Repositórios](Feature-RepositoriesSyncAll)
 
 ---
 
