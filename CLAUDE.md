@@ -102,6 +102,7 @@ Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Da
 @Instructions/snippets/README.md
 @Instructions/snippets/canonical-snippets.md
 @Instructions/wiki/wiki-governance.md
+@scripts/operational-runbook.md
 @open-questions.md
 @assumptions-log.md
 @bash-errors-log.md

@@ -86,6 +86,18 @@ Incluir essas exportações no perfil do shell do container (`.bashrc`, `.profil
 
 ---
 
+## Portas e Serviços
+
+Referência rápida de portas utilizadas pelo projeto. Para detalhes completos (URLs, endpoints, credenciais), ver `scripts/operational-runbook.md`.
+
+| Serviço | Porta | Contexto |
+|---|---|---|
+| Aplicação (Docker) | `8080` | `docker compose up` — acesso via `http://localhost:8080` |
+| Aplicação (Debug) | `5000` | `dotnet run` — acesso via `http://localhost:5000` |
+| Datadog Agent (traces) | `8126` | Rede interna Docker; referenciado em `Program.cs` |
+
+---
+
 ## Checklist de Verificação Final
 
 Execute após configurar o container na ferramenta externa:
@@ -112,9 +124,46 @@ echo "HTTP_PROXY=${HTTP_PROXY:-(não definido)}"
 
 ---
 
+## Verificação Pós-Setup
+
+Após o checklist acima passar, execute esta sequência para confirmar que o ambiente funciona de ponta a ponta:
+
+```bash
+# 1. Build — deve compilar sem erros
+dotnet build src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
+
+# 2. Execução debug — deve iniciar e responder
+dotnet run --project src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj &
+sleep 5
+curl -sf http://localhost:5000/health && echo " → OK" || echo " → FALHOU"
+kill %1 2>/dev/null
+
+# 3. Docker — deve subir containers e responder
+docker compose up -d --build
+sleep 10
+curl -sf http://localhost:8080/health && echo " → OK" || echo " → FALHOU"
+docker compose down
+```
+
+Se todos os passos retornarem OK, o ambiente está pronto para desenvolvimento.
+
+> **Erro comum**: `dotnet: command not found` — o .NET SDK está instalado em `/root/.dotnet` mas não está no `PATH`. Adicionar `export PATH="${PATH}:/root/.dotnet"` ao perfil do shell. Ver seção "PATH e Runtime" acima.
+
+---
+
 ## Referências
 
+- `scripts/operational-runbook.md` — ponto de entrada unificado: portas, URLs, comandos, troubleshooting
 - `scripts/required-vars.md` — variáveis de ambiente e secrets a cadastrar (arquivo separado)
 - `scripts/setup-env.sh` — script de bootstrap que valida este checklist automaticamente
 - `.claude/rules/environment-readiness.md` — protocolo do agente quando o ambiente não está pronto
 - `bash-errors-log.md` — histórico de falhas de ambiente e soluções adotadas
+
+---
+
+## Histórico de Mudanças
+
+| Data | Mudança | Referência |
+|---|---|---|
+| 2026-03-19 | Estrutura inicial criada | Bootstrap de governança |
+| 2026-03-19 | Adicionado: seção Portas e Serviços, Verificação Pós-Setup com sequência de validação ponta a ponta | Instrução do usuário |
