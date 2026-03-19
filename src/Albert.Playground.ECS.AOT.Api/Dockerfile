@@ -9,6 +9,8 @@ ARG EXTRA_CA_CERT=""
 RUN if [ -n "${EXTRA_CA_CERT}" ]; then \
     echo "${EXTRA_CA_CERT}" | base64 -d > /usr/local/share/ca-certificates/proxy-ca.crt && \
     update-ca-certificates; \
+  else \
+    touch /usr/local/share/ca-certificates/proxy-ca.crt; \
   fi
 
 COPY Albert.Playground.ECS.AOT.Api.csproj .
@@ -31,6 +33,15 @@ COPY --from=build /app/publish/ .
 # Inclui qualquer CA customizada instalada via EXTRA_CA_CERT (ex: proxy TLS de sandbox).
 # Necessário para que chamadas HTTPS externas (Open-Meteo) funcionem em ambientes com inspeção TLS.
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /usr/local/share/ca-certificates/proxy-ca.crt /usr/local/share/ca-certificates/proxy-ca.crt
+
+# Copiar cert individual do proxy para /etc/ssl/certs/ e regenerar hash symlinks.
+# O OpenSSL usa hash symlinks para lookup de CA na verificação de cadeia TLS.
+# Sem o hash symlink, a primeira conexão falha com PartialChain e depende do retry do Polly.
+RUN if [ -s /usr/local/share/ca-certificates/proxy-ca.crt ]; then \
+      cp /usr/local/share/ca-certificates/proxy-ca.crt /etc/ssl/certs/proxy-ca.crt && \
+      c_rehash /etc/ssl/certs/ 2>/dev/null; \
+    fi || true
 
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production

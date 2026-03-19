@@ -220,8 +220,33 @@ Após a aplicação das correções dos Erros 8–10:
 
 ---
 
+## Erro 14 — SSL PartialChain no primeiro request HTTPS dentro do container Docker
+
+| Campo | Valor |
+|---|---|
+| **Número** | 14 |
+| **Data** | 2026-03-19 |
+| **Comando executado** | `curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/weather-conditions` (via docker compose) |
+| **Erro retornado** | Primeiro request à Open-Meteo falha com `PartialChain` — `System.Security.Authentication.AuthenticationException: The remote certificate is invalid because of errors in the certificate chain: PartialChain`. Retry do Polly (Attempt 1) retorna HTTP 200. |
+| **Causa** | O Dockerfile copiava o bundle `ca-certificates.crt` do build stage para o runtime stage, incluindo a CA do proxy. Porém os hash symlinks em `/etc/ssl/certs/` não incluíam a CA do proxy (hash `1a2ed160`). O OpenSSL no .NET usa hash symlinks para lookup de CA durante verificação de cadeia TLS. Sem o symlink, a primeira conexão falhava com `PartialChain`; no retry, caching interno de sessão SSL permitia sucesso. |
+| **Novo comando / solução** | Alterar o Dockerfile para: (1) no build stage, criar arquivo `proxy-ca.crt` vazio quando `EXTRA_CA_CERT` não é fornecido (`touch`), garantindo que `COPY --from=build` não falhe; (2) no runtime stage, copiar o cert individual do proxy para `/etc/ssl/certs/` e executar `c_rehash /etc/ssl/certs/` para criar os hash symlinks. Resultado: hash symlink `1a2ed160.0 -> proxy-ca.crt` criado, Attempt 0 retorna HTTP 200 sem retry. |
+
+---
+
+## Resultado Final (Sessão 2026-03-19 — SSL PartialChain Fix)
+
+Após a aplicação da correção do Erro 14:
+
+- `GET http://localhost:8080/health` → `200 Degraded` (Datadog 403 é comportamento esperado neste ambiente)
+- `POST http://localhost:8080/login` → `200` com JWT
+- `GET http://localhost:8080/weather-conditions` → `200` com payload Open-Meteo, **Attempt 0, sem retry**
+- Hash symlink `1a2ed160.0 -> proxy-ca.crt` presente no container
+- 94/94 testes passando em modo debug
+
+---
+
 ## Referências
 
 - `docker-compose.yml` — arquivo principal afetado pelas correções
-- `src/ClaudeDotNetPlayground/Dockerfile` — modificado para suporte a CA customizada
+- `src/Albert.Playground.ECS.AOT.Api/Dockerfile` — modificado para suporte a CA customizada e hash symlinks
 - `assumptions-log.md` — premissas de ambiente registradas
