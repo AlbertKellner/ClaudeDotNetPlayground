@@ -13,6 +13,7 @@ using Albert.Playground.ECS.AOT.Api.Infra.HealthChecks;
 using Albert.Playground.ECS.AOT.Api.Infra.Security;
 using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.GitHub;
 using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.OpenMeteo;
+using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.PokeApi;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
 using Refit;
@@ -175,6 +176,39 @@ builder.Services
 builder.Services.AddScoped<OpenMeteoApiClient>();
 builder.Services.AddScoped<IOpenMeteoApiClient, CachedOpenMeteoApiClient>();
 
+builder.Services
+    .AddRefitClient<IPokeApi>(new RefitSettings
+    {
+        ContentSerializer = new SystemTextJsonContentSerializer(
+            new JsonSerializerOptions
+            {
+                TypeInfoResolver = PokeApiJsonContext.Default
+            })
+    })
+    .ConfigureHttpClient(c =>
+        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:PokeApi:HttpRequest:BaseUrl"]!))
+    .AddResilienceHandler("pokeapi", resilienceBuilder =>
+    {
+        var maxRetryAttempts = builder.Configuration.GetValue<int>(
+            "ExternalApi:PokeApi:CircuitBreaker:MaxRetryAttempts", 3);
+        var delaySeconds = builder.Configuration.GetValue<double>(
+            "ExternalApi:PokeApi:CircuitBreaker:DelaySeconds", 3);
+        var backoffType = builder.Configuration.GetValue<DelayBackoffType>(
+            "ExternalApi:PokeApi:CircuitBreaker:BackoffType", DelayBackoffType.Exponential);
+
+        resilienceBuilder.AddRetry(new HttpRetryStrategyOptions
+        {
+            MaxRetryAttempts = maxRetryAttempts,
+            Delay = TimeSpan.FromSeconds(delaySeconds),
+            BackoffType = backoffType,
+            UseJitter = false
+        });
+
+        resilienceBuilder.AddTimeout(TimeSpan.FromSeconds(delaySeconds));
+    });
+
+builder.Services.AddScoped<IPokeApiClient, PokeApiClient>();
+
 Log.Information("[Program] Registrar dependências das features");
 
 builder.Services.AddScoped<Albert.Playground.ECS.AOT.Api.Features.Query.TestGet.TestGetUseCase>();
@@ -182,6 +216,7 @@ builder.Services.AddScoped<UserLoginUseCase>();
 builder.Services.AddScoped<WeatherConditionsGetUseCase>();
 builder.Services.AddScoped<Albert.Playground.ECS.AOT.Api.Features.Query.RepositoriesGetAll.RepositoriesGetAllUseCase>();
 builder.Services.AddScoped<Albert.Playground.ECS.AOT.Api.Features.Command.RepositoriesSyncAll.RepositoriesSyncAllUseCase>();
+builder.Services.AddScoped<Albert.Playground.ECS.AOT.Api.Features.Query.PokemonSearchGet.PokemonSearchGetUseCase>();
 
 Log.Information("[Program] Registrar segurança e autenticação");
 
@@ -220,5 +255,6 @@ internal static class AotControllerPreservation
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Query.WeatherConditionsGet.WeatherConditionsGetEndpoint))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Query.RepositoriesGetAll.RepositoriesGetAllEndpoint))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Command.RepositoriesSyncAll.RepositoriesSyncAllEndpoint))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Query.PokemonSearchGet.PokemonSearchGetEndpoint))]
     internal static void PreserveControllers() { }
 }

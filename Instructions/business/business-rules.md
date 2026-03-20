@@ -135,6 +135,19 @@ Cada regra segue a estrutura:
 
 ---
 
+### RN-008 — Busca de ficha completa de Pokémon via PokeAPI
+**Enunciado**: A aplicação deve expor um endpoint autenticado para buscar a ficha completa de um Pokémon na API pública PokeAPI (pokeapi.co), retornando o payload completo retornado pela API, sem filtragem, redução de campos ou mapeamento parcial. Para testes iniciais, o nome do Pokémon buscado é hardcoded como "pikachu".
+**Condição**: Quando uma requisição GET autenticada é recebida no endpoint de busca de Pokémon.
+**Ação**: O sistema consulta a PokeAPI (`GET /api/v2/pokemon/pikachu`) e retorna HTTP 200 com o payload JSON completo da resposta da PokeAPI, preservando sua estrutura original. A resposta inclui id, nome, tipos, estatísticas base, habilidades, sprites, movimentos, espécie e demais campos retornados pela API.
+**Exceções**: Nenhuma.
+**Dependências**: RN-003 (autenticação obrigatória).
+**BDD relacionado**: Nenhum no momento.
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
 ## Regras Substituídas ou Depreciadas
 
 > Nenhuma regra substituída no momento.

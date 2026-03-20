@@ -259,6 +259,19 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 
 ---
 
+### DA-021 — Integração PokeAPI com Refit + Polly
+**Data**: 2026-03-20
+**Status**: Ativo
+**Decisão**: A integração com a PokeAPI (pokeapi.co) segue o padrão `Shared/ExternalApi/` (DA-017): interface Refit (`IPokeApi`), interface de serviço (`IPokeApiClient`), classe cliente (`PokeApiClient`) e subpasta `Models/` com `PokeApiOutput.cs`. A PokeAPI é pública e não requer autenticação, portanto não possui `DelegatingHandler`. A resiliência segue o padrão Polly v8 com retry exponencial e timeout.
+**Motivação**: Consistência com o padrão já estabelecido em DA-017 para integrações HTTP externas. A PokeAPI é gratuita e aberta.
+**Consequências**:
+- `Shared/ExternalApi/PokeApi/` criada com `IPokeApi`, `IPokeApiClient`, `PokeApiClient`.
+- `Shared/ExternalApi/PokeApi/Models/PokeApiOutput.cs` criada com modelo de resposta e `PokeApiJsonContext`.
+- Feature `PokemonSearchGet` criada em `Features/Query/` com endpoint `GET /pokemon-search`.
+- Configuração `ExternalApi:PokeApi` adicionada ao `appsettings.json`.
+
+---
+
 ## Decisões Pendentes
 
 | Id | Decisão Necessária | Impacto |

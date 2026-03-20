@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Albert.Playground.ECS.AOT.Api.Features.Command.RepositoriesSyncAll;
 using Albert.Playground.ECS.AOT.Api.Features.Command.UserLogin;
+using Albert.Playground.ECS.AOT.Api.Features.Query.PokemonSearchGet;
 using Albert.Playground.ECS.AOT.Api.Features.Query.RepositoriesGetAll;
 using Albert.Playground.ECS.AOT.Api.Features.Query.WeatherConditionsGet;
 using Albert.Playground.ECS.AOT.Api.Shared.Repositories;
@@ -11,6 +12,7 @@ namespace Albert.Playground.ECS.AOT.Api.Infra.Json;
 [JsonSerializable(typeof(UserLoginInput))]
 [JsonSerializable(typeof(UserLoginOutput))]
 [JsonSerializable(typeof(WeatherConditionsGetOutput))]
+[JsonSerializable(typeof(PokemonSearchGetOutput))]
 [JsonSerializable(typeof(RepositoriesGetAllOutput))]
 [JsonSerializable(typeof(List<RepositoryFileEntry>))]
 [JsonSerializable(typeof(RepositoriesSyncAllOutput))]

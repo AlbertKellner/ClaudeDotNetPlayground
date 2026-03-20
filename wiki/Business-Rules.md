@@ -81,3 +81,14 @@ A aplicação expõe um endpoint autenticado que lê o arquivo JSON gerado pela 
 - **Comportamento:** para cada repositório no JSON, clona se ainda não existe ou executa pull se já clonado; atualiza o campo de última sincronização com data/hora no formato 24h; log info para sucesso, log error para falhas
 - **BDD:** 11 cenários definidos em `Instructions/bdd/repositories-sync-all.feature`
 - **Documentação completa:** [Feature: Sincronização de Repositórios](Feature-RepositoriesSyncAll)
+
+---
+
+## RN-008 — Busca de ficha completa de Pokémon via PokeAPI
+
+A aplicação expõe um endpoint autenticado que consulta a PokeAPI para buscar a ficha completa de um Pokémon, retornando o payload completo da API sem filtragem. Para testes iniciais, o Pokémon buscado é hardcoded como "pikachu".
+
+- **Endpoint:** `GET /pokemon-search`
+- **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
+- **Comportamento:** consulta a PokeAPI (`GET /api/v2/pokemon/pikachu`) e retorna HTTP 200 com a ficha completa do Pokémon incluindo id, nome, tipos, estatísticas, habilidades, sprites, movimentos e espécie
+- **Documentação completa:** [Feature: Busca de Pokémon](Feature-PokemonSearchGet)

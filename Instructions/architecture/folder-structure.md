@@ -25,6 +25,9 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   ├── Feature-UserLogin.md
 │   ├── Feature-TestGet.md
 │   ├── Feature-WeatherConditionsGet.md
+│   ├── Feature-RepositoriesGetAll.md
+│   ├── Feature-RepositoriesSyncAll.md
+│   ├── Feature-PokemonSearchGet.md
 │   ├── Infra-Correlation-ID.md
 │   ├── Infra-Authentication.md
 │   ├── Infra-Exception-Handling.md
@@ -245,3 +248,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-18 | Reorganização: solution movida para `src/`; projeto de testes movido de `tests/` para `src/`; pasta `tests/` removida; todos os projetos agora em `src/` | Instrução do usuário |
 | 2026-03-19 | Shared/ExternalApi/GitHub/ criada (integração GitHub API); Shared/Repositories/ criada (modelo JSON compartilhado); Features RepositoriesGetAll e RepositoriesSyncAll adicionadas | DA-019, RN-006, RN-007 |
 | 2026-03-19 | Regra de residência de models adicionada: Input e Output de Features exclusivamente em `<Feature>Models/`, não em Shared | DA-020 |
+| 2026-03-20 | Shared/ExternalApi/PokeApi/ criada (integração PokeAPI pública); Feature PokemonSearchGet adicionada em Features/Query/; wiki/ atualizada com Feature-PokemonSearchGet.md, Feature-RepositoriesGetAll.md e Feature-RepositoriesSyncAll.md | DA-021, RN-008 |
