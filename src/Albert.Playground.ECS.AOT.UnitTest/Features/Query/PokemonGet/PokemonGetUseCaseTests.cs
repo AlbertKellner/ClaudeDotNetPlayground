@@ -204,16 +204,4 @@ public sealed class PokemonGetUseCaseTests
         Assert.Equal(35, result.Stats[0].BaseStat);
     }
 
-    [Fact]
-    public async Task ExecuteAsync_DeveMapearSpritesCorretamente()
-    {
-        var fakeClient = new FakePokeApiClient();
-        var fakeLogger = new FakeLogger<PokemonGetUseCase>();
-        var useCase = new PokemonGetUseCase(fakeClient, fakeLogger);
-
-        var result = await useCase.ExecuteAsync();
-
-        Assert.NotNull(result.Sprites.FrontDefault);
-        Assert.Contains("25.png", result.Sprites.FrontDefault);
-    }
 }

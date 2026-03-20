@@ -136,9 +136,9 @@ Cada regra segue a estrutura:
 ---
 
 ### RN-008 — Consulta de perfil essencial de Pokemon via PokeAPI
-**Enunciado**: A aplicação deve expor um endpoint autenticado que consulta a PokeAPI para obter o perfil essencial de um Pokemon hardcoded (pikachu), retornando id, name, height, weight, base_experience, types, abilities, stats e sprites.
+**Enunciado**: A aplicação deve expor um endpoint autenticado que consulta a PokeAPI para obter o perfil essencial de um Pokemon hardcoded (pikachu), retornando id, name, height, weight, base_experience, types, abilities e stats.
 **Condição**: Quando uma requisição GET autenticada é recebida no endpoint `/pokemon`.
-**Ação**: O sistema consulta a PokeAPI (`GET /api/v2/pokemon/pikachu`) e retorna HTTP 200 com o perfil essencial do Pokemon contendo: id, name, height, weight, base_experience, types, abilities, stats e sprites.
+**Ação**: O sistema consulta a PokeAPI (`GET /api/v2/pokemon/pikachu`) e retorna HTTP 200 com o perfil essencial do Pokemon contendo: id, name, height, weight, base_experience, types, abilities e stats.
 **Exceções**: Nenhuma.
 **Dependências**: RN-003 (autenticação obrigatória).
 **BDD relacionado**: `Instructions/bdd/pokemon-get.feature`

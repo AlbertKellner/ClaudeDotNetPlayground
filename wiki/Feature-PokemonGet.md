@@ -2,7 +2,7 @@
 
 ## Resumo
 
-Consulta o perfil essencial do Pokemon Pikachu a partir da PokeAPI e retorna os campos id, name, height, weight, base_experience, types, abilities, stats e sprites.
+Consulta o perfil essencial do Pokemon Pikachu a partir da PokeAPI e retorna os campos id, name, height, weight, base_experience, types, abilities e stats.
 
 ## Autenticação
 
@@ -31,8 +31,7 @@ Sim. Requer Bearer Token JWT válido no header `Authorization`. Ver [Autenticaç
   "base_experience": 112,
   "types": [...],
   "abilities": [...],
-  "stats": [...],
-  "sprites": {...}
+  "stats": [...]
 }
 ```
 
@@ -53,7 +52,7 @@ Conforme [RN-008](Business-Rules):
 
 - O Pokemon consultado é fixo na implementação: `pikachu`
 - A PokeAPI é consumida via `GET /api/v2/pokemon/pikachu`
-- O perfil essencial retornado contém: id, name, height, weight, base_experience, types, abilities, stats e sprites
+- O perfil essencial retornado contém: id, name, height, weight, base_experience, types, abilities e stats
 
 ### Resiliência
 

@@ -90,6 +90,23 @@ public sealed class PokemonGetEndpointTests
     }
 
     [Fact]
+    public async Task Get_DeveRegistrarLogComRespostaDaApi()
+    {
+        var fakeClient = new FakePokeApiClient();
+        var fakeLoggerUseCase = new FakeLogger<PokemonGetUseCase>();
+        var useCase = new PokemonGetUseCase(fakeClient, fakeLoggerUseCase);
+        var fakeLoggerEndpoint = new FakeLogger<PokemonGetEndpoint>();
+        var endpoint = new PokemonGetEndpoint(useCase, fakeLoggerEndpoint);
+
+        await endpoint.Get(CancellationToken.None);
+
+        var logs = fakeLoggerEndpoint.GetSnapshot();
+        Assert.Contains(logs, l =>
+            l.Level == LogLevel.Information &&
+            l.Message.Contains("Resposta recebida"));
+    }
+
+    [Fact]
     public async Task Get_DeveRegistrarLogsComPrefixoCorreto()
     {
         var fakeClient = new FakePokeApiClient();

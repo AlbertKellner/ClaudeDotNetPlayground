@@ -27,9 +27,6 @@ public sealed class PokemonGetOutput
 
     [JsonPropertyName("stats")]
     public List<PokemonGetStat> Stats { get; init; } = [];
-
-    [JsonPropertyName("sprites")]
-    public PokemonGetSprites Sprites { get; init; } = new();
 }
 
 public sealed class PokemonGetType
@@ -63,19 +60,4 @@ public sealed class PokemonGetStat
 
     [JsonPropertyName("effort")]
     public int Effort { get; init; }
-}
-
-public sealed class PokemonGetSprites
-{
-    [JsonPropertyName("front_default")]
-    public string? FrontDefault { get; init; }
-
-    [JsonPropertyName("front_shiny")]
-    public string? FrontShiny { get; init; }
-
-    [JsonPropertyName("front_female")]
-    public string? FrontFemale { get; init; }
-
-    [JsonPropertyName("back_default")]
-    public string? BackDefault { get; init; }
 }

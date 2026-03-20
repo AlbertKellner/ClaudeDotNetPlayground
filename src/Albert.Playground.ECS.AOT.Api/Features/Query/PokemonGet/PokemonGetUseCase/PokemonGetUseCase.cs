@@ -46,14 +46,7 @@ public sealed class PokemonGetUseCase(
                 Name = s.Stat.Name,
                 BaseStat = s.BaseStat,
                 Effort = s.Effort
-            }).ToList(),
-            Sprites = new PokemonGetSprites
-            {
-                FrontDefault = result.Sprites.FrontDefault,
-                FrontShiny = result.Sprites.FrontShiny,
-                FrontFemale = result.Sprites.FrontFemale,
-                BackDefault = result.Sprites.BackDefault
-            }
+            }).ToList()
         };
 
         logger.LogInformation(

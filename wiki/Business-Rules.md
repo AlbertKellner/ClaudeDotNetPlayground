@@ -86,10 +86,10 @@ A aplicação expõe um endpoint autenticado que lê o arquivo JSON gerado pela 
 
 ## RN-008 — Consulta de perfil essencial de Pokemon via PokeAPI
 
-A aplicação expõe um endpoint autenticado que consulta a PokeAPI para obter o perfil essencial do Pokemon pikachu, retornando id, name, height, weight, base_experience, types, abilities, stats e sprites.
+A aplicação expõe um endpoint autenticado que consulta a PokeAPI para obter o perfil essencial do Pokemon pikachu, retornando id, name, height, weight, base_experience, types, abilities e stats.
 
 - **Endpoint:** `GET /pokemon`
 - **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
-- **Comportamento:** consulta a PokeAPI para o Pokemon pikachu e retorna `HTTP 200` com o perfil essencial contendo id, name, height, weight, base_experience, types, abilities, stats e sprites
+- **Comportamento:** consulta a PokeAPI para o Pokemon pikachu e retorna `HTTP 200` com o perfil essencial contendo id, name, height, weight, base_experience, types, abilities e stats
 - **BDD:** 3 cenários definidos em `Instructions/bdd/pokemon-get.feature`
 - **Documentação completa:** [Feature: Consulta de Pokemon](Feature-PokemonGet)

@@ -42,4 +42,3 @@ Feature: Consulta de perfil essencial de Pokemon via PokeAPI
     And a resposta contém o campo types
     And a resposta contém o campo abilities
     And a resposta contém o campo stats
-    And a resposta contém o campo sprites
