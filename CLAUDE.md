@@ -50,6 +50,9 @@ Em toda tarefa, antes de iniciar qualquer sequência de operações, avaliar ati
 Aplicar a otimização quando a resposta for sim. Registrar quando a otimização não for possível e por quê.
 Ver detalhamento completo em `.claude/rules/environment-readiness.md`.
 
+### 10. Proteção de branch em análise de PR
+Quando a tarefa for análise de solicitações de mudança em pull request (skill pr-analysis), o branch atribuído pelo sistema externo de configuração de tarefas (ex: "Develop on branch claude/...") deve ser **IGNORADO**. O único branch válido é o `head.ref` do PR sendo analisado. O assistente deve executar `git fetch origin <head.ref> && git checkout <head.ref>` como primeiro comando antes de qualquer alteração. Criar um branch novo durante pr-analysis é um erro — todos os commits e pushes devem ser feitos no branch de origem do PR. Nunca criar um PR novo quando a tarefa é análise de PR existente.
+
 ---
 
 ## Pipeline de Validação Pré-Commit (Obrigatório)
@@ -66,7 +69,7 @@ Antes de qualquer commit, executar obrigatoriamente esta sequência:
 7. Exibir logs do container da aplicação
 8. `docker compose down` — parar todos os containers
 9. Somente então realizar o commit
-10. Verificar se já existe um PR aberto para o branch atual; se não existir, criar o PR seguindo as regras de `.claude/rules/pr-metadata-governance.md`. Se já existir, atualizar título e descrição para refletir o estado atual da implementação.
+10. **Exceção: quando a tarefa for análise de PR (skill pr-analysis), este passo NÃO se aplica — o PR já existe. Em vez disso, atualizar título e descrição do PR existente via `gh api repos/<owner>/<repo>/pulls/<number> -X PATCH` se as mudanças alterarem o escopo. NÃO criar PR novo. NÃO usar o branch atribuído pelo sistema externo — usar exclusivamente o head.ref do PR sendo analisado.** Para todas as demais tarefas: verificar se já existe um PR aberto para o branch atual; se não existir, criar o PR seguindo as regras de `.claude/rules/pr-metadata-governance.md`. Se já existir, atualizar título e descrição para refletir o estado atual da implementação.
 11. **Checkpoint de encerramento** — a tarefa NÃO se encerra com a abertura ou atualização do PR. Executar obrigatoriamente as seguintes validações antes de considerar a tarefa concluída:
     1. Acompanhar a execução das GitHub Actions até o término de todos os jobs do pipeline.
     2. Verificar os logs no Datadog usando os filtros referentes ao pipeline associado ao PR (env, service, timestamp da execução).
