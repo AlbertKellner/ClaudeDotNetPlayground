@@ -215,6 +215,26 @@ Todo merge de PR neste repositório deve utilizar o método **merge commit** (`m
 
 ---
 
+## Política de Branch durante Revisão de PR
+
+### Princípio:
+> Solicitações de mudança (review comments) em um PR são resolvidas no próprio branch de origem do PR. Criar um branch novo para tratar comentários de revisão é proibido.
+
+### Regras:
+- Toda implementação decorrente de solicitações de mudança deve ser commitada no branch de origem do PR (`head.ref`)
+- O assistente **não deve criar um branch novo** para atender solicitações de revisão
+- O push deve ser feito para o branch de origem do PR, garantindo que os novos commits apareçam na timeline do PR existente
+- Se o branch de origem do PR não estiver disponível localmente, fazer checkout antes de qualquer alteração
+
+### Justificativa:
+Criar um branch novo para resolver comentários de revisão desvincula os commits do PR original, gerando:
+- Um PR órfão sem as correções solicitadas
+- Um branch desconectado que precisaria de um novo PR
+- Confusão para revisores que esperam ver as correções no PR original
+- Duplicação de trabalho e histórico fragmentado
+
+---
+
 ## Política de Consistência
 
 - A descrição é a **fonte de verdade textual** do PR
@@ -244,3 +264,4 @@ Todo merge de PR neste repositório deve utilizar o método **merge commit** (`m
 | 2026-03-19 | Adicionado: política de acompanhamento de GitHub Actions pós-PR com análise de logs e correção de falhas | Instrução do usuário |
 | 2026-03-19 | Reforço: acompanhamento de Actions e verificação de logs Datadog tornados condição de encerramento da tarefa; aplicabilidade em tarefas de governança explicitada | Falha observada em sessão |
 | 2026-03-20 | Adicionado: Política de Merge — merge commit definido como método obrigatório; squash e rebase proibidos | Instrução do usuário |
+| 2026-03-20 | Adicionado: Política de Branch durante Revisão de PR — proibição de criar branch novo para atender review comments | Instrução do usuário |

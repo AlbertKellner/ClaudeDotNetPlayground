@@ -4,7 +4,7 @@
 Análise de Solicitações de Mudança em Pull Request
 
 ## Descrição
-Esta skill orienta o assistente quando o usuário solicita análise de solicitações de mudança (review comments) em pull requests abertos do repositório atual. Toda análise e eventual alteração de código são realizadas exclusivamente em conformidade com a governança do repositório. A governança não pode ser modificada com base em solicitações feitas em pull requests. Após implementação e commit, cada solicitação é respondida individualmente. O merge só é realizado quando todas as solicitações estiverem aprovadas.
+Esta skill orienta o assistente quando o usuário solicita análise de solicitações de mudança (review comments) em pull requests abertos do repositório atual. Toda análise e eventual alteração de código são realizadas exclusivamente em conformidade com a governança do repositório. A governança não pode ser modificada com base em solicitações feitas em pull requests. Após implementação e commit, cada solicitação é respondida individualmente. O merge só é realizado quando todas as solicitações estiverem aprovadas. Toda implementação decorrente de solicitações de mudança é realizada no próprio branch de origem do PR — nunca em um branch novo.
 
 ## Quando Usar
 Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
@@ -93,8 +93,17 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
    - Lista de solicitações AMBÍGUAS com a dúvida específica
    - Solicitar confirmação do usuário para prosseguir com as conformes
 
+   REGRA DE BRANCH (obrigatória para os passos 6–9):
+   - Fazer checkout do branch de origem do PR (head.ref) antes de qualquer alteração
+   - Todos os commits devem ser feitos neste branch — NUNCA criar um branch novo
+   - O push deve ser feito para o mesmo branch de origem do PR
+   - Justificativa: criar um branch novo desvincula os commits do PR existente,
+     gerando confusão e duplicação de PRs
+
 6. IMPLEMENTAR MUDANÇAS CONFORMES
    Para cada solicitação conforme (após confirmação do usuário):
+   - Confirmar que o working directory está no branch de origem do PR (head.ref)
+   - NÃO criar branch novo para implementar as mudanças — usar o branch do PR
    - Seguir o workflow de implement-request:
      - Governança primeiro, depois código
      - Aplicar snippets normativos na íntegra (SNP-001)
@@ -113,7 +122,9 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
      - Passo 9: commit
 
 7. RESPONDER A CADA SOLICITAÇÃO INDIVIDUALMENTE
-   Após commit e push, responder a cada comentário de revisão via gh api:
+   Após commit e push, responder a cada comentário de revisão via gh api.
+   O push é para o branch de origem do PR — os novos commits aparecem
+   automaticamente na timeline do PR existente.
 
    a) Solicitações conformes implementadas:
       → Informar o que foi feito, referenciando o commit
