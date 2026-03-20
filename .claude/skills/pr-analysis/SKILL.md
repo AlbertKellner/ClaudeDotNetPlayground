@@ -164,16 +164,21 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
    - Se todas estão approved → reportar que o PR está pronto para merge
    - Se alguma não está approved → reportar quais revisores têm status pendente
 
-9. MERGE CONDICIONAL
-   O merge só deve ser realizado quando DUAS condições forem satisfeitas:
-   a) TODAS as reviews estão em estado "approved"
-   b) O usuário confirma explicitamente a realização do merge
+9. MERGE CONDICIONAL (ver restrição absoluta em `pr-metadata-governance.md`)
+   **O merge NUNCA deve ser realizado a menos que o usuário solicite explicitamente na mensagem atual.**
+   Mesmo com todas as aprovações e pipeline verde, sem solicitação explícita → reportar estado e NÃO realizar merge.
 
-   Se ambas as condições forem satisfeitas:
+   O merge só deve ser realizado quando TODAS as condições forem satisfeitas:
+   a) TODAS as reviews estão em estado "approved"
+   b) O usuário solicita explicitamente o merge na mensagem atual (ex: "faça o merge", "pode mergear")
+   c) Nenhuma outra restrição de governança impede o merge
+
+   Se todas as condições forem satisfeitas:
      gh api repos/<owner>/<repo>/pulls/<number>/merge \
        -X PUT -f merge_method="merge"
 
-   Se alguma condição não for satisfeita → reportar o estado atual e aguardar
+   Se alguma condição não for satisfeita → reportar o estado atual e aguardar instrução do usuário.
+   O assistente também **nunca deve fechar** um PR sem solicitação explícita do usuário.
 
 10. RELATAR
     Relatório completo incluindo:
@@ -193,7 +198,7 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
 - Restrições de governança explicadas para solicitações não conformes com alternativas
 - Dúvidas registradas em `open-questions.md` para solicitações ambíguas
 - Relatório completo de status de aprovação
-- Merge realizado (condicional a aprovação total e confirmação do usuário)
+- Merge realizado apenas quando solicitado explicitamente pelo usuário e todas as aprovações estiverem presentes
 
 ## Arquivos de Governança Relacionados
 - `.claude/rules/governance-policies.md` — políticas de contexto (§2), propagação (§3), ambiguidade (§4)
