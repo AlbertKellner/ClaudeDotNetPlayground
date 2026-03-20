@@ -27,6 +27,7 @@ Este repositório opera com um sistema de governança persistente. Todo conteúd
 | Resolução de ambiguidade | Responde a dúvida registrada ou esclarece lacuna | `resolve-ambiguity` |
 | Fornecimento de trecho técnico | Entrega código, configuração, schema ou artefato para aplicar | `apply-user-snippet` |
 | Alteração de instrução | Cria, altera ou remove arquivos de governança | `review-instructions` |
+| Análise de PR | Analisa solicitações de mudança em pull request aberto | `pr-analysis` |
 
 Uma mensagem pode ativar múltiplos tipos simultaneamente.
 
