@@ -218,6 +218,23 @@ Todo merge de PR neste repositório deve utilizar o método **merge commit** (`m
 
 ---
 
+## Política de Merge e Fechamento — Restrição Absoluta
+
+### Princípio:
+> O assistente **nunca** deve executar merge nem fechar Pull Requests, a menos que o usuário solicite explicitamente na mensagem atual.
+
+### Regras:
+- **Merge proibido sem solicitação explícita**: o assistente não deve executar `gh api repos/<owner>/<repo>/pulls/<number>/merge` nem qualquer outro comando que resulte em merge de PR, independentemente do estado de aprovações, pipeline ou qualquer outra condição
+- **Fechamento proibido sem solicitação explícita**: o assistente não deve executar `gh api repos/<owner>/<repo>/pulls/<number> -f state="closed"` nem qualquer outro comando que feche um PR
+- **Esta restrição prevalece sobre qualquer outra condição**: mesmo que todas as reviews estejam aprovadas, mesmo que o pipeline esteja verde, mesmo que a automação sugira merge — sem solicitação explícita do usuário, merge e fechamento são proibidos
+- **Solicitação explícita significa**: o usuário escrever na mensagem atual uma instrução clara como "faça o merge", "realize o merge", "feche o PR", "pode mergear". Inferência, suposição ou contexto implícito não constituem solicitação explícita
+- **O assistente deve reportar** o estado atual do PR (aprovações, pipeline, status) e aguardar instrução do usuário antes de qualquer ação de merge ou fechamento
+
+### Justificativa:
+Merge e fechamento de PRs são ações irreversíveis que afetam o histórico do repositório e podem impactar outros colaboradores. A decisão de quando executar essas ações pertence exclusivamente ao usuário.
+
+---
+
 ## Política de Branch durante Revisão de PR
 
 ### Princípio:
@@ -275,3 +292,4 @@ Criar um branch novo ou usar um branch atribuído pelo sistema para resolver com
 | 2026-03-20 | Adicionado: Política de Merge — merge commit definido como método obrigatório; squash e rebase proibidos | Instrução do usuário |
 | 2026-03-20 | Adicionado: Política de Branch durante Revisão de PR — proibição de criar branch novo para atender review comments | Instrução do usuário |
 | 2026-03-20 | Reforço: branch atribuído pelo sistema externo é ignorado em pr-analysis; passo 10 do pipeline não se aplica em análise de PR; exceção explícita adicionada à Política de Verificação e Criação de PR | Comportamento incorreto observado — novo PR criado em vez de usar PR existente |
+| 2026-03-20 | Adicionado: Política de Merge e Fechamento — Restrição Absoluta; merge e fechamento de PRs proibidos sem solicitação explícita do usuário | Instrução explícita do usuário |
