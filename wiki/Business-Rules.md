@@ -81,3 +81,15 @@ A aplicação expõe um endpoint autenticado que lê o arquivo JSON gerado pela 
 - **Comportamento:** para cada repositório no JSON, clona se ainda não existe ou executa pull se já clonado; atualiza o campo de última sincronização com data/hora no formato 24h; log info para sucesso, log error para falhas
 - **BDD:** 11 cenários definidos em `Instructions/bdd/repositories-sync-all.feature`
 - **Documentação completa:** [Feature: Sincronização de Repositórios](Feature-RepositoriesSyncAll)
+
+---
+
+## RN-008 — Consulta de perfil essencial de Pokemon via PokeAPI
+
+A aplicação expõe um endpoint autenticado que consulta a PokeAPI para obter o perfil essencial do Pokemon pikachu, retornando id, name, height, weight, base_experience, types, abilities, stats e sprites.
+
+- **Endpoint:** `GET /pokemon`
+- **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
+- **Comportamento:** consulta a PokeAPI para o Pokemon pikachu e retorna `HTTP 200` com o perfil essencial contendo id, name, height, weight, base_experience, types, abilities, stats e sprites
+- **BDD:** 3 cenários definidos em `Instructions/bdd/pokemon-get.feature`
+- **Documentação completa:** [Feature: Consulta de Pokemon](Feature-PokemonGet)

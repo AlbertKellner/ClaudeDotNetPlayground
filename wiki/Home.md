@@ -10,6 +10,7 @@ API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native 
 - Consulta de condições climáticas de São Paulo via Open-Meteo (`GET /weather-conditions`)
 - Busca de repositórios do team IntegrationRepos no GitHub (`GET /repositories`)
 - Sincronização local de repositórios com clone/pull (`POST /repositories/sync`)
+- Consulta de perfil essencial de Pokemon via PokeAPI (`GET /pokemon`)
 - Infraestrutura transversal: rastreabilidade por Correlation ID, tratamento centralizado de exceções, autenticação JWT
 
 ---
@@ -38,6 +39,7 @@ API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native 
 | [Condições Climáticas de São Paulo](Feature-WeatherConditionsGet) | Consulta das condições climáticas atuais de São Paulo via Open-Meteo API (`GET /weather-conditions`) |
 | [Busca de Repositórios](Feature-RepositoriesGetAll) | Lista repositórios do team IntegrationRepos no GitHub (`GET /repositories`) |
 | [Sincronização de Repositórios](Feature-RepositoriesSyncAll) | Clona e atualiza repositórios localmente (`POST /repositories/sync`) |
+| [Consulta de Pokemon](Feature-PokemonGet) | Consulta do perfil essencial de Pokemon via PokeAPI (`GET /pokemon`) |
 
 ### Infraestrutura
 

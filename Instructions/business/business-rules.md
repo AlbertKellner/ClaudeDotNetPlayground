@@ -135,6 +135,19 @@ Cada regra segue a estrutura:
 
 ---
 
+### RN-008 — Consulta de perfil essencial de Pokemon via PokeAPI
+**Enunciado**: A aplicação deve expor um endpoint autenticado que consulta a PokeAPI para obter o perfil essencial de um Pokemon hardcoded (pikachu), retornando id, name, height, weight, base_experience, types, abilities, stats e sprites.
+**Condição**: Quando uma requisição GET autenticada é recebida no endpoint `/pokemon`.
+**Ação**: O sistema consulta a PokeAPI (`GET /api/v2/pokemon/pikachu`) e retorna HTTP 200 com o perfil essencial do Pokemon contendo: id, name, height, weight, base_experience, types, abilities, stats e sprites.
+**Exceções**: Nenhuma.
+**Dependências**: RN-003 (autenticação obrigatória).
+**BDD relacionado**: `Instructions/bdd/pokemon-get.feature`
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
 ## Regras Substituídas ou Depreciadas
 
 > Nenhuma regra substituída no momento.
@@ -169,3 +182,4 @@ Cada regra segue a estrutura:
 | 2026-03-17 | RN-005 criada: health check inclui verificação do Datadog Agent via HTTP | Instrução do usuário |
 | 2026-03-19 | RN-006 criada: busca de repositórios do team IntegrationRepos via API GitHub | Instrução do usuário |
 | 2026-03-19 | RN-007 criada: sincronização local de repositórios com clone/pull e registro de data | Instrução do usuário |
+| 2026-03-20 | RN-008 criada: consulta de perfil essencial de Pokemon via PokeAPI | Instrução do usuário |

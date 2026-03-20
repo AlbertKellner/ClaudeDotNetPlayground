@@ -94,6 +94,7 @@ docker compose down
 | `GET` | `/weather-conditions` | Sim | Condições climáticas atuais de São Paulo via Open-Meteo | RN-004 |
 | `GET` | `/repositories` | Sim | Lista repositórios do team IntegrationRepos no GitHub | RN-006 |
 | `POST` | `/repositories/sync` | Sim | Sincroniza repositórios localmente (clone/pull) | RN-007 |
+| `GET` | `/pokemon` | Sim | Perfil essencial de Pokemon via PokeAPI | RN-008 |
 
 ---
 

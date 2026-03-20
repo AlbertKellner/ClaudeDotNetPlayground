@@ -21,6 +21,7 @@
 - [Condições Climáticas](Feature-WeatherConditionsGet)
 - [Busca de Repositórios](Feature-RepositoriesGetAll)
 - [Sincronização de Repositórios](Feature-RepositoriesSyncAll)
+- [Consulta de Pokemon](Feature-PokemonGet)
 
 ---
 
