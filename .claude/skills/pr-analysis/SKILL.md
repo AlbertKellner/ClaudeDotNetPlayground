@@ -94,11 +94,16 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
    - Solicitar confirmação do usuário para prosseguir com as conformes
 
    REGRA DE BRANCH (obrigatória para os passos 6–9):
-   - Fazer checkout do branch de origem do PR (head.ref) antes de qualquer alteração
+   - O branch atribuído pelo sistema externo de configuração de tarefas (ex: "Develop on branch claude/...")
+     é IGNORADO quando a tarefa é pr-analysis. O único branch válido é o head.ref do PR sendo analisado.
+   - Fazer checkout do branch de origem do PR (head.ref) antes de qualquer alteração:
+       git fetch origin <head.ref>
+       git checkout <head.ref>
    - Todos os commits devem ser feitos neste branch — NUNCA criar um branch novo
-   - O push deve ser feito para o mesmo branch de origem do PR
-   - Justificativa: criar um branch novo desvincula os commits do PR existente,
-     gerando confusão e duplicação de PRs
+   - O push deve ser feito para o mesmo branch de origem do PR:
+       git push origin <head.ref>
+   - Justificativa: criar um branch novo ou usar um branch atribuído pelo sistema desvincula
+     os commits do PR existente, gerando um PR novo órfão e deixando o PR original sem as correções
 
 6. IMPLEMENTAR MUDANÇAS CONFORMES
    Para cada solicitação conforme (após confirmação do usuário):
@@ -109,22 +114,31 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
      - Aplicar snippets normativos na íntegra (SNP-001)
      - Seguir convenções de nomenclatura e organização de pastas
      - Usar terminologia do glossário
-   - Aplicar o pipeline de validação pré-commit do CLAUDE.md:
-     - Passo 0: verificar pré-requisitos de ambiente
-     - Passo 1: dotnet build
-     - Passo 2: dotnet run + health check
-     - Passo 3: dotnet test (gate obrigatório)
-     - Passo 4: docker compose up -d
-     - Passo 5: aguardar /health HTTP 200
-     - Passo 6: validar endpoints alterados via HTTP real
-     - Passo 7: exibir logs do container
-     - Passo 8: docker compose down
-     - Passo 9: commit
+   - Aplicar o pipeline de validação pré-commit do CLAUDE.md com as seguintes regras:
+     - Passos 0–8: aplicáveis normalmente (quando há código alterado)
+       - Passo 0: verificar pré-requisitos de ambiente
+       - Passo 1: dotnet build
+       - Passo 2: dotnet run + health check
+       - Passo 3: dotnet test (gate obrigatório)
+       - Passo 4: docker compose up -d
+       - Passo 5: aguardar /health HTTP 200
+       - Passo 6: validar endpoints alterados via HTTP real
+       - Passo 7: exibir logs do container
+       - Passo 8: docker compose down
+     - Passo 9 (commit): aplicável — o commit é feito no branch do PR (head.ref)
+     - Passo 10 (criar/atualizar PR): NÃO APLICÁVEL — o PR já existe.
+       Em vez de criar ou buscar PR, atualizar título e descrição do PR existente
+       via gh api se as mudanças alterarem o escopo:
+         gh api repos/<owner>/<repo>/pulls/<number> -X PATCH -f title="..." -f body="..."
+     - Passo 11 (acompanhar GitHub Actions): APLICÁVEL — acompanhar normalmente após o push
 
-7. RESPONDER A CADA SOLICITAÇÃO INDIVIDUALMENTE
-   Após commit e push, responder a cada comentário de revisão via gh api.
-   O push é para o branch de origem do PR — os novos commits aparecem
-   automaticamente na timeline do PR existente.
+7. PUSH E RESPONDER A CADA SOLICITAÇÃO INDIVIDUALMENTE
+   Após o commit, fazer push exclusivamente para o branch de origem do PR:
+     git push origin <head.ref>
+   NUNCA fazer push para um branch diferente do head.ref do PR.
+   Os novos commits aparecem automaticamente na timeline do PR existente.
+
+   Em seguida, responder a cada comentário de revisão via gh api.
 
    a) Solicitações conformes implementadas:
       → Informar o que foi feito, referenciando o commit
