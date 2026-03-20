@@ -234,7 +234,7 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 
 ### DA-019 — Integração GitHub API com Refit + Polly e Persistência em Arquivo JSON
 **Data**: 2026-03-19
-**Status**: Ativo
+**Status**: Revogado (2026-03-20) — funcionalidades de busca e sincronização de repositórios removidas do sistema
 **Decisão**: A integração com a API do GitHub segue o mesmo padrão de `Shared/ExternalApi/` (DA-017): interface Refit, resiliência Polly v8, e um `DelegatingHandler` dedicado (`GitHubAuthenticationHandler`) para injetar Bearer PAT, User-Agent e Accept no pipeline HTTP. Os dados de repositórios são persistidos em arquivo JSON local com modelo compartilhado (`RepositoryFileEntry`) em `Shared/Repositories/`.
 **Motivação**: Consistência com o padrão já estabelecido em DA-017 para integrações HTTP externas. Persistência em arquivo JSON atende ao requisito sem necessidade de banco de dados.
 **Consequências**:
@@ -255,7 +255,7 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - PAD-007 atualizado em `patterns.md` com proibição explícita.
 - `folder-structure.md` atualizado com regra de residência de models.
 - Models de APIs externas permanecem em `Shared/ExternalApi/*/Models/` (DA-017) como contratos do cliente HTTP, mas não podem ser usados diretamente como Output de Features.
-- Models de dados compartilhados em `Shared/Repositories/` permanecem como models de persistência compartilhada.
+- `Shared/Repositories/` removida (2026-03-20) — a persistência compartilhada em arquivo foi eliminada junto com as features que a utilizavam (DA-019 revogada).
 
 ---
 
@@ -315,3 +315,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-18 | DA-015 criada: padrão de logging estruturado storytelling — referenciada por technical-overview.md e SNP-001 mas ausente do registro | Revisão de governança |
 | 2026-03-19 | DA-018 criada: Memory Cache para endpoints GET com Decorator Pattern; reestruturação de ExternalApi config em HttpRequest/CircuitBreaker/EndpointCache | Instrução do usuário |
 | 2026-03-19 | DA-020 criada: isolamento de models de Feature — Input e Output não compartilhados via Shared | Instrução do usuário |
+| 2026-03-20 | DA-019 revogada: funcionalidades de busca e sincronização de repositórios removidas; Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos | Instrução do usuário |

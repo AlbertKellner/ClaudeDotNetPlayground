@@ -179,8 +179,6 @@ src/
          │         └── Models/
          │              ├── <Servico>Input.cs       # Parâmetros da requisição à API
          │              └── <Servico>Output.cs      # Modelo completo da resposta da API + JsonSerializerContext
-         ├── Repositories/                          # Modelos compartilhados de persistência em arquivo
-         │    └── RepositoryFileEntry.cs            # Modelo do arquivo JSON de repositórios + JsonSerializerContext
          ├── <Abstrações e interfaces genéricas reutilizáveis entre Slices>
          ├── <Utilitários e helpers>
          └── <Configurações de infraestrutura compartilhada>
@@ -194,7 +192,7 @@ src/
 - `<NomeDaFeature>Output.cs` existe apenas quando há retorno estruturado.
 - `<NomeDaFeature>Entity.cs` existe apenas quando a Slice materializa objetos de domínio tipados.
 - `Scripts/` e `<NomeDaFeature>.sql` existem apenas quando a Slice acessa banco de dados via SQL.
-- `<NomeDaFeature>Input.cs` e `<NomeDaFeature>Output.cs` pertencem exclusivamente a `<Feature>Models/` da Slice. Não devem ser movidos ou duplicados em `Shared/`. Models em `Shared/ExternalApi/*/Models/` são models de APIs externas (contrato do cliente HTTP, não de Features) e seguem regras próprias (DA-017). Models em `Shared/Repositories/` são models de dados compartilhados e não se confundem com models de Features (DA-020).
+- `<NomeDaFeature>Input.cs` e `<NomeDaFeature>Output.cs` pertencem exclusivamente a `<Feature>Models/` da Slice. Não devem ser movidos ou duplicados em `Shared/`. Models em `Shared/ExternalApi/*/Models/` são models de APIs externas (contrato do cliente HTTP, não de Features) e seguem regras próprias (DA-017). Models de APIs externas não se confundem com models de Features (DA-020).
 - Features que consomem APIs externas via `Shared/ExternalApi/` devem possuir seu próprio model de Output em `<Feature>Models/`, mesmo que a estrutura espelhe o model da API externa. O model de Shared é o contrato do cliente HTTP; o model da Feature é o contrato do endpoint. Features não devem usar types de `Shared/` como tipo de retorno de seus Use Cases ou Endpoints (DA-020).
 
 ---
@@ -245,3 +243,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-18 | Reorganização: solution movida para `src/`; projeto de testes movido de `tests/` para `src/`; pasta `tests/` removida; todos os projetos agora em `src/` | Instrução do usuário |
 | 2026-03-19 | Shared/ExternalApi/GitHub/ criada (integração GitHub API); Shared/Repositories/ criada (modelo JSON compartilhado); Features RepositoriesGetAll e RepositoriesSyncAll adicionadas | DA-019, RN-006, RN-007 |
 | 2026-03-19 | Regra de residência de models adicionada: Input e Output de Features exclusivamente em `<Feature>Models/`, não em Shared | DA-020 |
+| 2026-03-20 | Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos; Features RepositoriesGetAll e RepositoriesSyncAll removidas | DA-019 revogada |
