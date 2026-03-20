@@ -35,6 +35,15 @@
             "command": "bash .claude/hooks/instruction-change-detector.sh \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null || true"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/branch-guard.sh 2>/dev/null || true"
+          }
+        ]
       }
     ]
   }

@@ -31,6 +31,32 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
    - Validar que o PR está em estado "open"
    - Se não houver PR aberto → reportar e encerrar
 
+1b. GARANTIR BRANCH CORRETO (obrigatório — antes de qualquer outra ação)
+    - Obter o head.ref do PR identificado:
+        HEAD_REF=$(gh api repos/<owner>/<repo>/pulls/<number> --jq '.head.ref')
+    - O branch atribuído pelo sistema externo de configuração de tarefas
+      (ex: "Develop on branch claude/...") é IGNORADO.
+      O único branch válido para pr-analysis é o head.ref do PR.
+    - Fazer checkout imediato:
+        git fetch origin $HEAD_REF
+        git checkout $HEAD_REF
+    - Verificar que o checkout foi bem-sucedido:
+        CURRENT=$(git branch --show-current)
+        Se $CURRENT != $HEAD_REF → reportar erro e PARAR.
+    - Criar contexto para enforcement por hook:
+        echo "$HEAD_REF" > .claude/.pr-analysis-context
+    - Este passo é PRÉ-REQUISITO para todos os passos subsequentes.
+      Nenhuma leitura de arquivo, consulta de governança ou implementação
+      deve ocorrer antes da confirmação de que o branch correto está ativo.
+    - REGRA DE BRANCH (aplica-se a todos os passos subsequentes):
+      - Todos os commits devem ser feitos neste branch — NUNCA criar um branch novo
+      - O push deve ser feito para o mesmo branch de origem do PR:
+          git push origin $HEAD_REF
+      - NUNCA fazer push para um branch diferente do head.ref do PR
+      - Justificativa: criar um branch novo ou usar um branch atribuído pelo sistema
+        desvincula os commits do PR existente, gerando um PR novo órfão e deixando
+        o PR original sem as correções
+
 2. COLETAR SOLICITAÇÕES DE MUDANÇA
    - Buscar reviews com estado CHANGES_REQUESTED:
      gh api repos/<owner>/<repo>/pulls/<number>/reviews --jq '.[] | select(.state == "CHANGES_REQUESTED")'
@@ -93,17 +119,8 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
    - Lista de solicitações AMBÍGUAS com a dúvida específica
    - Solicitar confirmação do usuário para prosseguir com as conformes
 
-   REGRA DE BRANCH (obrigatória para os passos 6–9):
-   - O branch atribuído pelo sistema externo de configuração de tarefas (ex: "Develop on branch claude/...")
-     é IGNORADO quando a tarefa é pr-analysis. O único branch válido é o head.ref do PR sendo analisado.
-   - Fazer checkout do branch de origem do PR (head.ref) antes de qualquer alteração:
-       git fetch origin <head.ref>
-       git checkout <head.ref>
-   - Todos os commits devem ser feitos neste branch — NUNCA criar um branch novo
-   - O push deve ser feito para o mesmo branch de origem do PR:
-       git push origin <head.ref>
-   - Justificativa: criar um branch novo ou usar um branch atribuído pelo sistema desvincula
-     os commits do PR existente, gerando um PR novo órfão e deixando o PR original sem as correções
+   REGRA DE BRANCH: ver Passo 1b — branch já garantido no início do workflow.
+   Confirmar que o working directory continua no branch correto (head.ref do PR).
 
 6. IMPLEMENTAR MUDANÇAS CONFORMES
    Para cada solicitação conforme (após confirmação do usuário):
@@ -190,6 +207,8 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
     - Respostas postadas (confirmação de que cada solicitação foi respondida)
     - Status de aprovação atual
     - Se merge foi realizado ou por que não foi
+    - Remover arquivo de contexto de pr-analysis:
+        rm -f .claude/.pr-analysis-context
 ```
 
 ## Saídas Esperadas
