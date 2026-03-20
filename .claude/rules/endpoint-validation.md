@@ -73,28 +73,40 @@ O token obtido deve ser armazenado em variável e usado em todas as chamadas sub
 
 ### Passo 3: Consumir cada endpoint
 
-Para cada endpoint identificado no Passo 1, executar a chamada HTTP e verificar o resultado:
+Para cada endpoint identificado no Passo 1, executar a chamada HTTP capturando o body completo e o status code:
 
 #### Endpoint sem autenticação:
 ```bash
-curl -s -o /dev/null -w "%{http_code}" \
-  -X <MÉTODO> http://localhost:8080<ROTA>
+RESPONSE=$(curl -s -w "\n%{http_code}" \
+  -X <MÉTODO> http://localhost:8080<ROTA>)
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+echo "Status: $HTTP_CODE"
+echo "$BODY"
 ```
 
 #### Endpoint com autenticação:
 ```bash
-curl -s -o /dev/null -w "%{http_code}" \
+RESPONSE=$(curl -s -w "\n%{http_code}" \
   -X <MÉTODO> http://localhost:8080<ROTA> \
-  -H "Authorization: Bearer <TOKEN>"
+  -H "Authorization: Bearer <TOKEN>")
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+echo "Status: $HTTP_CODE"
+echo "$BODY"
 ```
 
 #### Endpoint com body (POST/PUT/PATCH):
 ```bash
-curl -s -o /dev/null -w "%{http_code}" \
+RESPONSE=$(curl -s -w "\n%{http_code}" \
   -X POST http://localhost:8080<ROTA> \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <TOKEN>" \
-  -d '<PAYLOAD_JSON>'
+  -d '<PAYLOAD_JSON>')
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+echo "Status: $HTTP_CODE"
+echo "$BODY"
 ```
 
 ### Passo 4: Verificar resultado
@@ -111,10 +123,19 @@ Se o status code retornado **não** corresponder ao esperado:
 ### Passo 5: Reportar resultado da validação
 
 No relatório final da tarefa, incluir obrigatoriamente:
-- Lista de endpoints validados
-- Status code obtido em cada chamada
 - Se token foi gerado: confirmar geração bem-sucedida
-- Resultado: todos aprovados / algum reprovado (e qual)
+- Resultado geral: todos aprovados / algum reprovado (e qual)
+
+**Para cada endpoint validado com sucesso**, incluir obrigatoriamente:
+1. **Status code** da requisição (ex: `200`)
+2. **Endpoint completo** com método HTTP, URL e todos os parâmetros, headers e body utilizados na chamada (ex: `GET http://localhost:8080/weather-conditions` com header `Authorization: Bearer <token>`)
+3. **JSON completo** retornado pelo endpoint, formatado como bloco de código Markdown JSON para facilitar a visualização:
+
+```json
+{
+  "exemplo": "resposta completa do endpoint"
+}
+```
 
 ---
 
@@ -161,3 +182,4 @@ Todas as chamadas de validação devem usar `http://localhost:8080` como base UR
 | Data | Mudança | Referência |
 |---|---|---|
 | 2026-03-17 | Criado: rule de validação obrigatória de endpoints após implementação de feature | Instrução do usuário |
+| 2026-03-20 | Adicionado: relatório de sucesso deve incluir status code, endpoint completo com parâmetros e JSON completo da resposta formatado em Markdown | Instrução do usuário |
