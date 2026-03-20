@@ -7,6 +7,8 @@ services:
         EXTRA_CA_CERT: ${EXTRA_CA_CERT:-}
     ports:
       - "8080:8080"
+    environment:
+      - ExternalApi__GitHub__HttpRequest__PersonalAccessToken=${GITHUB_PAT:-}
     depends_on:
       - datadog-agent
     labels:

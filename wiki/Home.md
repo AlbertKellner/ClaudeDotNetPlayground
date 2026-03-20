@@ -8,6 +8,7 @@ API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native 
 - Autenticação de usuário com geração de JWT (`POST /login`)
 - Endpoint protegido por Bearer Token (`GET /test`)
 - Consulta de condições climáticas de São Paulo via Open-Meteo (`GET /weather-conditions`)
+- Pesquisa de repositórios GitHub da conta AlbertKellner (`GET /github-repo-search`)
 - Infraestrutura transversal: rastreabilidade por Correlation ID, tratamento centralizado de exceções, autenticação JWT
 
 ---
@@ -34,6 +35,7 @@ API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native 
 | [Login de Usuário](Feature-UserLogin) | Autenticação com credenciais e geração de JWT Bearer Token (`POST /login`) |
 | [Test Get](Feature-TestGet) | Endpoint protegido que retorna confirmação de funcionamento (`GET /test`) |
 | [Condições Climáticas de São Paulo](Feature-WeatherConditionsGet) | Consulta das condições climáticas atuais de São Paulo via Open-Meteo API (`GET /weather-conditions`) |
+| [Pesquisa de Repositórios GitHub](Feature-GitHubRepoSearch) | Pesquisa e exibição dos repositórios da conta AlbertKellner (`GET /github-repo-search`) |
 
 ### Infraestrutura
 

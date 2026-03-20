@@ -25,6 +25,7 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   ├── Feature-UserLogin.md
 │   ├── Feature-TestGet.md
 │   ├── Feature-WeatherConditionsGet.md
+│   ├── Feature-GitHubRepoSearch.md
 │   ├── Infra-Correlation-ID.md
 │   ├── Infra-Authentication.md
 │   ├── Infra-Exception-Handling.md
@@ -244,3 +245,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-19 | Shared/ExternalApi/GitHub/ criada (integração GitHub API); Shared/Repositories/ criada (modelo JSON compartilhado); Features RepositoriesGetAll e RepositoriesSyncAll adicionadas | DA-019, RN-006, RN-007 |
 | 2026-03-19 | Regra de residência de models adicionada: Input e Output de Features exclusivamente em `<Feature>Models/`, não em Shared | DA-020 |
 | 2026-03-20 | Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos; Features RepositoriesGetAll e RepositoriesSyncAll removidas | DA-019 revogada |
+| 2026-03-20 | Shared/ExternalApi/GitHub/ recriada (integração GitHub API); Feature GitHubRepoSearch adicionada em Features/Query/ | DA-021, RN-008 |
