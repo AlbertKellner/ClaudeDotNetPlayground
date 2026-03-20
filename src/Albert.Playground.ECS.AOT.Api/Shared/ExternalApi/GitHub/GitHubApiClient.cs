@@ -36,8 +36,9 @@ public sealed class GitHubApiClient(
             allRepositories.Count);
 
         logger.LogInformation(
-            "[GitHubApiClient][GetRepositoriesAsync] Retornar lista de repositórios do GitHub. Total={Total}",
-            allRepositories.Count);
+            "[GitHubApiClient][GetRepositoriesAsync] Retornar {Total} repositórios obtidos da conta GitHub '{Username}'",
+            allRepositories.Count,
+            username);
 
         return allRepositories;
     }
