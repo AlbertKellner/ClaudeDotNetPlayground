@@ -66,7 +66,7 @@ Antes de qualquer commit, executar obrigatoriamente esta sequência:
 4. `docker compose up -d` — publicar (Release/Native AOT) e iniciar aplicação + Datadog Agent em Docker. Executado somente após aprovação no gate de testes (passo 3).
 5. Aguardar `/health` responder HTTP 200 (polling até 30 tentativas)
 6. Se a tarefa criou ou alterou features com endpoint: validar cada endpoint via chamada HTTP real (ver `.claude/rules/endpoint-validation.md`). Se o endpoint exigir autenticação, obter Bearer Token via `POST /login` antes de consumir. Status code inesperado bloqueia o commit.
-7. Exibir logs do container da aplicação
+7. Exibir logs do container da aplicação — os logs de storytelling de cada requisição validada (passo 6) já devem ter sido apresentados no relatório de validação conforme `.claude/rules/endpoint-validation.md`. Se a tarefa não incluiu validação de endpoint (passo 6 não aplicável), exibir os logs gerais do container via `docker logs`.
 8. `docker compose down` — parar todos os containers
 9. Somente então realizar o commit
 10. **Exceção: quando a tarefa for análise de PR (skill pr-analysis), este passo NÃO se aplica — o PR já existe. Em vez disso, atualizar título e descrição do PR existente via `gh api repos/<owner>/<repo>/pulls/<number> -X PATCH` se as mudanças alterarem o escopo. NÃO criar PR novo. NÃO usar o branch atribuído pelo sistema externo — usar exclusivamente o head.ref do PR sendo analisado.** Para todas as demais tarefas: verificar se já existe um PR aberto para o branch atual; se não existir, criar o PR seguindo as regras de `.claude/rules/pr-metadata-governance.md`. Se já existir, atualizar título e descrição para refletir o estado atual da implementação.

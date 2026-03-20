@@ -109,6 +109,16 @@ echo "Status: $HTTP_CODE"
 echo "$BODY"
 ```
 
+### Passo 3.1: Capturar logs de storytelling da requisição
+
+Imediatamente após cada chamada HTTP (Passo 3), capturar os logs do container correspondentes à requisição executada:
+
+```bash
+docker logs $(docker compose ps -q app) --tail 30 2>&1
+```
+
+Os logs capturados devem ser filtrados para incluir apenas as linhas correspondentes à requisição validada, identificáveis pelo CorrelationId presente na resposta ou pela proximidade temporal (logs emitidos entre a chamada e a captura). Estes logs serão apresentados no relatório (Passo 5, item 4).
+
 ### Passo 4: Verificar resultado
 
 Para cada chamada, verificar:
@@ -135,6 +145,17 @@ No relatório final da tarefa, incluir obrigatoriamente:
 {
   "exemplo": "resposta completa do endpoint"
 }
+```
+
+4. **Logs de storytelling da requisição** capturados do container da aplicação imediatamente após a chamada ao endpoint (Passo 3.1). Os logs devem ser apresentados como bloco de código Markdown, filtrados para mostrar apenas as linhas correspondentes à requisição validada (identificáveis pelo CorrelationId ou pela proximidade temporal). O usuário deve poder verificar visualmente que o padrão SNP-001 (storytelling por classe e método) está sendo seguido:
+   - Prefixo `[NomeDaClasse][NomeDoMétodo]` presente em cada linha de log
+   - Logs de entrada e saída de cada método visíveis
+   - Sequência narrativa coerente do fluxo da requisição
+
+```log
+[20/03/2026 14:30:00.0000000] [correlation-id] [UserName] [Controller][Action] Processar requisição...
+[20/03/2026 14:30:00.0000001] [correlation-id] [UserName] [UseCase][Method] Executar lógica...
+...
 ```
 
 ---
@@ -183,3 +204,4 @@ Todas as chamadas de validação devem usar `http://localhost:8080` como base UR
 |---|---|---|
 | 2026-03-17 | Criado: rule de validação obrigatória de endpoints após implementação de feature | Instrução do usuário |
 | 2026-03-20 | Adicionado: relatório de sucesso deve incluir status code, endpoint completo com parâmetros e JSON completo da resposta formatado em Markdown | Instrução do usuário |
+| 2026-03-20 | Adicionado: Passo 3.1 (captura de logs por requisição) e item 4 no Passo 5 (logs de storytelling obrigatórios no relatório, com verificação visual do padrão SNP-001) | Instrução do usuário |
