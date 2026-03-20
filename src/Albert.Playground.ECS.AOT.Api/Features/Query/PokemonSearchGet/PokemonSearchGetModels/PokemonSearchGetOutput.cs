@@ -52,9 +52,6 @@ public sealed class PokemonSearchGetOutput
     [JsonPropertyName("cries")]
     public PokemonCries Cries { get; init; } = new();
 
-    [JsonPropertyName("stats")]
-    public List<PokemonStatSlot> Stats { get; init; } = [];
-
     [JsonPropertyName("types")]
     public List<PokemonTypeSlot> Types { get; init; } = [];
 
@@ -135,18 +132,6 @@ public sealed class PokemonMoveVersionGroupDetail
 
     [JsonPropertyName("order")]
     public int? MoveOrder { get; init; }
-}
-
-public sealed class PokemonStatSlot
-{
-    [JsonPropertyName("base_stat")]
-    public int BaseStat { get; init; }
-
-    [JsonPropertyName("effort")]
-    public int Effort { get; init; }
-
-    [JsonPropertyName("stat")]
-    public PokemonNamedResource Stat { get; init; } = new();
 }
 
 public sealed class PokemonTypeSlot

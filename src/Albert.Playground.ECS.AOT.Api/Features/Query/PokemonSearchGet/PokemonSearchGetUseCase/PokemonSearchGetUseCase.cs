@@ -123,12 +123,6 @@ public sealed class PokemonSearchGetUseCase(
                 Latest = result.Cries.Latest,
                 Legacy = result.Cries.Legacy
             },
-            Stats = result.Stats.Select(s => new PokemonStatSlot
-            {
-                BaseStat = s.BaseStat,
-                Effort = s.Effort,
-                Stat = new PokemonNamedResource { Name = s.Stat.Name, Url = s.Stat.Url }
-            }).ToList(),
             Types = result.Types.Select(t => new PokemonTypeSlot
             {
                 Slot = t.Slot,

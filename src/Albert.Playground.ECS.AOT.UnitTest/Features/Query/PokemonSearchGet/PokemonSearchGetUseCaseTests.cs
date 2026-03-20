@@ -45,15 +45,6 @@ public sealed class PokemonSearchGetUseCaseTests
                         Type = new PokeApiNamedResource { Name = "electric", Url = "https://pokeapi.co/api/v2/type/13/" }
                     }
                 ],
-                Stats =
-                [
-                    new PokeApiStatSlot
-                    {
-                        BaseStat = 35,
-                        Effort = 0,
-                        Stat = new PokeApiNamedResource { Name = "hp", Url = "https://pokeapi.co/api/v2/stat/1/" }
-                    }
-                ],
                 Cries = new PokeApiCries
                 {
                     Latest = "https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/25.ogg",
@@ -194,20 +185,6 @@ public sealed class PokemonSearchGetUseCaseTests
         Assert.NotNull(result.Abilities[0].Ability);
         Assert.Equal("static", result.Abilities[0].Ability!.Name);
         Assert.False(result.Abilities[0].IsHidden);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_DeveMapearStatsCorretamente()
-    {
-        var fakeClient = new FakePokeApiClient();
-        var fakeLogger = new FakeLogger<PokemonSearchGetUseCase>();
-        var useCase = new PokemonSearchGetUseCase(fakeClient, fakeLogger);
-
-        var result = await useCase.ExecuteAsync();
-
-        Assert.Single(result.Stats);
-        Assert.Equal(35, result.Stats[0].BaseStat);
-        Assert.Equal("hp", result.Stats[0].Stat.Name);
     }
 
     [Fact]
