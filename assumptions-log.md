@@ -73,20 +73,6 @@ Este arquivo contém **apenas** premissas **ainda ativas** ou ainda não confirm
 | **Status** | Ativo |
 | **Log de erros** | `bash-errors-log.md` — erros completos documentados com causa e solução |
 
-### PREM-005
-| Campo | Valor |
-|---|---|
-| **Id** | PREM-005 |
-| **Data** | 2026-03-20 |
-| **Premissa** | O método de merge de PRs será informado pelo usuário no momento da confirmação do merge, caso a caso. O assistente não assume um método padrão e solicita ao usuário quando o merge for solicitado. |
-| **Motivo** | Nenhuma política de merge foi definida para o repositório. O merge é condicional a confirmação explícita do usuário (passo 9 da skill pr-analysis). |
-| **Escopo** | `.claude/skills/pr-analysis/SKILL.md` (passo 9) |
-| **Artefatos impactados** | Skill pr-analysis |
-| **Nível de risco** | Baixo |
-| **Precisa de confirmação** | Sim — quando o usuário definir uma política de merge, esta premissa deve ser consolidada |
-| **Status** | Ativo |
-| **Dúvida relacionada** | DUV-001 em open-questions.md |
-
 ### PREM-006
 | Campo | Valor |
 |---|---|
