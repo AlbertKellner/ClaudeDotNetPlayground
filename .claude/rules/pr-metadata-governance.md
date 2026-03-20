@@ -122,6 +122,9 @@ Todo PR deve ter pelo menos uma label de tipo e uma de impacto:
 ### Quando se aplica:
 Esta política é ativada automaticamente **após a criação do último commit** de qualquer tarefa, como passo 10 do pipeline de validação pré-commit definido em `CLAUDE.md`.
 
+### Exceção — Análise de PR (skill pr-analysis):
+Esta política **não se aplica** quando a tarefa é uma análise de PR via skill `pr-analysis`. Nesse caso, o PR já existe e **não deve ser criado um novo**. O passo 10 é substituído pela atualização do PR existente (título e descrição, se necessário) via `gh api repos/<owner>/<repo>/pulls/<number> -X PATCH`.
+
 ### Workflow obrigatório:
 
 1. **Verificar se já existe PR aberto** para o branch atual:
@@ -223,13 +226,19 @@ Todo merge de PR neste repositório deve utilizar o método **merge commit** (`m
 ### Regras:
 - Toda implementação decorrente de solicitações de mudança deve ser commitada no branch de origem do PR (`head.ref`)
 - O assistente **não deve criar um branch novo** para atender solicitações de revisão
-- O push deve ser feito para o branch de origem do PR, garantindo que os novos commits apareçam na timeline do PR existente
-- Se o branch de origem do PR não estiver disponível localmente, fazer checkout antes de qualquer alteração
+- **O branch atribuído pelo sistema externo de configuração de tarefas é ignorado** quando a tarefa é análise de PR. O único branch válido é o `head.ref` do PR sendo analisado. Comandos obrigatórios antes de qualquer alteração:
+  ```bash
+  git fetch origin <head.ref>
+  git checkout <head.ref>
+  ```
+- O push deve ser feito exclusivamente para o branch de origem do PR (`git push origin <head.ref>`), garantindo que os novos commits apareçam na timeline do PR existente
+- Se o branch de origem do PR não estiver disponível localmente, fazer fetch e checkout antes de qualquer alteração
+- **O passo 10 do pipeline pré-commit (criar/atualizar PR) NÃO se aplica** durante análise de PR — o PR já existe. Em vez disso, atualizar título e descrição do PR existente via `gh api` se as mudanças alterarem o escopo
 
 ### Justificativa:
-Criar um branch novo para resolver comentários de revisão desvincula os commits do PR original, gerando:
+Criar um branch novo ou usar um branch atribuído pelo sistema para resolver comentários de revisão desvincula os commits do PR original, gerando:
 - Um PR órfão sem as correções solicitadas
-- Um branch desconectado que precisaria de um novo PR
+- Um branch desconectado que resulta na criação de um novo PR
 - Confusão para revisores que esperam ver as correções no PR original
 - Duplicação de trabalho e histórico fragmentado
 
@@ -265,3 +274,4 @@ Criar um branch novo para resolver comentários de revisão desvincula os commit
 | 2026-03-19 | Reforço: acompanhamento de Actions e verificação de logs Datadog tornados condição de encerramento da tarefa; aplicabilidade em tarefas de governança explicitada | Falha observada em sessão |
 | 2026-03-20 | Adicionado: Política de Merge — merge commit definido como método obrigatório; squash e rebase proibidos | Instrução do usuário |
 | 2026-03-20 | Adicionado: Política de Branch durante Revisão de PR — proibição de criar branch novo para atender review comments | Instrução do usuário |
+| 2026-03-20 | Reforço: branch atribuído pelo sistema externo é ignorado em pr-analysis; passo 10 do pipeline não se aplica em análise de PR; exceção explícita adicionada à Política de Verificação e Criação de PR | Comportamento incorreto observado — novo PR criado em vez de usar PR existente |
