@@ -199,6 +199,22 @@ Esta política é ativada automaticamente **após o push e a criação/atualiza�
 
 ---
 
+## Política de Merge
+
+### Método obrigatório: Merge Commit
+
+Todo merge de PR neste repositório deve utilizar o método **merge commit** (`merge_method: "merge"`).
+
+**Justificativa**: O merge commit preserva todos os commits individuais do branch de feature no histórico do branch principal, mantendo rastreabilidade completa de cada mudança realizada. Isso garante que o histórico de commits reflita fielmente a sequência de trabalho, facilitando auditoria, diagnóstico de regressões e navegação temporal do código.
+
+**Proibido**:
+- Squash merge (`merge_method: "squash"`) — consolida commits e perde granularidade do histórico
+- Rebase merge (`merge_method: "rebase"`) — reescreve a árvore de commits e perde a referência ao branch original
+
+**Aplicação**: Esta política se aplica a todo merge realizado pelo assistente, seja via skill `pr-analysis` ou via qualquer outro fluxo que resulte em merge de PR.
+
+---
+
 ## Política de Consistência
 
 - A descrição é a **fonte de verdade textual** do PR
@@ -227,3 +243,4 @@ Esta política é ativada automaticamente **após o push e a criação/atualiza�
 | 2026-03-18 | Adicionado: política de verificação e criação automática de PR após último commit | Instrução do usuário |
 | 2026-03-19 | Adicionado: política de acompanhamento de GitHub Actions pós-PR com análise de logs e correção de falhas | Instrução do usuário |
 | 2026-03-19 | Reforço: acompanhamento de Actions e verificação de logs Datadog tornados condição de encerramento da tarefa; aplicabilidade em tarefas de governança explicitada | Falha observada em sessão |
+| 2026-03-20 | Adicionado: Política de Merge — merge commit definido como método obrigatório; squash e rebase proibidos | Instrução do usuário |

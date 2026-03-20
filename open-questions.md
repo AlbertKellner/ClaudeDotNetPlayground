@@ -14,19 +14,6 @@ Este arquivo contém **apenas** dúvidas e ambiguidades **ainda abertas**.
 
 ## Dúvidas Ativas
 
-### DUV-001
-| Campo | Valor |
-|---|---|
-| **Id** | DUV-001 |
-| **Data** | 2026-03-20 |
-| **Origem** | Implementação da skill `pr-analysis` — passo 9 (merge condicional) |
-| **Dúvida** | Qual método de merge deve ser utilizado ao realizar merge de PRs aprovados? (merge commit, squash, rebase) |
-| **Por que importa** | Cada método gera histórico de commits diferente. Squash consolida em um commit; rebase reescreve a árvore; merge commit preserva todos os commits. A escolha afeta rastreabilidade, legibilidade do histórico e convenções de CI/CD. |
-| **Artefatos impactados** | `.claude/skills/pr-analysis/SKILL.md` (passo 9), política de merge do repositório |
-| **Bloqueante** | Não — o merge só ocorre com confirmação explícita do usuário, que pode informar o método nesse momento |
-| **Status** | Aberta |
-| **Premissas relacionadas** | PREM-005 em assumptions-log.md |
-
 ### DUV-002
 | Campo | Valor |
 |---|---|

@@ -146,7 +146,7 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
 
    Se ambas as condições forem satisfeitas:
      gh api repos/<owner>/<repo>/pulls/<number>/merge \
-       -X PUT -f merge_method="<método>"
+       -X PUT -f merge_method="merge"
 
    Se alguma condição não for satisfeita → reportar o estado atual e aguardar
 
