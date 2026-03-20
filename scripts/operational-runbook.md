@@ -69,7 +69,6 @@ echo $TOKEN
 ### 6. Chamar endpoint autenticado
 ```bash
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/weather-conditions
-curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/repositories
 ```
 
 ### 7. Logs do container da aplicação
@@ -92,8 +91,6 @@ docker compose down
 | `POST` | `/login` | Não | Login com credenciais; retorna JWT Bearer Token | RN-002 |
 | `GET` | `/test` | Sim | Endpoint de teste; retorna `"funcionando"` | RN-001 |
 | `GET` | `/weather-conditions` | Sim | Condições climáticas atuais de São Paulo via Open-Meteo | RN-004 |
-| `GET` | `/repositories` | Sim | Lista repositórios do team IntegrationRepos no GitHub | RN-006 |
-| `POST` | `/repositories/sync` | Sim | Sincroniza repositórios localmente (clone/pull) | RN-007 |
 
 ---
 
@@ -124,7 +121,6 @@ Esta tabela consolida os problemas de ambiente mais frequentes, extraídos de `b
 | Serviço | URL Base | Autenticação | Variável de Configuração | Impacto se Indisponível |
 |---|---|---|---|---|
 | Open-Meteo API | `api.open-meteo.com` | Nenhuma (API pública) | `ExternalApi:OpenMeteo:BaseUrl` em `appsettings.json` | `/weather-conditions` retorna HTTP 500 |
-| GitHub API | `api.github.com` | Bearer PAT | `ExternalApi:GitHub:HttpRequest:Token` em `appsettings.json` | `/repositories` e `/repositories/sync` retornam HTTP 500 |
 | Datadog | `app.datadoghq.com` | API Key | `DD_API_KEY` no ambiente/`.env` | `/health` retorna `Degraded` ou `Unhealthy`; logs não fluem ao Datadog |
 | Datadog MCP | `mcp.datadoghq.com` | API Key + App Key | `DD_API_KEY` + `DD_APP_KEY` no ambiente | Ferramentas MCP do Datadog ficam indisponíveis para o assistente |
 
