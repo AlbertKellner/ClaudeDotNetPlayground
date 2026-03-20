@@ -58,3 +58,14 @@ O endpoint de health check verifica a disponibilidade da aplicação e do Datado
 - **Comportamento:** retorna `HTTP 200 Healthy` quando ambos estão disponíveis; `HTTP 200 Degraded` quando o Datadog Agent responde com status inesperado; `HTTP 503 Unhealthy` quando o Datadog Agent está inacessível
 - **Documentação completa:** [Feature: Health Check](Feature-Health)
 
+---
+
+## RN-008 — Pesquisa de repositórios do GitHub por conta
+
+A aplicação expõe um endpoint autenticado para pesquisar e exibir todos os repositórios da conta GitHub AlbertKellner, apresentando o nome de cada repositório e o respectivo endereço Git. A resposta é cacheada por usuário autenticado com duração configurável.
+
+- **Endpoint:** `GET /github-repo-search`
+- **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
+- **Comportamento:** consulta a API GitHub (`GET /users/AlbertKellner/repos`) com paginação automática e cache por usuário; retorna `HTTP 200` com lista de repositórios contendo nome e endereço Git
+- **Documentação completa:** [Feature: Pesquisa de Repositórios GitHub](Feature-GitHubRepoSearch)
+

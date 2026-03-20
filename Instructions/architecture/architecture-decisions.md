@@ -257,6 +257,19 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - Models de APIs externas permanecem em `Shared/ExternalApi/*/Models/` (DA-017) como contratos do cliente HTTP, mas não podem ser usados diretamente como Output de Features.
 - `Shared/Repositories/` removida (2026-03-20) — a persistência compartilhada em arquivo foi eliminada junto com as features que a utilizavam (DA-019 revogada).
 
+### DA-021 — Integração GitHub API com Refit + Polly e Pesquisa de Repositórios
+**Data**: 2026-03-20
+**Status**: Ativo
+**Decisão**: A integração com a API do GitHub segue o padrão de `Shared/ExternalApi/` (DA-017): interface Refit (`IGitHubApi`), resiliência Polly v8, e um `DelegatingHandler` dedicado (`GitHubAuthenticationHandler`) para injetar PAT e User-Agent no pipeline HTTP. A feature `GitHubRepoSearch` expõe um endpoint GET autenticado que lista repositórios da conta AlbertKellner com nome e endereço Git. O resultado é cacheado por usuário autenticado via Memory Cache (DA-018) com duração configurável. Paginação automática na consulta à API do GitHub.
+**Motivação**: Consistência com o padrão já estabelecido em DA-017 para integrações HTTP externas. Reutilização dos padrões de cache (DA-018) e autenticação (DA-013) já implementados.
+**Alternativas consideradas**: `HttpClient` manual — descartado por boilerplate. Integração sem cache — descartada para reduzir chamadas repetidas à API GitHub e respeitar rate limiting.
+**Trade-offs**: PAT é opcional; sem PAT, a API GitHub impõe rate limiting mais restritivo (60 requests/hora vs. 5000/hora).
+**Consequências**:
+- `Shared/ExternalApi/GitHub/` criada com `IGitHubApi`, `IGitHubApiClient`, `GitHubApiClient`, `CachedGitHubApiClient`, `GitHubAuthenticationHandler`.
+- `Shared/ExternalApi/GitHub/Models/GitHubRepositoryOutput.cs` criada com modelo de resposta e `GitHubJsonContext`.
+- Feature `GitHubRepoSearch` criada em `Features/Query/GitHubRepoSearch/` com Endpoint, UseCase e Models próprios (DA-020).
+- 95 testes unitários passando.
+
 ---
 
 ## Decisões Pendentes
@@ -316,3 +329,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-19 | DA-018 criada: Memory Cache para endpoints GET com Decorator Pattern; reestruturação de ExternalApi config em HttpRequest/CircuitBreaker/EndpointCache | Instrução do usuário |
 | 2026-03-19 | DA-020 criada: isolamento de models de Feature — Input e Output não compartilhados via Shared | Instrução do usuário |
 | 2026-03-20 | DA-019 revogada: funcionalidades de busca e sincronização de repositórios removidas; Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos | Instrução do usuário |
+| 2026-03-20 | DA-021 criada: integração GitHub API com Refit + Polly + DelegatingHandler para PAT; Feature GitHubRepoSearch com cache por usuário | RN-008 |

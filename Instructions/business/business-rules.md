@@ -109,6 +109,19 @@ Cada regra segue a estrutura:
 
 ---
 
+### RN-008 — Pesquisa de repositórios do GitHub por conta
+**Enunciado**: A aplicação deve expor um endpoint autenticado para pesquisar e exibir todos os repositórios da conta GitHub AlbertKellner, apresentando o nome de cada repositório e o respectivo endereço Git. A resposta deve ser cacheada por usuário autenticado com duração configurável.
+**Condição**: Quando uma requisição GET autenticada é recebida no endpoint de pesquisa de repositórios GitHub.
+**Ação**: O sistema verifica o Memory Cache usando o ID do usuário autenticado como chave. Se houver cache válido, retorna a resposta cacheada sem consultar a API externa. Se não houver cache, consulta a API do GitHub (`GET /users/AlbertKellner/repos`) com paginação automática, armazena o resultado no cache e retorna HTTP 200 com a lista de repositórios contendo nome e endereço Git de cada um.
+**Exceções**: Nenhuma.
+**Dependências**: RN-003 (autenticação obrigatória).
+**BDD relacionado**: Nenhum no momento.
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
 ## Regras Substituídas ou Depreciadas
 
 ### RN-006 — Busca de repositórios do team IntegrationRepos no GitHub
@@ -148,3 +161,4 @@ Cada regra segue a estrutura:
 | 2026-03-19 | RN-006 criada: busca de repositórios do team IntegrationRepos via API GitHub | Instrução do usuário |
 | 2026-03-19 | RN-007 criada: sincronização local de repositórios com clone/pull e registro de data | Instrução do usuário |
 | 2026-03-20 | RN-006 e RN-007 removidas: funcionalidades de busca e sincronização de repositórios removidas do sistema | Instrução do usuário |
+| 2026-03-20 | RN-008 criada: pesquisa de repositórios GitHub da conta AlbertKellner | Instrução do usuário |

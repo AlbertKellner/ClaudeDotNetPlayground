@@ -16,6 +16,7 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Integração HTTP externa | Refit (`Refit.HttpClientFactory`) — interfaces decoradas com atributos HTTP; implementação source-generated | DA-017 |
 | Resiliência HTTP | Polly v8 via `Microsoft.Extensions.Http.Resilience` — retry exponencial + timeout por tentativa | DA-017 |
 | Memory Cache | `IMemoryCache` (`Microsoft.Extensions.Caching.Memory`) — cache por usuário autenticado; duração e expiração configuráveis via `appsettings.json` seção `EndpointCache` | DA-018 |
+| Integração GitHub API | Refit (`Refit.HttpClientFactory`) + Polly v8 + DelegatingHandler para PAT | DA-021 |
 | Persistência | A definir por Feature | — |
 | Mensageria | A definir | — |
 | Containerização | Docker — Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent | DA-016 |
@@ -53,6 +54,12 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 | OpenMeteoApiClient | `Shared/ExternalApi/OpenMeteo/OpenMeteoApiClient.cs` | Implementa IOpenMeteoApiClient; usa IOpenMeteoApi (Refit + Polly via HttpClient); aplica logging SNP-001 |
 | CachedOpenMeteoApiClient | `Shared/ExternalApi/OpenMeteo/CachedOpenMeteoApiClient.cs` | Decorator de IOpenMeteoApiClient; implementa Memory Cache por usuário autenticado com duração configurável; chave de cache definida no código |
 | OpenMeteoInput/Output | `Shared/ExternalApi/OpenMeteo/Models/` | Modelos de entrada (coordenadas + fields) e saída completa da Open-Meteo; inclui OpenMeteoJsonContext para AOT |
+| IGitHubApi | `Shared/ExternalApi/GitHub/IGitHubApi.cs` | Interface Refit para a API GitHub; contrato HTTP com rota `/users/{username}/repos` |
+| IGitHubApiClient | `Shared/ExternalApi/GitHub/IGitHubApiClient.cs` | Interface de serviço; contrato que Features injetam via DI |
+| GitHubApiClient | `Shared/ExternalApi/GitHub/GitHubApiClient.cs` | Implementa IGitHubApiClient; usa IGitHubApi (Refit + Polly via HttpClient); aplica logging SNP-001; paginação automática |
+| CachedGitHubApiClient | `Shared/ExternalApi/GitHub/CachedGitHubApiClient.cs` | Decorator de IGitHubApiClient; implementa Memory Cache por usuário autenticado com duração configurável |
+| GitHubAuthenticationHandler | `Shared/ExternalApi/GitHub/GitHubAuthenticationHandler.cs` | DelegatingHandler que adiciona PAT e User-Agent ao header das requisições GitHub |
+| GitHubRepositoryOutput | `Shared/ExternalApi/GitHub/Models/GitHubRepositoryOutput.cs` | Modelo de resposta da API GitHub; inclui GitHubJsonContext para AOT |
 | Exception Handler | `Infra/ExceptionHandling/GlobalExceptionHandler.cs` | Handler centralizado de exceções; retorna Problem Details (RFC 7807) |
 | Correlation ID Middleware | `Infra/Middlewares/CorrelationIdMiddleware.cs` | Garante GUID v7 por request; enriquece logs via Serilog LogContext; completamente opaco para Features |
 | GuidV7 | `Infra/Correlation/GuidV7.cs` | Utilitário de geração e validação de GUID v7 (uso interno da Infra) |
@@ -190,3 +197,4 @@ Quando o usuário disponibilizar um novo recurso operacional (MCP server, integr
 | 2026-03-19 | Integração GitHub API adicionada: Refit + Polly + DelegatingHandler para PAT; Shared/ExternalApi/GitHub/ criada; Shared/Repositories/ criada; Features RepositoriesGetAll e RepositoriesSyncAll implementadas; RN-006, RN-007 | DA-019, RN-006, RN-007 |
 | 2026-03-19 | Restrição adicionada: models de Input e Output de Features devem residir exclusivamente em `<Feature>Models/`, não em Shared | DA-020 |
 | 2026-03-20 | Features RepositoriesGetAll e RepositoriesSyncAll removidas; Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos; DA-019 revogada; integração GitHub API removida da stack | Instrução do usuário |
+| 2026-03-20 | Integração GitHub API adicionada: Refit + Polly + DelegatingHandler para PAT; Shared/ExternalApi/GitHub/ criada; Feature GitHubRepoSearch implementada; RN-008 | DA-021, RN-008 |

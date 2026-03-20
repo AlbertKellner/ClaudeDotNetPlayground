@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Albert.Playground.ECS.AOT.Api.Features.Command.UserLogin;
+using Albert.Playground.ECS.AOT.Api.Features.Query.GitHubRepoSearch;
 using Albert.Playground.ECS.AOT.Api.Features.Query.WeatherConditionsGet;
 using Albert.Playground.ECS.AOT.Api.Infra.ExceptionHandling;
 using Albert.Playground.ECS.AOT.Api.Infra.Json;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Albert.Playground.ECS.AOT.Api.Infra.HealthChecks;
 using Albert.Playground.ECS.AOT.Api.Infra.Security;
+using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.GitHub;
 using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.OpenMeteo;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
@@ -138,11 +140,48 @@ builder.Services
 builder.Services.AddScoped<OpenMeteoApiClient>();
 builder.Services.AddScoped<IOpenMeteoApiClient, CachedOpenMeteoApiClient>();
 
+builder.Services.AddTransient<GitHubAuthenticationHandler>();
+builder.Services
+    .AddRefitClient<IGitHubApi>(new RefitSettings
+    {
+        ContentSerializer = new SystemTextJsonContentSerializer(
+            new JsonSerializerOptions
+            {
+                TypeInfoResolver = GitHubJsonContext.Default
+            })
+    })
+    .ConfigureHttpClient(c =>
+        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:GitHub:HttpRequest:BaseUrl"]!))
+    .AddHttpMessageHandler<GitHubAuthenticationHandler>()
+    .AddResilienceHandler("github", resilienceBuilder =>
+    {
+        var maxRetryAttempts = builder.Configuration.GetValue<int>(
+            "ExternalApi:GitHub:CircuitBreaker:MaxRetryAttempts", 3);
+        var delaySeconds = builder.Configuration.GetValue<double>(
+            "ExternalApi:GitHub:CircuitBreaker:DelaySeconds", 3);
+        var backoffType = builder.Configuration.GetValue<DelayBackoffType>(
+            "ExternalApi:GitHub:CircuitBreaker:BackoffType", DelayBackoffType.Exponential);
+
+        resilienceBuilder.AddRetry(new HttpRetryStrategyOptions
+        {
+            MaxRetryAttempts = maxRetryAttempts,
+            Delay = TimeSpan.FromSeconds(delaySeconds),
+            BackoffType = backoffType,
+            UseJitter = false
+        });
+
+        resilienceBuilder.AddTimeout(TimeSpan.FromSeconds(delaySeconds));
+    });
+
+builder.Services.AddScoped<GitHubApiClient>();
+builder.Services.AddScoped<IGitHubApiClient, CachedGitHubApiClient>();
+
 Log.Information("[Program] Registrar dependências das features");
 
 builder.Services.AddScoped<Albert.Playground.ECS.AOT.Api.Features.Query.TestGet.TestGetUseCase>();
 builder.Services.AddScoped<UserLoginUseCase>();
 builder.Services.AddScoped<WeatherConditionsGetUseCase>();
+builder.Services.AddScoped<GitHubRepoSearchUseCase>();
 
 Log.Information("[Program] Registrar segurança e autenticação");
 
@@ -179,5 +218,6 @@ internal static class AotControllerPreservation
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Query.TestGet.TestGetEndpoint))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Command.UserLogin.UserLoginEndpoint))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Query.WeatherConditionsGet.WeatherConditionsGetEndpoint))]
+    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Query.GitHubRepoSearch.GitHubRepoSearchEndpoint))]
     internal static void PreserveControllers() { }
 }

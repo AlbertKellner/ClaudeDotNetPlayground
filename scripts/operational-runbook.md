@@ -91,6 +91,7 @@ docker compose down
 | `POST` | `/login` | Não | Login com credenciais; retorna JWT Bearer Token | RN-002 |
 | `GET` | `/test` | Sim | Endpoint de teste; retorna `"funcionando"` | RN-001 |
 | `GET` | `/weather-conditions` | Sim | Condições climáticas atuais de São Paulo via Open-Meteo | RN-004 |
+| `GET` | `/github-repo-search` | Sim | Pesquisa de repositórios GitHub da conta AlbertKellner | RN-008 |
 
 ---
 
@@ -121,6 +122,7 @@ Esta tabela consolida os problemas de ambiente mais frequentes, extraídos de `b
 | Serviço | URL Base | Autenticação | Variável de Configuração | Impacto se Indisponível |
 |---|---|---|---|---|
 | Open-Meteo API | `api.open-meteo.com` | Nenhuma (API pública) | `ExternalApi:OpenMeteo:BaseUrl` em `appsettings.json` | `/weather-conditions` retorna HTTP 500 |
+| GitHub API | `api.github.com` | PAT (opcional) | `ExternalApi:GitHub:HttpRequest:PersonalAccessToken` + `ExternalApi:GitHub:HttpRequest:BaseUrl` em `appsettings.json` | `/github-repo-search` retorna HTTP 500 |
 | Datadog | `app.datadoghq.com` | API Key | `DD_API_KEY` no ambiente/`.env` | `/health` retorna `Degraded` ou `Unhealthy`; logs não fluem ao Datadog |
 | Datadog MCP | `mcp.datadoghq.com` | API Key + App Key | `DD_API_KEY` + `DD_APP_KEY` no ambiente | Ferramentas MCP do Datadog ficam indisponíveis para o assistente |
 
