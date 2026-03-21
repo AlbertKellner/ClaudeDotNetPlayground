@@ -1,28 +1,35 @@
 #!/bin/bash
 # Hook: branch-guard.sh
-# Propósito: Detectar operações de branch incorretas durante pr-analysis
+# Propósito: Detectar operações de branch incorretas durante pr-analysis.
 # Ativação: PostToolUse em Bash
 #
-# Quando existe .claude/.pr-analysis-context com o head.ref esperado,
-# qualquer git checkout ou git branch para um branch diferente emite alerta.
+# Durante análise de PR (quando .claude/.pr-analysis-context existe),
+# verifica se o branch atual corresponde ao head.ref esperado do PR.
+# Se o branch estiver incorreto, emite alerta.
+#
+# Fora de contexto de pr-analysis, este hook não faz nada.
 
-PR_CONTEXT_FILE=".claude/.pr-analysis-context"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+CONTEXT_FILE="$REPO_ROOT/.claude/.pr-analysis-context"
 
-if [ ! -f "$PR_CONTEXT_FILE" ]; then
+# Só ativar durante pr-analysis
+if [ ! -f "$CONTEXT_FILE" ]; then
   exit 0
 fi
 
-EXPECTED_BRANCH=$(head -1 "$PR_CONTEXT_FILE" 2>/dev/null)
-COMMAND="${CLAUDE_TOOL_INPUT_COMMAND:-}"
+# Ler o branch esperado do contexto
+EXPECTED_BRANCH=$(grep -oP 'head_ref=\K.*' "$CONTEXT_FILE" 2>/dev/null || echo "")
 
-if [ -z "$EXPECTED_BRANCH" ] || [ -z "$COMMAND" ]; then
+if [ -z "$EXPECTED_BRANCH" ]; then
   exit 0
 fi
 
-if echo "$COMMAND" | grep -qE "git (checkout|switch|branch)"; then
-  if ! echo "$COMMAND" | grep -q "$EXPECTED_BRANCH"; then
-    echo "[ALERTA - branch-guard] Contexto de pr-analysis ativo. Branch esperado: $EXPECTED_BRANCH. O comando pode estar mudando para um branch incorreto. Durante pr-analysis, todos os commits devem ser feitos no branch de origem do PR (head.ref)."
-  fi
+# Verificar branch atual
+CURRENT_BRANCH=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+if [ -n "$CURRENT_BRANCH" ] && [ "$CURRENT_BRANCH" != "$EXPECTED_BRANCH" ]; then
+  echo "[ALERTA branch-guard] Branch atual ($CURRENT_BRANCH) difere do esperado ($EXPECTED_BRANCH) para pr-analysis."
+  echo "                       Durante análise de PR, todos os commits devem ser feitos no branch do PR: $EXPECTED_BRANCH"
 fi
 
 exit 0

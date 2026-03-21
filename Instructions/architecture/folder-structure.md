@@ -155,6 +155,9 @@ src/
     │    │    └── DatadogAgentHealthCheck.cs  # Verifica disponibilidade do Datadog Agent via HTTP (RN-005)
     │    ├── Json/
     │    │    └── AppJsonContext.cs            # JsonSerializerContext source-generated para serialização AOT-compatível da aplicação
+    │    ├── Logging/
+    │    │    ├── DatadogHttpSink.cs           # Serilog ILogEventSink: envia logs diretamente ao Datadog via HTTP; batching assíncrono
+    │    │    └── DatadogLogEntry.cs           # Modelo de log + DatadogLogJsonContext para serialização AOT-compatível
     │    ├── Middlewares/
     │    │    └── CorrelationIdMiddleware.cs   # Garante GUID v7 por request; enriquece Serilog LogContext; opaco para Features
     │    ├── ModelBinding/
@@ -246,3 +249,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-19 | Regra de residência de models adicionada: Input e Output de Features exclusivamente em `<Feature>Models/`, não em Shared | DA-020 |
 | 2026-03-20 | Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos; Features RepositoriesGetAll e RepositoriesSyncAll removidas | DA-019 revogada |
 | 2026-03-20 | Shared/ExternalApi/GitHub/ recriada (integração GitHub API); Feature GitHubRepoSearch adicionada em Features/Query/ | DA-021, RN-008 |
+| 2026-03-21 | Infra/Logging/ documentada: DatadogHttpSink.cs e DatadogLogEntry.cs adicionados à estrutura; lacuna de governança corrigida | Análise de causas-raiz |

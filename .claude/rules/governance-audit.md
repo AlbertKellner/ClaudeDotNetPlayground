@@ -28,21 +28,26 @@ Esta rule define a política de auditoria automatizada da consistência estrutur
 
 O script `scripts/governance-audit.sh` verifica automaticamente:
 
-| # | Verificação |
-|---|---|
-| 1 | Todos os arquivos `.md` de `Instructions/` estão importados no `CLAUDE.md` |
-| 2 | Todos os arquivos `.md` de `.claude/rules/` estão importados no `CLAUDE.md` |
-| 3 | Contagem de rules no `README.md` corresponde ao número real |
-| 4 | Contagem de skills no `README.md` corresponde ao número real |
-| 5 | Variáveis de ambiente do `docker-compose.yml` estão documentadas em `required-vars.md` |
-| 6 | Nenhuma referência ativa a regras de negócio removidas em arquivos não-históricos |
-| 7 | Todas as features possuem página correspondente na Wiki |
-| 8 | Pages estruturais obrigatórias existem na Wiki |
-| 9 | Rules não contêm workflows procedurais extensos (>5 passos) |
-| 10 | Referências cruzadas entre rules apontam para arquivos existentes |
-| 11 | `README.md` não referencia funcionalidades removidas |
-| 12 | ADRs revogadas possuem nota de redirecionamento |
-| 13 | Imports existentes no CLAUDE.md apontam para arquivos reais |
+| # | Verificação | Categoria |
+|---|---|---|
+| 1 | Todos os arquivos `.md` de `Instructions/` estão importados no `CLAUDE.md` | Estrutura de governança |
+| 2 | Todos os arquivos `.md` de `.claude/rules/` estão importados no `CLAUDE.md` | Estrutura de governança |
+| 3 | Contagem de rules no `README.md` corresponde ao número real | Consistência documental |
+| 4 | Contagem de skills no `README.md` corresponde ao número real | Consistência documental |
+| 5 | Variáveis de ambiente do `docker-compose.yml` estão documentadas em `required-vars.md` | Configuração |
+| 6 | Nenhuma referência ativa a regras de negócio removidas em arquivos não-históricos | Higiene |
+| 7 | Todas as features possuem página correspondente na Wiki | Cobertura documental |
+| 8 | Pages estruturais obrigatórias existem na Wiki | Cobertura documental |
+| 9 | Rules não contêm workflows procedurais extensos (>5 passos) | Separação rules/skills |
+| 10 | Referências cruzadas entre rules apontam para arquivos existentes | Integridade referencial |
+| 11 | `README.md` não referencia funcionalidades removidas | Higiene |
+| 12 | ADRs revogadas possuem nota de redirecionamento | Rastreabilidade |
+| 13 | Imports existentes no CLAUDE.md apontam para arquivos reais | Integridade referencial |
+| 14 | Subpastas de `Infra/` estão documentadas em `technical-overview.md` | Código vs. Governança |
+| 15 | Subpastas de `Infra/` estão registradas em `folder-structure.md` | Código vs. Governança |
+| 16 | Integrações em `Shared/ExternalApi/` estão documentadas em `technical-overview.md` | Código vs. Governança |
+| 17 | Hooks configurados em `settings.json` existem como arquivos | Integridade de hooks |
+| 18 | Contagens de skills são consistentes em todas as ocorrências do `README.md` | Consistência documental |
 
 ---
 
@@ -83,3 +88,4 @@ Quando uma nova categoria de inconsistência for identificada (manualmente ou po
 | Data | Mudança | Referência |
 |---|---|---|
 | 2026-03-21 | Criado: regra de auditoria automatizada de governança | Análise de inconsistências do repositório |
+| 2026-03-21 | Expandido: verificações 14–18 adicionadas (código vs. governança, integridade de hooks, consistência interna do README) | Análise de causas-raiz |

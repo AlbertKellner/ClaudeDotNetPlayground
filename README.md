@@ -31,7 +31,7 @@ open-questions.md
 |---|---|
 | `CLAUDE.md` | Ponto de entrada: pipeline obrigatório de execução e imports de governança |
 | `.claude/rules/` | **Comportamento operacional persistente do assistente** — 11 rules que definem como interpretar, classificar, priorizar, propagar, auditar e implementar |
-| `.claude/skills/` | 8 skills que mapeiam tipos de solicitação a workflows completos de execução |
+| `.claude/skills/` | 11 skills que mapeiam tipos de solicitação e passos de pipeline a workflows completos de execução |
 | `.claude/hooks/` | Scripts de enforcement automatizado — detecção de mudanças em governança, proteção de branch e auditoria |
 | `Instructions/operating-model.md` | Documento central: explica como tudo funciona junto em runtime |
 | `Instructions/architecture/` | Memória arquitetural: princípios, padrões, decisões, nomenclatura, estrutura |
