@@ -138,7 +138,7 @@ Recursos externos disponíveis para o assistente durante o desenvolvimento, conf
 | Recurso | Tipo | Configuração | Variáveis Requeridas | Capacidade |
 |---|---|---|---|---|
 | Datadog MCP | MCP Server (HTTP) | `.mcp.json` → `datadog` | `DD_API_KEY`, `DD_APP_KEY` | Acesso a logs de todos os ambientes (local, CI, produção) via ferramentas MCP do Datadog |
-| GitHub API | CLI + Token | `gh` CLI + `GH_TOKEN` | `GH_TOKEN` | Criação, atualização e consulta de Pull Requests; manipulação de issues e releases via `gh api` |
+| GitHub MCP | MCP Server (HTTP) | `.mcp.json` → `github` | `GH_TOKEN_MCP` | Criação, atualização e consulta de Pull Requests; monitoramento de GitHub Actions; manipulação de issues e releases via ferramentas MCP do GitHub (usuário ClaudeCode-Bot) |
 
 ### Como Novos Recursos São Registrados
 
@@ -209,3 +209,4 @@ Quando o usuário disponibilizar um novo recurso operacional (MCP server, integr
 | 2026-03-20 | Integração GitHub API adicionada: Refit + Polly + DelegatingHandler para PAT; Shared/ExternalApi/GitHub/ criada; Feature GitHubRepoSearch implementada; RN-008 | DA-021, RN-008 |
 | 2026-03-21 | Infra/Logging/ documentada: DatadogHttpSink e DatadogLogEntry adicionados à tabela de componentes; lacuna de governança corrigida | Análise de causas-raiz |
 | 2026-03-21 | Integração PokéAPI adicionada: Refit + Polly; Shared/ExternalApi/Pokemon/ criada; Feature PokemonGet implementada; RN-009 | DA-023, RN-009 |
+| 2026-03-21 | Migração GitHub API → MCP: recurso operacional alterado de CLI (`gh` + `GH_TOKEN`) para MCP Server HTTP (`github/github-mcp-server` + `GH_TOKEN_MCP`); usuário dedicado ClaudeCode-Bot | Instrução do usuário |

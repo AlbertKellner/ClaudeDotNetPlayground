@@ -113,7 +113,7 @@ Esta tabela consolida os problemas de ambiente mais frequentes, extraídos de `b
 | 9 | HTTP 500 em `/login` — `Jwt:Secret is not configured` | `appsettings.json` não copiado para runtime no Dockerfile | Usar `COPY --from=build /app/publish/ .` (com barra) no Dockerfile | Erro 9 |
 | 10 | HTTP 500 em `/weather-conditions` — `UntrustedRoot` em runtime | CA do proxy não propagada do build para o runtime stage | Copiar bundle CA: `COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/` | Erro 10 |
 | 11 | HTTP 401 inesperado em endpoint autenticado | Token expirado, inválido ou ausente | Regenerar via `POST /login` com credenciais válidas (Albert/albert123) | — |
-| 12 | `remote "origin"` não reconhecido pelo `gh` | Remote aponta para proxy local, não para github.com | Usar `gh api` diretamente em vez de `gh pr create` | Erro 12 |
+| 12 | ~~`remote "origin"` não reconhecido pelo `gh`~~ | ~~Remote aponta para proxy local~~ | **Obsoleto**: migração para MCP eliminou dependência do `gh` CLI | Erro 12 |
 | 13 | HTTP 500 em `/weather-conditions` no CI — `ArgumentNullException` | CWD incorreto no CI; `appsettings.json` não encontrado | Executar `cd ./app` antes de iniciar o binário no CI | Erro 13 |
 
 ---
@@ -127,6 +127,7 @@ Esta tabela consolida os problemas de ambiente mais frequentes, extraídos de `b
 | PokéAPI | `pokeapi.co` | Nenhuma (API pública) | `ExternalApi:Pokemon:HttpRequest:BaseUrl` em `appsettings.json` | `/pokemon` retorna HTTP 500 |
 | Datadog | `app.datadoghq.com` | API Key | `DD_API_KEY` no ambiente/`.env` | `/health` retorna `Degraded` ou `Unhealthy`; logs não fluem ao Datadog |
 | Datadog MCP | `mcp.datadoghq.com` | API Key + App Key | `DD_API_KEY` + `DD_APP_KEY` no ambiente | Ferramentas MCP do Datadog ficam indisponíveis para o assistente |
+| GitHub MCP | `api.githubcopilot.com` | Bearer Token (PAT) | `GH_TOKEN_MCP` no ambiente | Ferramentas MCP do GitHub ficam indisponíveis para o assistente (criação/atualização de PRs, monitoramento de Actions) |
 
 ---
 

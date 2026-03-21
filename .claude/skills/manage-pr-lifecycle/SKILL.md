@@ -14,24 +14,24 @@ Esta skill é ativada pelos passos 10 e 11 do pipeline de validação pré-commi
 
 ## Workflow — Verificação e Criação/Atualização de PR (Passo 10)
 
+Todas as operações de PR são realizadas exclusivamente via ferramentas MCP do GitHub (servidor `github` em `.mcp.json`), autenticadas pelo usuário ClaudeCode-Bot via `GH_TOKEN_MCP`.
+
 ### Passo 1: Verificar PR existente
 
-```bash
-gh pr list --head <branch-atual> --state open --json number,title,url
-```
+Usar a ferramenta MCP `list_pull_requests` para buscar PRs abertos para o branch atual.
 
 ### Passo 2a: Se não existir PR aberto
 
-- Criar o PR seguindo o formato obrigatório de título (Semantic Commit) definido em `pr-metadata-governance.md`
+- Usar a ferramenta MCP `create_pull_request` para criar o PR
+- Seguir o formato obrigatório de título (Semantic Commit) definido em `pr-metadata-governance.md`
 - Preencher a descrição com as três seções obrigatórias (Motivos, Plano, Realizado)
-- Adicionar as labels correspondentes
 - Reportar a URL do PR criado no relatório final
 
 ### Passo 2b: Se já existir PR aberto
 
+- Usar a ferramenta MCP `update_pull_request` para atualizar título e descrição
 - Revisar o título — atualizar se a nova mudança alterar o escopo ou foco
 - Revisar a descrição — incorporar as mudanças do novo commit
-- Atualizar labels se o tipo ou impacto da mudança se alterou
 - Reportar a URL do PR atualizado no relatório final
 
 ### Regras
@@ -64,15 +64,11 @@ gh pr list --head <branch-atual> --state open --json number,title,url
 
 ### Passo 2: Identificar a execução ativa
 
-```bash
-gh api repos/<owner>/<repo>/actions/runs --jq '.workflow_runs[:1] | .[].id'
-```
+Usar a ferramenta MCP `list_workflow_runs` para identificar a execução mais recente do repositório.
 
 ### Passo 3: Acompanhar os jobs
 
-```bash
-gh api repos/<owner>/<repo>/actions/runs/<run-id>/jobs --jq '.jobs[] | {name, status, conclusion}'
-```
+Usar a ferramenta MCP `get_workflow_run` para consultar o status dos jobs da execução identificada.
 
 - Aplicar o intervalo de espera conforme a estratégia calculada
 - Continuar até que todos os jobs tenham `status: completed`
@@ -88,10 +84,7 @@ gh api repos/<owner>/<repo>/actions/runs/<run-id>/jobs --jq '.jobs[] | {name, st
 ### Passo 5: Tratar falhas
 
 **Se algum job falhar** (`conclusion: failure`):
-1. Obter os logs do job que falhou:
-   ```bash
-   gh api repos/<owner>/<repo>/actions/runs/<run-id>/jobs --jq '.jobs[] | select(.conclusion == "failure") | {name, id}'
-   ```
+1. Obter os logs do job que falhou via ferramenta MCP `get_workflow_run_logs`
 2. Analisar os logs considerando **apenas registros de erro do horário de execução** — ignorar logs antigos
 3. Diagnosticar a causa raiz
 4. Corrigir o código, testes ou configuração
@@ -105,7 +98,7 @@ gh api repos/<owner>/<repo>/actions/runs/<run-id>/jobs --jq '.jobs[] | {name, st
 
 Quando a tarefa é análise de PR:
 - **Não criar PR novo** — o PR já existe
-- Atualizar título e descrição do PR existente via `gh api repos/<owner>/<repo>/pulls/<number> -X PATCH` se as mudanças alterarem o escopo
+- Atualizar título e descrição do PR existente via ferramenta MCP `update_pull_request` se as mudanças alterarem o escopo
 - **Não usar o branch atribuído pelo sistema externo** — usar exclusivamente o `head.ref` do PR
 - Todos os commits devem ser feitos no branch de origem do PR
 
@@ -124,3 +117,4 @@ Quando a tarefa é análise de PR:
 | Data | Mudança | Referência |
 |---|---|---|
 | 2026-03-21 | Criado: workflow extraído de pr-metadata-governance.md (separação rules/skills) | Auditoria de governança |
+| 2026-03-21 | Migração: comandos `gh api` substituídos por ferramentas MCP do GitHub (usuário ClaudeCode-Bot) | Migração API → MCP |
