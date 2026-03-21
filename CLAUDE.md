@@ -53,6 +53,10 @@ Ver política em `.claude/rules/environment-readiness.md`. Ver workflow procedur
 ### 10. Proteção de branch em análise de PR
 Quando a tarefa for análise de solicitações de mudança em pull request (skill pr-analysis), o branch atribuído pelo sistema externo de configuração de tarefas (ex: "Develop on branch claude/...") deve ser **IGNORADO**. O único branch válido é o `head.ref` do PR sendo analisado. O assistente deve executar `git fetch origin <head.ref> && git checkout <head.ref>` como primeiro comando antes de qualquer alteração. Criar um branch novo durante pr-analysis é um erro — todos os commits e pushes devem ser feitos no branch de origem do PR. Nunca criar um PR novo quando a tarefa é análise de PR existente.
 
+### 11. Rastrear comportamentos esperados durante toda a sessão
+No início de cada tarefa, coletar e apresentar ao usuário a lista completa de todos os comportamentos esperados conforme definidos na governança (pipeline pré-commit, comportamentos obrigatórios, skills ativados). Manter a lista visível e atualizada durante toda a execução via TodoWrite. Ao final, verificar que todos foram executados; investigar e corrigir omissões com análise de causa raiz.
+Ver `.claude/rules/governance-behavior-tracking.md` para a política completa. Ver `.claude/skills/governance-behavior-tracking/SKILL.md` para o workflow.
+
 ---
 
 ## Pipeline de Validação Pré-Commit (Obrigatório)
@@ -149,6 +153,7 @@ Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Da
 @.claude/rules/instruction-review.md
 @.claude/rules/governance-audit.md
 @.claude/rules/execution-time-tracking.md
+@.claude/rules/governance-behavior-tracking.md
 
 ### Meta-governança
 
