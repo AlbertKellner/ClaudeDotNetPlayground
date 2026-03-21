@@ -99,11 +99,22 @@ Este checklist é **obrigatório** sempre que qualquer um destes arquivos for cr
 
 ---
 
+## Checklist 8 — Auditoria Automatizada
+
+| # | Verificação | Critério |
+|---|---|---|
+| 8.1 | `bash scripts/governance-audit.sh` passa sem falhas? | Todas as verificações retornam `[OK]` |
+| 8.2 | Se houve falhas, foram corrigidas antes do commit? | Nenhuma falha pendente |
+
+---
+
 ## Referências Cruzadas
 
 - `.claude/rules/instruction-review.md` — meta-regra que ativa este checklist
+- `.claude/rules/governance-audit.md` — política de auditoria automatizada (Checklist 8)
 - `.claude/skills/review-instructions/SKILL.md` — skill que executa este checklist
-- `.claude/hooks/instruction-change-detector.sh` — hook que detecta mudanças e emite lembrete
+- `.claude/hooks/instruction-change-detector.sh` — hook que detecta mudanças, emite lembrete e executa auditoria
+- `scripts/governance-audit.sh` — script de auditoria automatizada
 - `CLAUDE.md` — ponto de entrada global que referencia este arquivo
 
 ---
@@ -113,3 +124,4 @@ Este checklist é **obrigatório** sempre que qualquer um destes arquivos for cr
 | Data | Mudança | Referência |
 |---|---|---|
 | 2026-03-18 | Criado: checklist estruturado de revisão de instruções | Reestruturação de governança |
+| 2026-03-21 | Adicionado: Checklist 8 — Auditoria Automatizada via scripts/governance-audit.sh | Análise de inconsistências do repositório |

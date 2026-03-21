@@ -13,6 +13,7 @@ O script `scripts/setup-env.sh` assume que essas entradas já existem no ambient
 | `DD_API_KEY` | **Sim** | Datadog → Organization Settings → API Keys | Datadog Agent não autentica. `/health` retorna `Unhealthy`. Build e run da aplicação funcionam, mas sem observabilidade. |
 | `DD_APP_KEY` | **Sim** | Datadog → Organization Settings → Application Keys | Conexão MCP do Datadog não autentica. O servidor MCP fica inacessível para o Claude Code. |
 | `GH_TOKEN` | **Sim** | GitHub → Settings → Developer Settings → Personal Access Tokens | Assistente não consegue criar, atualizar ou consultar Pull Requests via `gh api`. Pipeline pré-commit (passo 10) falha ao tentar criar PR. |
+| `GITHUB_PAT` | Condicional² | GitHub → Settings → Developer Settings → Personal Access Tokens | Feature `/github-repo-search` retorna HTTP 500 ao consultar API do GitHub. Mapeada no `docker-compose.yml` para `ExternalApi__GitHub__HttpRequest__PersonalAccessToken`. |
 
 ---
 
@@ -26,6 +27,7 @@ O script `scripts/setup-env.sh` assume que essas entradas já existem no ambient
 | `NO_PROXY` | Condicional¹ | `localhost,127.0.0.1` | Conexões locais podem ser roteadas incorretamente pelo proxy. |
 
 > ¹ **Condicional**: obrigatório em ambientes com proxy de inspeção TLS (como este sandbox Claude Code). Em ambientes sem proxy intermediário, essas variáveis não são necessárias.
+> ² **Condicional**: obrigatório quando a feature `/github-repo-search` será usada. Pode ser o mesmo token que `GH_TOKEN`, mas serve propósitos diferentes: `GH_TOKEN` é para o CLI `gh` (criar PRs, push), `GITHUB_PAT` é para a aplicação .NET consultar a API GitHub via Refit.
 
 ---
 
@@ -78,6 +80,17 @@ Ou execute `scripts/setup-env.sh` — ele valida todas as entradas e emite erros
 | **Como renovar** | GitHub → Settings → Developer Settings → Personal Access Tokens → criar novo token com as mesmas permissões. Atualizar na ferramenta externa de configuração de container. |
 | **Quem pode fornecer** | O próprio desenvolvedor (tokens são pessoais). Para tokens de organização, consultar o admin do GitHub. |
 
+### GITHUB_PAT (GitHub Personal Access Token para a aplicação)
+
+| Campo | Valor |
+|---|---|
+| **Validade** | Depende da configuração: tokens Classic podem não expirar; tokens Fine-grained têm validade configurável. |
+| **Como obter** | GitHub → Settings → Developer Settings → Personal Access Tokens → criar token. Permissões mínimas: `public_repo` (para leitura de repositórios públicos). |
+| **Sintoma quando ausente** | `GET /github-repo-search` retorna HTTP 500. Aplicação loga erro de autenticação ao consultar `api.github.com`. |
+| **Sintoma quando inválido/expirado** | API GitHub retorna HTTP 401. Aplicação retorna HTTP 500. |
+| **Como renovar** | Criar novo token no GitHub. Atualizar `GITHUB_PAT` na ferramenta externa de configuração de container. |
+| **Quem pode fornecer** | O próprio desenvolvedor (tokens são pessoais). |
+
 ---
 
 ## Mapa de Erros por Variável
@@ -89,6 +102,7 @@ Esta tabela mapeia cada variável ao erro exato que aparece quando está ausente
 | `DD_API_KEY` | Pipeline Docker prossegue sem Datadog; `/health` retorna `Unhealthy` | `Unexpected response code from the API Key validation endpoint` | `docker compose up`, `GET /health` |
 | `DD_APP_KEY` | MCP Datadog inacessível; ferramentas MCP não respondem | HTTP 403 do servidor MCP | Ferramentas MCP do Claude Code |
 | `GH_TOKEN` | `gh api: auth required` | HTTP 401: `Bad credentials` | `gh api`, `gh pr create`, `git push` |
+| `GITHUB_PAT` | `/github-repo-search` retorna HTTP 500 | HTTP 401 da API GitHub | `GET /github-repo-search` via Docker |
 | `EXTRA_CA_CERT` | `UntrustedRoot` em `dotnet restore` dentro do Docker build | CA inválida; mesmo erro `UntrustedRoot` | `docker compose build` |
 | `HTTP_PROXY` | `Temporary failure resolving 'archive.ubuntu.com'` em `apt-get` | Proxy inacessível; timeout de conexão | `docker compose build`, `apt-get`, `dotnet restore` |
 
@@ -112,3 +126,4 @@ Esta tabela mapeia cada variável ao erro exato que aparece quando está ausente
 |---|---|---|
 | 2026-03-19 | Estrutura inicial criada | Bootstrap de governança |
 | 2026-03-19 | Adicionado: ciclo de vida de credenciais, mapa de erros por variável, instruções detalhadas para obtenção de secrets | Instrução do usuário |
+| 2026-03-21 | Adicionado: GITHUB_PAT documentada como variável condicional para a aplicação .NET consultar API GitHub; diferenciação entre GH_TOKEN (CLI) e GITHUB_PAT (aplicação) | Auditoria de governança |

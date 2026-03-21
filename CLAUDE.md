@@ -60,6 +60,7 @@ Quando a tarefa for análise de solicitações de mudança em pull request (skil
 Antes de qualquer commit, executar obrigatoriamente esta sequência:
 
 0. Verificar pré-requisitos de ambiente (checklist em `.claude/rules/environment-readiness.md`). O ambiente deve estar pronto — se não estiver, seguir o protocolo de ambiente não pronto antes de prosseguir.
+0.1. `bash scripts/governance-audit.sh` — executar auditoria automatizada de governança. **Gate obrigatório**: falhas bloqueiam o commit. Corrigir todas as falhas antes de prosseguir. Em tarefas exclusivamente de governança (sem build/Docker), este é o gate principal antes do commit (passo 9). Ver `.claude/rules/governance-audit.md` para a política completa.
 1. `dotnet build` — verificar compilação em modo Debug sem erros
 2. `dotnet run` (modo debug) — iniciar a aplicação localmente, aguardar `/health` responder (qualquer código HTTP confirma inicialização), encerrar o processo. Primeira validação em modo debug antes de executar os testes.
 3. `dotnet test` — executar todos os testes em modo debug. **Gate obrigatório**: falha em qualquer teste bloqueia o avanço para os passos seguintes. Somente se todos os testes passarem, prosseguir.
@@ -98,9 +99,21 @@ Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Da
 
 @Instructions/operating-model.md
 @Instructions/architecture/technical-overview.md
+@Instructions/architecture/engineering-principles.md
+@Instructions/architecture/patterns.md
+@Instructions/architecture/architecture-decisions.md
+@Instructions/architecture/folder-structure.md
+@Instructions/architecture/naming-conventions.md
 @Instructions/business/business-rules.md
+@Instructions/business/domain-model.md
+@Instructions/business/invariants.md
+@Instructions/business/workflows.md
+@Instructions/business/assumptions.md
+@Instructions/bdd/README.md
 @Instructions/bdd/conventions.md
 @Instructions/contracts/README.md
+@Instructions/decisions/README.md
+@Instructions/decisions/adr-template.md
 @Instructions/glossary/ubiquitous-language.md
 @Instructions/snippets/README.md
 @Instructions/snippets/canonical-snippets.md
@@ -122,6 +135,7 @@ Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Da
 @.claude/rules/endpoint-validation.md
 @.claude/rules/pr-metadata-governance.md
 @.claude/rules/instruction-review.md
+@.claude/rules/governance-audit.md
 
 ### Meta-governança
 
