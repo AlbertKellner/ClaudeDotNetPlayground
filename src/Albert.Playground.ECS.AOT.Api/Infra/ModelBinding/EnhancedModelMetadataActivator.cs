@@ -50,6 +50,22 @@ internal static class EnhancedModelMetadataActivator
                     "[EnhancedModelMetadataActivator][Activate] DynamicMethod falhou: {Message}",
                     ex.Message);
             }
+
+            try
+            {
+                backingField.SetValue(null, true);
+
+                logger.LogInformation(
+                    "[EnhancedModelMetadataActivator][Activate] IsEnhancedModelMetadataSupported definido via FieldInfo.SetValue em {Type}",
+                    modelMetadataType.FullName);
+                return;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(
+                    "[EnhancedModelMetadataActivator][Activate] FieldInfo.SetValue falhou: {Message}",
+                    ex.Message);
+            }
         }
 
         logger.LogWarning(

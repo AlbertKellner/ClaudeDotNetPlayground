@@ -6,15 +6,13 @@ public sealed class PokemonGetUseCase(
     IPokemonApiClient pokemonApiClient,
     ILogger<PokemonGetUseCase> logger)
 {
-    private const int PikachuId = 25;
-
-    public async Task<PokemonGetOutput> ExecuteAsync(CancellationToken cancellationToken = default)
+    public async Task<PokemonGetOutput> ExecuteAsync(int id, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Executar caso de uso de consulta de Pokemon. PokemonId={PokemonId}", PikachuId);
+        logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Executar caso de uso de consulta de Pokemon. PokemonId={PokemonId}", id);
 
-        logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Consultar PokeAPI. PokemonId={PokemonId}", PikachuId);
+        logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Consultar PokeAPI. PokemonId={PokemonId}", id);
 
-        var result = await pokemonApiClient.GetByIdAsync(PikachuId, cancellationToken);
+        var result = await pokemonApiClient.GetByIdAsync(id, cancellationToken);
 
         logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Mapear resposta da PokeAPI para model da Feature");
 

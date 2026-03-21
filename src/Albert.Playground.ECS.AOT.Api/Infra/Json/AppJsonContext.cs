@@ -18,4 +18,5 @@ namespace Albert.Playground.ECS.AOT.Api.Infra.Json;
 [JsonSerializable(typeof(List<PokemonGetStatItem>))]
 [JsonSerializable(typeof(string))]
 [JsonSerializable(typeof(ProblemDetails))]
+[JsonSerializable(typeof(ValidationProblemDetails))]
 internal sealed partial class AppJsonContext : JsonSerializerContext { }
