@@ -148,6 +148,7 @@ Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Da
 @.claude/rules/pr-metadata-governance.md
 @.claude/rules/instruction-review.md
 @.claude/rules/governance-audit.md
+@.claude/rules/execution-time-tracking.md
 
 ### Meta-governança
 

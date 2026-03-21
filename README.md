@@ -5,7 +5,7 @@
 ```
 .claude/
   hooks/         (3 scripts + settings.json)
-  rules/         (11 rules operacionais)
+  rules/         (12 rules operacionais)
   skills/        (11 skills com SKILL.md cada)
 CLAUDE.md
 Instructions/
@@ -30,7 +30,7 @@ open-questions.md
 | Grupo | Propósito |
 |---|---|
 | `CLAUDE.md` | Ponto de entrada: pipeline obrigatório de execução e imports de governança |
-| `.claude/rules/` | **Comportamento operacional persistente do assistente** — 11 rules que definem como interpretar, classificar, priorizar, propagar, auditar e implementar |
+| `.claude/rules/` | **Comportamento operacional persistente do assistente** — 12 rules que definem como interpretar, classificar, priorizar, propagar, auditar e implementar |
 | `.claude/skills/` | 11 skills que mapeiam tipos de solicitação e passos de pipeline a workflows completos de execução |
 | `.claude/hooks/` | Scripts de enforcement automatizado — detecção de mudanças em governança, proteção de branch e auditoria |
 | `Instructions/operating-model.md` | Documento central: explica como tudo funciona junto em runtime |

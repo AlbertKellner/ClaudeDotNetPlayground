@@ -13,12 +13,13 @@ Esta pasta contém os hooks de enforcement do Claude Code para este repositório
 | `instruction-change-detector.sh` | PostToolUse | Write\|Edit | Detecta mudanças em arquivos de governança e emite lembrete de revisão via REVIEW.md. A auditoria (`scripts/governance-audit.sh`) é executada no passo 0.1 do pipeline pré-commit, não por este hook. |
 | `pre-commit-gate.sh` | Manual | — | Gate de validação: dotnet build + dotnet test antes de commit; paths resolvidos dinamicamente |
 | `branch-guard.sh` | PostToolUse | Bash | Detecta operações de branch incorretas durante pr-analysis; emite alerta se o branch não for o head.ref esperado |
+| `session-timer.sh` | PostToolUse | Bash | Exibe tempo efetivo acumulado da sessão após cada chamada Bash; informativo, nunca bloqueante |
 
 ---
 
 ## Configuração
 
-Os hooks são configurados em `.claude/settings.json` na seção `hooks`. Os hooks `instruction-change-detector.sh` e `branch-guard.sh` são acionados automaticamente (PostToolUse). O `pre-commit-gate.sh` é referência para execução manual no pipeline pré-commit.
+Os hooks são configurados em `.claude/settings.json` na seção `hooks`. Os hooks `instruction-change-detector.sh`, `branch-guard.sh` e `session-timer.sh` são acionados automaticamente (PostToolUse). O `pre-commit-gate.sh` é referência para execução manual no pipeline pré-commit.
 
 ---
 
@@ -27,6 +28,7 @@ Os hooks são configurados em `.claude/settings.json` na seção `hooks`. Os hoo
 - `instruction-change-detector.sh` → ativa `.claude/rules/instruction-review.md` → emite lembrete para executar `REVIEW.md`; a auditoria é executada no passo 0.1 do pipeline pré-commit
 - `pre-commit-gate.sh` → implementa parte do pipeline de validação pré-commit definido em `CLAUDE.md`
 - `branch-guard.sh` → protege o branch correto durante pr-analysis; usa `.claude/.pr-analysis-context` como contexto; arquivo criado pela skill pr-analysis
+- `session-timer.sh` → implementa `.claude/rules/execution-time-tracking.md` → exibe tempo efetivo acumulado; usa `.claude/.session-timer` como estado
 
 ---
 
