@@ -57,10 +57,22 @@ Quando a tarefa for análise de solicitações de mudança em pull request (skil
 
 ## Pipeline de Validação Pré-Commit (Obrigatório)
 
-Antes de qualquer commit, executar obrigatoriamente esta sequência:
+### Classificação obrigatória de escopo da tarefa (ANTES de qualquer passo)
+
+Antes de iniciar o pipeline, classificar o escopo da tarefa:
+
+| Escopo | Critério | Passos aplicáveis |
+|---|---|---|
+| **Código** | A tarefa altera arquivos `.cs`, `.csproj`, `Dockerfile`, `docker-compose.yml`, `appsettings.json`, workflows de CI ou qualquer artefato que afete build, execução ou comportamento da aplicação | Todos: 0 → 11 |
+| **Governança** | A tarefa altera **exclusivamente** arquivos `.md`, `.sh`, scripts de governança, hooks ou documentação — sem impacto em build, execução ou comportamento da aplicação | Apenas: 0.1 → 9 → 10 |
+| **Análise de PR** | A tarefa é análise de solicitações de mudança em PR existente (skill pr-analysis) | Ver skill pr-analysis — o branch atribuído pelo sistema externo é ignorado; usar head.ref do PR |
+
+**Esta classificação é o primeiro ato obrigatório.** Executar passos inaplicáveis ao escopo é um erro — desperdiça tempo e gera ruído. Omitir passos aplicáveis ao escopo também é um erro.
+
+### Sequência de passos
 
 0. Verificar pré-requisitos de ambiente (checklist em `.claude/rules/environment-readiness.md`). O ambiente deve estar pronto — se não estiver, seguir o protocolo de ambiente não pronto antes de prosseguir.
-0.1. `bash scripts/governance-audit.sh` — executar auditoria automatizada de governança. **Gate obrigatório**: falhas bloqueiam o commit. Corrigir todas as falhas antes de prosseguir. Em tarefas exclusivamente de governança (sem build/Docker), este é o gate principal antes do commit (passo 9). Ver `.claude/rules/governance-audit.md` para a política completa.
+0.1. `bash scripts/governance-audit.sh` — executar auditoria automatizada de governança. **Gate obrigatório**: falhas bloqueiam o commit. Corrigir todas as falhas antes de prosseguir. Em tarefas de escopo **governança**, este é o gate principal antes do commit (passo 9). Ver `.claude/rules/governance-audit.md` para a política completa.
 1. `dotnet build` — verificar compilação em modo Debug sem erros
 2. `dotnet run` (modo debug) — iniciar a aplicação localmente, aguardar `/health` responder (qualquer código HTTP confirma inicialização), encerrar o processo. Primeira validação em modo debug antes de executar os testes.
 3. `dotnet test` — executar todos os testes em modo debug. **Gate obrigatório**: falha em qualquer teste bloqueia o avanço para os passos seguintes. Somente se todos os testes passarem, prosseguir.
@@ -79,13 +91,13 @@ Antes de qualquer commit, executar obrigatoriamente esta sequência:
     5. Se algum job falhar ou houver erros nos logs: diagnosticar a causa raiz, corrigir, e reiniciar o ciclo a partir do passo apropriado. Registrar o erro em `bash-errors-log.md`.
     Ver `.claude/rules/pr-metadata-governance.md` para a política completa.
 
-**O Passo 0 é obrigatório e não deve ser pulado.** Previne o ciclo de falhas em cascata documentado em `bash-errors-log.md`. Ver `.claude/rules/environment-readiness.md` para o protocolo completo.
+### Notas sobre os passos
+
+**O Passo 0 é obrigatório para escopo Código e não deve ser pulado.** Previne o ciclo de falhas em cascata documentado em `bash-errors-log.md`. Ver `.claude/rules/environment-readiness.md` para o protocolo completo.
 
 **O Passo 3 é um gate obrigatório.** O `docker compose up -d` (publish Release/AOT) só deve ser executado após todos os testes passarem em modo debug. Testes falhando bloqueiam o commit — corrigir antes de avançar.
 
-**O Passo 11 é obrigatório e encerra a tarefa.** A tarefa só está concluída quando todos os jobs do CI passarem **e** os logs no Datadog forem verificados sem erros. O agente não deve encerrar a interação, apresentar relatório final ou considerar a tarefa finalizada enquanto houver jobs em execução, jobs falhando ou logs não verificados. Ver `.claude/rules/pr-metadata-governance.md` para a política completa.
-
-**Os passos 9 e 10 são obrigatórios mesmo em tarefas exclusivamente de governança** (sem mudança de código, sem build, sem Docker). Quando a tarefa não altera código da aplicação, os passos 0–8 e o passo 11 são inaplicáveis e devem ser omitidos. Apenas o commit (passo 9) e a criação/atualização do PR (passo 10) são obrigatórios.
+**O Passo 11 é obrigatório para escopo Código e encerra a tarefa.** A tarefa só está concluída quando todos os jobs do CI passarem **e** os logs no Datadog forem verificados sem erros. O agente não deve encerrar a interação, apresentar relatório final ou considerar a tarefa finalizada enquanto houver jobs em execução, jobs falhando ou logs não verificados. Ver `.claude/rules/pr-metadata-governance.md` para a política completa.
 
 **`scripts/setup-env.sh` é um modelo declarativo** copiado manualmente pelo usuário em ferramenta externa de configuração de container. O agente não executa esse script — o ambiente deve chegar já pronto. Se um pré-requisito estiver ausente, o agente atualiza o script e sinaliza ao usuário para sincronizar a ferramenta externa.
 
