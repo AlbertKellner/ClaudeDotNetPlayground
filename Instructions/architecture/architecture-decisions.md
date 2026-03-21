@@ -270,6 +270,18 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - Feature `GitHubRepoSearch` criada em `Features/Query/GitHubRepoSearch/` com Endpoint, UseCase e Models próprios (DA-020).
 - 95 testes unitários passando.
 
+### DA-022 — Escopo Atual: Contratos OpenAPI Formais e Cenários BDD Diferidos
+**Data**: 2026-03-21
+**Status**: Ativo
+**Decisão**: Contratos OpenAPI formais e cenários BDD reais não são obrigatórios no escopo atual do projeto. Os placeholders existentes em `Instructions/contracts/` e o exemplo genérico em `Instructions/bdd/example.feature` permanecem como estrutura preparada para uso futuro. A auditoria automatizada sinaliza a ausência como aviso (não bloqueio).
+**Motivação**: O projeto está em fase de exploração funcional (playground). As 4 features implementadas possuem regras de negócio claras em `business-rules.md` e contratos de entrada/saída documentados nas páginas da Wiki. Criar contratos OpenAPI formais e cenários BDD para features de playground teria custo desproporcional ao benefício, considerando que o comportamento já está validado por 95+ testes unitários e validação de endpoint via HTTP real.
+**Alternativas consideradas**: (1) Criar contratos e BDD completos para todas as features — descartada por custo desproporcional. (2) Remover os placeholders e a infraestrutura de BDD — descartada: a estrutura deve estar pronta quando o domínio justificar.
+**Trade-offs**: A hierarquia de prioridade de fontes de verdade (`source-of-truth-priority.md`) coloca contratos e BDD acima de regras de negócio textuais. Com esta decisão, as fontes de maior prioridade estão vazias. Quando o projeto evoluir para domínio real, contratos e BDD devem ser os primeiros artefatos criados.
+**Consequências**:
+- PREM-003 (contratos placeholder) permanece ativa mas agora está amparada por esta decisão explícita.
+- `governance-audit.sh` emite avisos (não falhas) para features sem BDD e contratos placeholder.
+- Quando uma feature de domínio real for implementada, esta decisão deve ser revisitada.
+
 ---
 
 ## Decisões Pendentes
@@ -330,3 +342,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-19 | DA-020 criada: isolamento de models de Feature — Input e Output não compartilhados via Shared | Instrução do usuário |
 | 2026-03-20 | DA-019 revogada: funcionalidades de busca e sincronização de repositórios removidas; Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos | Instrução do usuário |
 | 2026-03-20 | DA-021 criada: integração GitHub API com Refit + Polly + DelegatingHandler para PAT; Feature GitHubRepoSearch com cache por usuário | RN-008 |
+| 2026-03-21 | DA-022 criada: contratos OpenAPI e cenários BDD diferidos para escopo de playground; auditoria emite avisos | Análise de causas-raiz |

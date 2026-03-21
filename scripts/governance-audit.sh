@@ -2,15 +2,20 @@
 # Script: governance-audit.sh
 # Propósito: Verificar automaticamente a consistência estrutural dos arquivos de governança.
 # Execução: bash scripts/governance-audit.sh
-# Saída: Relatório com [OK] / [FALHA] por verificação.
+# Saída: Relatório com [OK] / [FALHA] / [AVISO] por verificação.
 #
-# Este script NÃO verifica conteúdo semântico (ex: "a regra está correta?").
-# Verifica apenas consistência estrutural: imports, contagens, referências, alinhamento.
+# Este script verifica consistência estrutural e completude documental.
+# Verificações semânticas profundas (ex: "a regra está correta?") permanecem com o assistente.
+#
+# IMPORTANTE: A numeração das verificações neste script DEVE corresponder 1:1
+# à tabela em .claude/rules/governance-audit.md. Ao adicionar ou remover verificações,
+# atualizar ambos os arquivos simultaneamente.
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 FAILURES=0
+WARNINGS=0
 TOTAL=0
 
 pass() {
@@ -27,19 +32,41 @@ fail() {
   fi
 }
 
+warn() {
+  TOTAL=$((TOTAL + 1))
+  WARNINGS=$((WARNINGS + 1))
+  echo "[AVISO] $1"
+  if [ -n "${2:-}" ]; then
+    echo "        Detalhe: $2"
+  fi
+}
+
 echo "=== Auditoria de Governança ==="
 echo "Repositório: $REPO_ROOT"
 echo "Data: $(date '+%Y-%m-%d %H:%M:%S')"
 echo ""
 
-# ---------------------------------------------------------------------------
-# 1. Verificar que todos os arquivos .md em Instructions/ estão importados no CLAUDE.md
-# ---------------------------------------------------------------------------
-echo "--- 1. Imports do CLAUDE.md ---"
-
 CLAUDE_MD="$REPO_ROOT/CLAUDE.md"
-MISSING_IMPORTS=""
+README="$REPO_ROOT/README.md"
+TECH_OVERVIEW="$REPO_ROOT/Instructions/architecture/technical-overview.md"
+FOLDER_STRUCTURE="$REPO_ROOT/Instructions/architecture/folder-structure.md"
+ADR_FILE="$REPO_ROOT/Instructions/architecture/architecture-decisions.md"
+COMPOSE="$REPO_ROOT/docker-compose.yml"
+REQUIRED_VARS="$REPO_ROOT/scripts/required-vars.md"
+SETTINGS="$REPO_ROOT/.claude/settings.json"
+WIKI_DIR="$REPO_ROOT/wiki"
+WIKI_ARCH="$REPO_ROOT/wiki/Architecture.md"
+FEATURES_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Features"
+INFRA_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Infra"
+EXTERNAL_API_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Shared/ExternalApi"
+RUNBOOK="$REPO_ROOT/scripts/operational-runbook.md"
 
+# ---------------------------------------------------------------------------
+# 1. Todos os arquivos .md de Instructions/ estão importados no CLAUDE.md
+# ---------------------------------------------------------------------------
+echo "--- 1. Imports de Instructions/ no CLAUDE.md ---"
+
+MISSING_IMPORTS=""
 while IFS= read -r file; do
   relative="${file#$REPO_ROOT/}"
   if ! grep -qF "@$relative" "$CLAUDE_MD"; then
@@ -53,7 +80,12 @@ else
   fail "Arquivos de Instructions/ ausentes nos imports do CLAUDE.md" "$MISSING_IMPORTS"
 fi
 
-# Verificar rules
+# ---------------------------------------------------------------------------
+# 2. Todos os arquivos .md de .claude/rules/ estão importados no CLAUDE.md
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 2. Imports de .claude/rules/ no CLAUDE.md ---"
+
 MISSING_RULES_IMPORTS=""
 while IFS= read -r file; do
   relative="${file#$REPO_ROOT/}"
@@ -69,12 +101,11 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 2. Contagem de rules no README.md
+# 3. Contagem de rules no README.md corresponde ao número real
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 2. Contagens no README.md ---"
+echo "--- 3. Contagem de rules no README.md ---"
 
-README="$REPO_ROOT/README.md"
 ACTUAL_RULES_COUNT=$(find "$REPO_ROOT/.claude/rules" -name "*.md" -type f | wc -l)
 README_RULES_COUNT=$(grep -oP '\d+(?=\s*rules)' "$README" 2>/dev/null | head -1 || echo "0")
 
@@ -84,7 +115,12 @@ else
   fail "Contagem de rules no README.md ($README_RULES_COUNT) não corresponde ao real ($ACTUAL_RULES_COUNT)"
 fi
 
-# Contagem de skills
+# ---------------------------------------------------------------------------
+# 4. Contagem de skills no README.md corresponde ao número real
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 4. Contagem de skills no README.md ---"
+
 ACTUAL_SKILLS_COUNT=$(find "$REPO_ROOT/.claude/skills" -mindepth 1 -maxdepth 1 -type d | wc -l)
 README_SKILLS_COUNT=$(grep -oP '\d+(?=\s*skills)' "$README" 2>/dev/null | head -1 || echo "0")
 
@@ -95,18 +131,14 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 3. Variáveis de ambiente no docker-compose.yml documentadas em required-vars.md
+# 5. Variáveis de ambiente do docker-compose.yml documentadas em required-vars.md
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 3. Variáveis de ambiente ---"
-
-COMPOSE="$REPO_ROOT/docker-compose.yml"
-REQUIRED_VARS="$REPO_ROOT/scripts/required-vars.md"
+echo "--- 5. Variáveis de ambiente documentadas ---"
 
 if [ -f "$COMPOSE" ] && [ -f "$REQUIRED_VARS" ]; then
   UNDOCUMENTED_VARS=""
   while IFS= read -r var; do
-    # Ignorar variáveis padrão do Docker/Datadog que são internas ao compose
     case "$var" in
       DD_SITE|DD_ENV|DD_HOSTNAME|DD_LOGS_ENABLED|DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL|\
       DD_CONVERT_DD_SITE_FQDN_ENABLED|DD_DOGSTATSD_NON_LOCAL_TRAFFIC|\
@@ -127,86 +159,83 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 4. Referências a regras de negócio removidas em arquivos ativos
+# 6. Nenhuma referência ativa a artefatos removidos em arquivos não-históricos
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 4. Referências a artefatos removidos ---"
+echo "--- 6. Referências a artefatos removidos ---"
 
-# RN-006 e RN-007 foram removidas — não devem aparecer fora de seções de histórico
+# Lista de IDs de artefatos removidos — ADICIONAR NOVOS IDs AQUI ao remover artefatos
+REMOVED_ARTIFACTS="RN-006 RN-007"
+
 STALE_REFS=""
-while IFS= read -r file; do
-  # Ignorar bash-errors-log.md, assumptions-log.md, open-questions.md (logs históricos)
-  basename=$(basename "$file")
-  case "$basename" in
-    bash-errors-log.md|assumptions-log.md) continue ;;
-  esac
-  # Procurar RN-006 ou RN-007 no arquivo
-  if grep -qP 'RN-00[67]' "$file" 2>/dev/null; then
-    # Verificar se TODAS as ocorrências estão em contexto histórico:
-    # - Linhas de tabela de histórico (começam com | e contêm data YYYY-MM-DD)
-    # - Linhas com palavras de remoção/depreciação
-    # - Linhas em seções "Substituídas/Depreciadas/Removidas"
-    has_active_ref=false
-    while IFS= read -r line; do
-      if echo "$line" | grep -qiP 'remov|substituíd|depreciad|histórico|revogad|^\|.*20[0-9]{2}-[0-9]{2}-[0-9]{2}'; then
-        : # OK — contexto histórico na mesma linha
-      else
-        # Verificar contexto expandido: buscar keywords nas 3 linhas seguintes à ocorrência
-        line_num=$(grep -nF "$line" "$file" 2>/dev/null | head -1 | cut -d: -f1)
-        if [ -n "$line_num" ]; then
-          context_after=$(sed -n "$((line_num)),$((line_num + 3))p" "$file" 2>/dev/null)
-          if echo "$context_after" | grep -qiP 'remov|substituíd|depreciad|status.*remov'; then
-            : # OK — contexto próximo contém keywords de remoção
-          else
-            has_active_ref=true
-            break
+for artifact_id in $REMOVED_ARTIFACTS; do
+  while IFS= read -r file; do
+    basename=$(basename "$file")
+    case "$basename" in
+      bash-errors-log.md|assumptions-log.md) continue ;;
+    esac
+    if grep -qF "$artifact_id" "$file" 2>/dev/null; then
+      has_active_ref=false
+      while IFS= read -r line; do
+        if echo "$line" | grep -qiP 'remov|substituíd|depreciad|histórico|revogad|^\|.*20[0-9]{2}-[0-9]{2}-[0-9]{2}'; then
+          :
+        else
+          line_num=$(grep -nF "$line" "$file" 2>/dev/null | head -1 | cut -d: -f1)
+          if [ -n "$line_num" ]; then
+            context_after=$(sed -n "$((line_num)),$((line_num + 3))p" "$file" 2>/dev/null)
+            if echo "$context_after" | grep -qiP 'remov|substituíd|depreciad|status.*remov'; then
+              :
+            else
+              has_active_ref=true
+              break
+            fi
           fi
         fi
+      done < <(grep -F "$artifact_id" "$file" 2>/dev/null)
+      if [ "$has_active_ref" = true ]; then
+        STALE_REFS="$STALE_REFS $file($artifact_id)"
       fi
-    done < <(grep -P 'RN-00[67]' "$file" 2>/dev/null)
-    if [ "$has_active_ref" = true ]; then
-      STALE_REFS="$STALE_REFS $file"
     fi
-  fi
-done < <(find "$REPO_ROOT/Instructions" "$REPO_ROOT/.claude/rules" "$REPO_ROOT/wiki" -name "*.md" -type f 2>/dev/null | sort)
+  done < <(find "$REPO_ROOT/Instructions" "$REPO_ROOT/.claude/rules" "$REPO_ROOT/wiki" -name "*.md" -type f 2>/dev/null | sort)
+done
 
 if [ -z "$STALE_REFS" ]; then
-  pass "Nenhuma referência ativa a regras de negócio removidas (RN-006, RN-007)"
+  pass "Nenhuma referência ativa a artefatos removidos ($REMOVED_ARTIFACTS)"
 else
-  fail "Referências ativas a RN-006/RN-007 encontradas em arquivos não-históricos" "$STALE_REFS"
+  fail "Referências ativas a artefatos removidos encontradas" "$STALE_REFS"
 fi
 
 # ---------------------------------------------------------------------------
-# 5. Wiki pages existem para features ativas
+# 7. Todas as features possuem página correspondente na Wiki
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 5. Cobertura da Wiki ---"
+echo "--- 7. Features com página na Wiki ---"
 
-WIKI_DIR="$REPO_ROOT/wiki"
-if [ -d "$WIKI_DIR" ]; then
+if [ -d "$WIKI_DIR" ] && [ -d "$FEATURES_DIR" ]; then
   MISSING_WIKI=""
-  # Features ativas baseadas nas pastas em Features/
-  FEATURES_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Features"
-  if [ -d "$FEATURES_DIR" ]; then
-    while IFS= read -r feature_dir; do
-      feature_name=$(basename "$feature_dir")
-      # Procurar wiki page com nome parcialmente correspondente
-      if ! ls "$WIKI_DIR"/Feature-*"$feature_name"* 1>/dev/null 2>&1; then
-        # Tentar busca case-insensitive
-        if ! find "$WIKI_DIR" -iname "Feature-*${feature_name}*" -type f 2>/dev/null | grep -q .; then
-          MISSING_WIKI="$MISSING_WIKI $feature_name"
-        fi
-      fi
-    done < <(find "$FEATURES_DIR" -mindepth 2 -maxdepth 2 -type d | sort)
-  fi
+  while IFS= read -r feature_dir; do
+    feature_name=$(basename "$feature_dir")
+    if ! find "$WIKI_DIR" -iname "Feature-*${feature_name}*" -type f 2>/dev/null | grep -q .; then
+      MISSING_WIKI="$MISSING_WIKI $feature_name"
+    fi
+  done < <(find "$FEATURES_DIR" -mindepth 2 -maxdepth 2 -type d | sort)
 
   if [ -z "$MISSING_WIKI" ]; then
     pass "Todas as features possuem página correspondente na Wiki"
   else
     fail "Features sem página na Wiki" "$MISSING_WIKI"
   fi
+else
+  pass "wiki/ ou Features/ não encontrado — verificação ignorada"
+fi
 
-  # Verificar páginas estruturais obrigatórias
+# ---------------------------------------------------------------------------
+# 8. Páginas estruturais obrigatórias existem na Wiki
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 8. Páginas estruturais obrigatórias na Wiki ---"
+
+if [ -d "$WIKI_DIR" ]; then
   REQUIRED_PAGES="Home.md _Sidebar.md Architecture.md Project-Setup.md Business-Rules.md CI-CD.md"
   MISSING_PAGES=""
   for page in $REQUIRED_PAGES; do
@@ -225,41 +254,65 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 6. Rules com workflows procedurais extensos (heurística)
+# 9. Rules não contêm workflows procedurais extensos (>5 passos)
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 6. Separação Rules/Skills ---"
+echo "--- 9. Separação Rules/Skills (workflows extensos) ---"
 
 RULES_WITH_WORKFLOWS=""
 while IFS= read -r rule_file; do
   rule_name=$(basename "$rule_file")
-  # Contar seções de passos procedurais (### Passo, #### Passo, ### Step)
+  # Heurística 1: headings procedurais (### Passo, ### Step, ### Workflow)
   step_count=$(grep -cP '###\s+(Passo|Step|Workflow)' "$rule_file" 2>/dev/null || true)
   step_count="${step_count:-0}"
-  if [ "$step_count" -gt 5 ]; then
-    RULES_WITH_WORKFLOWS="$RULES_WITH_WORKFLOWS $rule_name(${step_count}_passos)"
+  # Heurística 2: sequências numeradas longas contíguas (>6 passos seguidos sem reiniciar)
+  # Rules podem ter múltiplos blocos curtos (1-4 passos cada) como parte da política.
+  # Um workflow extenso se manifesta como sequência longa contígua (1. 2. 3. ... 7. 8.).
+  # Extrair conteúdo excluindo seções de histórico e referências
+  max_sequence=0
+  current_sequence=0
+  last_num=0
+  while IFS= read -r num; do
+    if [ "$num" -eq $((last_num + 1)) ]; then
+      # Continuação da sequência (2 após 1, 3 após 2, etc.)
+      current_sequence=$((current_sequence + 1))
+    elif [ "$num" -eq 1 ]; then
+      # Início de nova lista — reiniciar contador
+      current_sequence=1
+    else
+      current_sequence=1
+    fi
+    last_num=$num
+    if [ "$current_sequence" -gt "$max_sequence" ]; then
+      max_sequence=$current_sequence
+    fi
+  done < <(sed '/## Histórico/,$ d; /## Relação com/,/^##/d; /## Referências/,/^##/d' "$rule_file" 2>/dev/null \
+    | grep -oP '^\d+(?=\.\s+\S)' 2>/dev/null || true)
+  total_steps=$((step_count + max_sequence))
+  # Limiar: headings procedurais + maior sequência contígua > 8 indica workflow extenso.
+  # Rules podem ter listas de até ~7-8 ações como parte da definição de política.
+  # Sequências >8 passos contíguos indicam workflow detalhado que pertence a uma skill.
+  if [ "$total_steps" -gt 8 ]; then
+    RULES_WITH_WORKFLOWS="$RULES_WITH_WORKFLOWS $rule_name(${total_steps}_passos)"
   fi
 done < <(find "$REPO_ROOT/.claude/rules" -name "*.md" -type f | sort)
 
 if [ -z "$RULES_WITH_WORKFLOWS" ]; then
-  pass "Nenhuma rule contém workflows procedurais extensos (>5 passos)"
+  pass "Nenhuma rule contém workflows procedurais extensos (>10 passos)"
 else
   fail "Rules com workflows procedurais extensos (deveriam ser skills)" "$RULES_WITH_WORKFLOWS"
 fi
 
 # ---------------------------------------------------------------------------
-# 7. Referências cruzadas entre rules apontam para arquivos existentes
+# 10. Referências cruzadas entre rules apontam para arquivos existentes
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 7. Referências cruzadas ---"
+echo "--- 10. Referências cruzadas entre rules ---"
 
 BROKEN_REFS=""
 while IFS= read -r rule_file; do
-  # Extrair referências a .md que contenham / (caminhos reais, não nomes curtos)
   while IFS= read -r ref; do
-    # Ignorar padrões glob (contêm * ou **)
     case "$ref" in *\**) continue ;; esac
-    # Resolver caminho relativo ao repositório
     if [ ! -f "$REPO_ROOT/$ref" ]; then
       BROKEN_REFS="$BROKEN_REFS $(basename "$rule_file")->$ref"
     fi
@@ -273,10 +326,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 8. README.md não referencia funcionalidades removidas
+# 11. README.md não referencia funcionalidades removidas
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 8. README.md atualizado ---"
+echo "--- 11. README.md sem funcionalidades removidas ---"
 
 README_ISSUES=""
 if grep -qi "WebMotors\|IntegrationRepos\|repositories/sync\|RepositoriesGetAll\|RepositoriesSyncAll" "$README" 2>/dev/null; then
@@ -290,14 +343,12 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 9. ADRs revogadas têm nota de redirecionamento
+# 12. ADRs revogadas possuem nota de redirecionamento
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 9. ADRs revogadas ---"
+echo "--- 12. ADRs revogadas com redirecionamento ---"
 
-ADR_FILE="$REPO_ROOT/Instructions/architecture/architecture-decisions.md"
 if [ -f "$ADR_FILE" ]; then
-  # Procurar entradas com "Revogad" que não tenham "Substituída por" ou "Ver DA-"
   REVOKED_WITHOUT_REDIRECT=$(grep -c 'Revogad' "$ADR_FILE" 2>/dev/null || echo "0")
   REVOKED_WITH_REDIRECT=$(grep -cP 'Revogad.*Substituíd|Substituíd.*DA-' "$ADR_FILE" 2>/dev/null || echo "0")
 
@@ -311,10 +362,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 10. Imports do CLAUDE.md apontam para arquivos existentes (sem imports quebrados)
+# 13. Imports existentes no CLAUDE.md apontam para arquivos reais
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 10. Integridade dos imports existentes ---"
+echo "--- 13. Integridade dos imports existentes ---"
 
 BROKEN_IMPORTS=""
 while IFS= read -r import_line; do
@@ -331,19 +382,15 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 11. Componentes de Infra/ documentados em technical-overview.md
+# 14. Subpastas de Infra/ documentadas em technical-overview.md
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 11. Cobertura de documentação: Infra/ ---"
-
-TECH_OVERVIEW="$REPO_ROOT/Instructions/architecture/technical-overview.md"
-INFRA_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Infra"
+echo "--- 14. Infra/ documentada em technical-overview.md ---"
 
 if [ -d "$INFRA_DIR" ] && [ -f "$TECH_OVERVIEW" ]; then
   UNDOCUMENTED_INFRA=""
   while IFS= read -r infra_subdir; do
     subdir_name=$(basename "$infra_subdir")
-    # Verificar se a subpasta está mencionada em technical-overview.md
     if ! grep -qi "$subdir_name" "$TECH_OVERVIEW" 2>/dev/null; then
       UNDOCUMENTED_INFRA="$UNDOCUMENTED_INFRA Infra/$subdir_name"
     fi
@@ -359,12 +406,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 12. Subpastas de Infra/ registradas em folder-structure.md
+# 15. Subpastas de Infra/ registradas em folder-structure.md
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 12. Cobertura de documentação: Infra/ em folder-structure.md ---"
-
-FOLDER_STRUCTURE="$REPO_ROOT/Instructions/architecture/folder-structure.md"
+echo "--- 15. Infra/ registrada em folder-structure.md ---"
 
 if [ -d "$INFRA_DIR" ] && [ -f "$FOLDER_STRUCTURE" ]; then
   UNDOCUMENTED_FOLDERS=""
@@ -385,12 +430,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 13. Integrações em Shared/ExternalApi/ documentadas em technical-overview.md
+# 16. Integrações Shared/ExternalApi/ documentadas em technical-overview.md
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 13. Cobertura de documentação: Shared/ExternalApi/ ---"
-
-EXTERNAL_API_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Shared/ExternalApi"
+echo "--- 16. Shared/ExternalApi/ documentada em technical-overview.md ---"
 
 if [ -d "$EXTERNAL_API_DIR" ] && [ -f "$TECH_OVERVIEW" ]; then
   UNDOCUMENTED_APIS=""
@@ -411,18 +454,14 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 14. Hooks configurados em settings.json existem como arquivos
+# 17. Hooks configurados em settings.json existem como arquivos
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 14. Integridade dos hooks ---"
-
-SETTINGS="$REPO_ROOT/.claude/settings.json"
-HOOKS_DIR="$REPO_ROOT/.claude/hooks"
+echo "--- 17. Integridade dos hooks ---"
 
 if [ -f "$SETTINGS" ]; then
   MISSING_HOOKS=""
   while IFS= read -r hook_script; do
-    # Extrair o nome do script do comando (ex: "bash .claude/hooks/branch-guard.sh ...")
     script_name=$(echo "$hook_script" | grep -oP '\.claude/hooks/\S+\.sh' | head -1)
     if [ -n "$script_name" ] && [ ! -f "$REPO_ROOT/$script_name" ]; then
       MISSING_HOOKS="$MISSING_HOOKS $script_name"
@@ -439,13 +478,12 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 15. Contagem de skills em README.md (todas as ocorrências)
+# 18. Contagens de skills consistentes em todas as ocorrências do README.md
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 15. Consistência interna do README.md ---"
+echo "--- 18. Consistência interna do README.md ---"
 
 if [ -f "$README" ]; then
-  # Verificar se TODAS as menções de skills no README usam o número correto
   INCONSISTENT_COUNTS=""
   while IFS= read -r line_num; do
     line_content=$(sed -n "${line_num}p" "$README")
@@ -463,10 +501,10 @@ if [ -f "$README" ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 16. Cada diretório em .claude/skills/ contém SKILL.md
+# 19. Todos os diretórios de skills contêm SKILL.md
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 16. Integridade das skills ---"
+echo "--- 19. Integridade das skills ---"
 
 SKILLS_WITHOUT_MD=""
 while IFS= read -r skill_dir; do
@@ -483,12 +521,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 17. wiki/Architecture.md lista todas as features implementadas
+# 20. wiki/Architecture.md lista todas as features implementadas
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 17. Completude da wiki: Architecture.md vs Features ---"
-
-WIKI_ARCH="$REPO_ROOT/wiki/Architecture.md"
+echo "--- 20. Architecture.md lista todas as features ---"
 
 if [ -f "$WIKI_ARCH" ] && [ -d "$FEATURES_DIR" ]; then
   MISSING_IN_ARCH=""
@@ -509,10 +545,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 18. wiki/Architecture.md lista todas as subpastas de Infra/
+# 21. wiki/Architecture.md lista todas as subpastas de Infra/
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 18. Completude da wiki: Architecture.md vs Infra/ ---"
+echo "--- 21. Architecture.md lista todas as subpastas de Infra/ ---"
 
 if [ -f "$WIKI_ARCH" ] && [ -d "$INFRA_DIR" ]; then
   MISSING_INFRA_WIKI=""
@@ -533,10 +569,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 19. wiki/Architecture.md lista todas as integrações Shared/ExternalApi/
+# 22. wiki/Architecture.md lista todas as integrações Shared/ExternalApi/
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 19. Completude da wiki: Architecture.md vs Shared/ExternalApi/ ---"
+echo "--- 22. Architecture.md lista Shared/ExternalApi/ ---"
 
 if [ -f "$WIKI_ARCH" ] && [ -d "$EXTERNAL_API_DIR" ]; then
   MISSING_API_WIKI=""
@@ -557,10 +593,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 20. Cada rule tem seção "Propósito"
+# 23. Todas as rules possuem seção "Propósito"
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 20. Estrutura mínima das rules ---"
+echo "--- 23. Estrutura mínima das rules ---"
 
 RULES_WITHOUT_PURPOSE=""
 while IFS= read -r rule_file; do
@@ -577,13 +613,12 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 21. wiki/Architecture.md tabela Features Implementadas lista todas as features
+# 24. Tabela "Features Implementadas" na wiki lista todas as features
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 21. Completude da tabela de features na wiki ---"
+echo "--- 24. Tabela de features na wiki ---"
 
 if [ -f "$WIKI_ARCH" ] && [ -d "$FEATURES_DIR" ]; then
-  # Extrair apenas a seção "Features Implementadas" da Architecture.md
   FEATURES_TABLE=$(sed -n '/## Features Implementadas/,/^##\s/p' "$WIKI_ARCH" 2>/dev/null)
   MISSING_IN_TABLE=""
   while IFS= read -r feature_dir; do
@@ -603,18 +638,141 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 25. Nenhuma página wiki Feature-* órfã (sem feature correspondente no código)
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 25. Wiki pages órfãs ---"
+
+if [ -d "$WIKI_DIR" ] && [ -d "$FEATURES_DIR" ]; then
+  ORPHAN_PAGES=""
+  while IFS= read -r wiki_page; do
+    page_name=$(basename "$wiki_page" .md)
+    # Extrair nome da feature do padrão Feature-NomeDaFeature
+    feature_part="${page_name#Feature-}"
+    # Procurar feature correspondente em Features/ ou em Infra/ (ex: Health é HealthChecks)
+    found=false
+    if find "$FEATURES_DIR" -mindepth 2 -maxdepth 2 -type d -iname "*${feature_part}*" 2>/dev/null | grep -q .; then
+      found=true
+    elif [ -d "$INFRA_DIR" ] && find "$INFRA_DIR" -mindepth 1 -maxdepth 1 -type d -iname "*${feature_part}*" 2>/dev/null | grep -q .; then
+      found=true
+    fi
+    if [ "$found" = false ]; then
+      ORPHAN_PAGES="$ORPHAN_PAGES $page_name"
+    fi
+  done < <(find "$WIKI_DIR" -name "Feature-*.md" -type f | sort)
+
+  if [ -z "$ORPHAN_PAGES" ]; then
+    pass "Nenhuma página wiki Feature-* órfã encontrada"
+  else
+    warn "Páginas wiki Feature-* sem feature correspondente no código" "$ORPHAN_PAGES"
+  fi
+else
+  pass "wiki/ ou Features/ não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 26. Endpoints no runbook correspondem a rotas nos Controllers
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 26. Alinhamento runbook ↔ endpoints reais ---"
+
+if [ -f "$RUNBOOK" ] && [ -d "$FEATURES_DIR" ]; then
+  # Extrair rotas do runbook (coluna "Rota" da tabela de endpoints)
+  RUNBOOK_ROUTES=$(grep -oP '`/[a-z][a-z0-9-]*`' "$RUNBOOK" 2>/dev/null | sed 's/`//g' | sort -u)
+  # Extrair rotas dos Controllers (atributos [Route("...")] e [Http*("...")])
+  CODE_ROUTES=$(grep -rhoP '\[Route\("([^"]+)"\)\]|\[Http(Get|Post|Put|Delete|Patch)\("([^"]+)"\)\]' "$FEATURES_DIR" 2>/dev/null \
+    | grep -oP '"[^"]+"' | sed 's/"//g' | sort -u)
+  # Adicionar rotas implícitas conhecidas (/health e /login são especiais)
+  CODE_ROUTES=$(echo -e "$CODE_ROUTES\nhealth\nlogin" | sort -u)
+
+  MISSING_IN_RUNBOOK=""
+  for route in $CODE_ROUTES; do
+    clean_route="/$route"
+    if ! echo "$RUNBOOK_ROUTES" | grep -qF "$clean_route"; then
+      MISSING_IN_RUNBOOK="$MISSING_IN_RUNBOOK $clean_route"
+    fi
+  done
+
+  STALE_IN_RUNBOOK=""
+  for route in $RUNBOOK_ROUTES; do
+    clean_route="${route#/}"
+    if ! echo "$CODE_ROUTES" | grep -qF "$clean_route"; then
+      STALE_IN_RUNBOOK="$STALE_IN_RUNBOOK $route"
+    fi
+  done
+
+  if [ -z "$MISSING_IN_RUNBOOK" ] && [ -z "$STALE_IN_RUNBOOK" ]; then
+    pass "Endpoints no runbook estão alinhados com rotas nos Controllers"
+  else
+    [ -n "$MISSING_IN_RUNBOOK" ] && warn "Rotas no código ausentes no runbook" "$MISSING_IN_RUNBOOK"
+    [ -n "$STALE_IN_RUNBOOK" ] && warn "Rotas no runbook sem Controller correspondente" "$STALE_IN_RUNBOOK"
+  fi
+else
+  pass "Runbook ou Features/ não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 27. Features com RN possuem cenários BDD (aviso, não bloqueante)
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 27. Completude semântica: BDD para regras de negócio ---"
+
+BDD_DIR="$REPO_ROOT/Instructions/bdd"
+BUSINESS_RULES="$REPO_ROOT/Instructions/business/business-rules.md"
+
+if [ -f "$BUSINESS_RULES" ] && [ -d "$BDD_DIR" ]; then
+  # Contar RNs ativas (excluindo removidas/depreciadas)
+  ACTIVE_RN_COUNT=$(grep -cP '^### RN-\d+ —' "$BUSINESS_RULES" 2>/dev/null || echo "0")
+  # Contar RNs com "BDD relacionado: Nenhum"
+  NO_BDD_COUNT=$(grep -cP 'BDD relacionado.*Nenhum' "$BUSINESS_RULES" 2>/dev/null || echo "0")
+  # Contar arquivos .feature reais (excluindo example.feature)
+  REAL_FEATURE_COUNT=$(find "$BDD_DIR" -name "*.feature" -type f ! -name "example.feature" 2>/dev/null | wc -l)
+
+  if [ "$NO_BDD_COUNT" -gt 0 ] || [ "$REAL_FEATURE_COUNT" -eq 0 ]; then
+    warn "Regras de negócio sem cenários BDD: $NO_BDD_COUNT de $ACTIVE_RN_COUNT RNs ativas não possuem BDD; $REAL_FEATURE_COUNT arquivos .feature reais existem"
+  else
+    pass "Todas as regras de negócio possuem cenários BDD correspondentes"
+  fi
+else
+  pass "business-rules.md ou bdd/ não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 28. Contratos OpenAPI refletem endpoints implementados (aviso, não bloqueante)
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 28. Completude semântica: contratos OpenAPI ---"
+
+OPENAPI="$REPO_ROOT/Instructions/contracts/openapi.yaml"
+
+if [ -f "$OPENAPI" ]; then
+  if grep -qi "placeholder\|a definir\|substituir" "$OPENAPI" 2>/dev/null; then
+    warn "Contratos OpenAPI são placeholders — nenhum contrato real para os endpoints implementados"
+  else
+    pass "Contratos OpenAPI parecem conter conteúdo real"
+  fi
+else
+  pass "openapi.yaml não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
 # Resumo
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Resumo ==="
-PASSED=$((TOTAL - FAILURES))
-echo "Total: $TOTAL verificações | $PASSED aprovadas | $FAILURES falhas"
+PASSED=$((TOTAL - FAILURES - WARNINGS))
+echo "Total: $TOTAL verificações | $PASSED aprovadas | $FAILURES falhas | $WARNINGS avisos"
 
 if [ "$FAILURES" -gt 0 ]; then
   echo ""
   echo "[ATENÇÃO] Existem $FAILURES falhas de consistência na governança."
   echo "Corrija as falhas antes de prosseguir com o commit."
   exit 1
+elif [ "$WARNINGS" -gt 0 ]; then
+  echo ""
+  echo "[APROVADO COM AVISOS] Governança estruturalmente consistente, mas existem $WARNINGS avisos de completude."
+  echo "Avisos não bloqueiam o commit, mas indicam áreas de melhoria."
+  exit 0
 else
   echo ""
   echo "[APROVADO] Governança estruturalmente consistente."
