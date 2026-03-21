@@ -26,7 +26,11 @@ Esta rule define a política de auditoria automatizada da consistência estrutur
 
 ## O Que a Auditoria Verifica
 
-O script `scripts/governance-audit.sh` verifica automaticamente:
+O script `scripts/governance-audit.sh` verifica automaticamente.
+
+**IMPORTANTE**: A numeração abaixo corresponde 1:1 às seções do script. Ao adicionar ou remover verificações, atualizar ambos os arquivos simultaneamente.
+
+### Verificações bloqueantes (falha bloqueia commit)
 
 | # | Verificação | Categoria |
 |---|---|---|
@@ -35,10 +39,10 @@ O script `scripts/governance-audit.sh` verifica automaticamente:
 | 3 | Contagem de rules no `README.md` corresponde ao número real | Consistência documental |
 | 4 | Contagem de skills no `README.md` corresponde ao número real | Consistência documental |
 | 5 | Variáveis de ambiente do `docker-compose.yml` estão documentadas em `required-vars.md` | Configuração |
-| 6 | Nenhuma referência ativa a regras de negócio removidas em arquivos não-históricos | Higiene |
+| 6 | Nenhuma referência ativa a artefatos removidos em arquivos não-históricos | Higiene |
 | 7 | Todas as features possuem página correspondente na Wiki | Cobertura documental |
-| 8 | Pages estruturais obrigatórias existem na Wiki | Cobertura documental |
-| 9 | Rules não contêm workflows procedurais extensos (>5 passos) | Separação rules/skills |
+| 8 | Páginas estruturais obrigatórias existem na Wiki | Cobertura documental |
+| 9 | Rules não contêm workflows procedurais extensos (headings procedurais + maior sequência contígua > 8) | Separação rules/skills |
 | 10 | Referências cruzadas entre rules apontam para arquivos existentes | Integridade referencial |
 | 11 | `README.md` não referencia funcionalidades removidas | Higiene |
 | 12 | ADRs revogadas possuem nota de redirecionamento | Rastreabilidade |
@@ -54,6 +58,23 @@ O script `scripts/governance-audit.sh` verifica automaticamente:
 | 22 | `wiki/Architecture.md` lista todas as integrações de `Shared/ExternalApi/` | Completude wiki |
 | 23 | Todas as rules possuem seção "Propósito" | Estrutura mínima |
 | 24 | Tabela "Features Implementadas" na wiki lista todas as features | Completude wiki |
+
+### Verificações não-bloqueantes (aviso, não bloqueia commit)
+
+| # | Verificação | Categoria |
+|---|---|---|
+| 25 | Nenhuma página wiki `Feature-*.md` órfã (sem feature correspondente no código) | Higiene bidirecional |
+| 26 | Endpoints no runbook correspondem a rotas nos Controllers | Alinhamento operacional |
+| 27 | Regras de negócio ativas possuem cenários BDD correspondentes | Completude semântica |
+| 28 | Contratos OpenAPI refletem endpoints implementados (não são placeholders) | Completude semântica |
+
+### Sobre a lista de artefatos removidos (check #6)
+
+O check #6 usa uma lista explícita de IDs de artefatos removidos, definida dentro do script na variável `REMOVED_ARTIFACTS`. Ao remover qualquer artefato (RN, DA, Feature, etc.), **adicionar o ID à lista no script**. Isso garante que referências ativas sejam detectadas sem necessidade de alterar a lógica do check.
+
+### Sobre verificações de completude semântica (checks #27-28)
+
+Estes checks emitem avisos, não falhas. A decisão de manter contratos e BDD como futuros está registrada em DA-022. Quando o projeto evoluir para domínio real, estes avisos devem ser promovidos a falhas.
 
 ---
 
@@ -96,3 +117,4 @@ Quando uma nova categoria de inconsistência for identificada (manualmente ou po
 | 2026-03-21 | Criado: regra de auditoria automatizada de governança | Análise de inconsistências do repositório |
 | 2026-03-21 | Expandido: verificações 14–18 adicionadas (código vs. governança, integridade de hooks, consistência interna do README) | Análise de causas-raiz |
 | 2026-03-21 | Expandido: verificações 19–24 adicionadas (integridade de skills, completude da wiki Architecture.md, estrutura mínima de rules) | Análise de governança — completude vs. existência |
+| 2026-03-21 | Reestruturado: numeração 1:1 entre rule e script; heurística de workflows melhorada (listas numeradas); check #6 generalizado para artefatos removidos; checks 25–28 adicionados (wiki órfãs, runbook↔endpoints, completude BDD, completude contratos); nível AVISO adicionado | Segunda análise de causas-raiz |
