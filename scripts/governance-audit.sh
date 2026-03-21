@@ -316,7 +316,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 9. Rules não contêm workflows procedurais extensos (>5 passos)
+# 9. Rules não contêm workflows procedurais extensos (>8 passos)
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- 9. Separação Rules/Skills (workflows extensos) ---"

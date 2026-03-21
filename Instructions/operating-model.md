@@ -31,6 +31,16 @@ Este repositório opera com um sistema de governança persistente. Todo conteúd
 
 Uma mensagem pode ativar múltiplos tipos simultaneamente.
 
+### Skills de Pipeline (não ativadas por tipo de mensagem)
+
+As seguintes skills são invocadas como passos do pipeline pré-commit (definido em `CLAUDE.md`), não por classificação de mensagem:
+
+| Skill | Passo do Pipeline | Propósito |
+|---|---|---|
+| `validate-endpoints` | Passo 6 | Validação HTTP real de endpoints após implementação |
+| `verify-environment` | Passo 0 | Verificação de pré-requisitos de ambiente |
+| `manage-pr-lifecycle` | Passos 10-11 | Criação/atualização de PR e acompanhamento de CI |
+
 ---
 
 ## O Que Conta Como Nova Definição Durável
@@ -110,3 +120,4 @@ O assistente pode lançar subagents especializados quando a tarefa beneficiar de
 | 2026-03-18 | Simplificado: removidas seções duplicadas com rules e CLAUDE.md; adicionada separação rules/skills/hooks; adicionada seção de subagents; adicionada referência a review-instructions | Reestruturação de governança |
 | 2026-03-19 | Adicionado: ferramentas, recursos MCP e capacidades operacionais como definições duráveis | Lacuna de governança identificada |
 | 2026-03-21 | Adicionado: 3 skills de pipeline extraídas das rules (validate-endpoints, verify-environment, manage-pr-lifecycle); rule governance-audit.md e script governance-audit.sh criados | Auditoria de governança |
+| 2026-03-21 | Adicionado: seção "Skills de Pipeline" distinguindo skills ativadas por tipo de mensagem (8) de skills de passos do pipeline (3) | Análise estrutural de governança |
