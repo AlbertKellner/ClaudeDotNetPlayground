@@ -12,7 +12,7 @@ O script `scripts/setup-env.sh` assume que essas entradas já existem no ambient
 |---|---|---|---|
 | `DD_API_KEY` | **Sim** | Datadog → Organization Settings → API Keys | Datadog Agent não autentica. `/health` retorna `Unhealthy`. Build e run da aplicação funcionam, mas sem observabilidade. |
 | `DD_APP_KEY` | **Sim** | Datadog → Organization Settings → Application Keys | Conexão MCP do Datadog não autentica. O servidor MCP fica inacessível para o Claude Code. |
-| `GH_TOKEN_MCP` | **Sim** | Gerado na conta GitHub do usuário ClaudeCode-Bot → Settings → Developer Settings → Personal Access Tokens (Fine-grained) | Servidor MCP do GitHub fica inacessível. Assistente não consegue criar, atualizar ou consultar Pull Requests via MCP. Pipeline pré-commit (passo 10) falha. |
+| `GH_CLAUDE_CODE_MCP` | **Sim** | Gerado na conta GitHub do usuário ClaudeCode-Bot → Settings → Developer Settings → Personal Access Tokens (Fine-grained) | Servidor MCP do GitHub fica inacessível. Assistente não consegue criar, atualizar ou consultar Pull Requests via MCP. Pipeline pré-commit (passo 10) falha. |
 | `GITHUB_PAT` | Condicional² | GitHub → Settings → Developer Settings → Personal Access Tokens | Feature `/github-repo-search` retorna HTTP 500 ao consultar API do GitHub. Mapeada no `docker-compose.yml` para `ExternalApi__GitHub__HttpRequest__PersonalAccessToken`. |
 
 ---
@@ -27,7 +27,7 @@ O script `scripts/setup-env.sh` assume que essas entradas já existem no ambient
 | `NO_PROXY` | Condicional¹ | `localhost,127.0.0.1` | Conexões locais podem ser roteadas incorretamente pelo proxy. |
 
 > ¹ **Condicional**: obrigatório em ambientes com proxy de inspeção TLS (como este sandbox Claude Code). Em ambientes sem proxy intermediário, essas variáveis não são necessárias.
-> ² **Condicional**: obrigatório quando a feature `/github-repo-search` será usada. `GH_TOKEN_MCP` é para o servidor MCP do GitHub (criar/atualizar PRs, monitorar Actions), `GITHUB_PAT` é para a aplicação .NET consultar a API GitHub via Refit. São tokens de usuários diferentes: `GH_TOKEN_MCP` pertence ao usuário ClaudeCode-Bot; `GITHUB_PAT` pertence ao desenvolvedor.
+> ² **Condicional**: obrigatório quando a feature `/github-repo-search` será usada. `GH_CLAUDE_CODE_MCP` é para o servidor MCP do GitHub (criar/atualizar PRs, monitorar Actions), `GITHUB_PAT` é para a aplicação .NET consultar a API GitHub via Refit. São tokens de usuários diferentes: `GH_CLAUDE_CODE_MCP` pertence ao usuário ClaudeCode-Bot; `GITHUB_PAT` pertence ao desenvolvedor.
 
 ---
 
@@ -69,7 +69,7 @@ Ou execute `scripts/setup-env.sh` — ele valida todas as entradas e emite erros
 | **Como renovar** | Revogar a chave antiga e criar nova no painel do Datadog. Atualizar na ferramenta externa. |
 | **Quem pode fornecer** | Qualquer membro da organização no Datadog (Application Keys são pessoais). |
 
-### GH_TOKEN_MCP (GitHub Personal Access Token do ClaudeCode-Bot para MCP)
+### GH_CLAUDE_CODE_MCP (GitHub Personal Access Token do ClaudeCode-Bot para MCP)
 
 | Campo | Valor |
 |---|---|
@@ -78,9 +78,9 @@ Ou execute `scripts/setup-env.sh` — ele valida todas as entradas e emite erros
 | **Como obter** | Fazer login na conta GitHub `ClaudeCode-Bot` → Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens → Generate new token. Repository access: Only select repositories → `AlbertKellner/ClaudeDotNetPlayground`. Permissões: `Contents` (Read and write), `Pull requests` (Read and write), `Actions` (Read-only), `Metadata` (Read-only). |
 | **Sintoma quando ausente** | Servidor MCP do GitHub fica inacessível. Ferramentas MCP de GitHub não respondem. Pipeline pré-commit (passo 10) falha. |
 | **Sintoma quando inválido/expirado** | MCP retorna HTTP 401 do GitHub. Ferramentas de PR e Actions não funcionam. |
-| **Como renovar** | Login na conta `ClaudeCode-Bot` → Settings → Developer Settings → Personal Access Tokens → criar novo token com as mesmas permissões. Atualizar `GH_TOKEN_MCP` nos secrets do Claude Code. |
+| **Como renovar** | Login na conta `ClaudeCode-Bot` → Settings → Developer Settings → Personal Access Tokens → criar novo token com as mesmas permissões. Atualizar `GH_CLAUDE_CODE_MCP` nos secrets do Claude Code. |
 | **Quem pode fornecer** | O administrador da conta `ClaudeCode-Bot` (proprietário do repositório). |
-| **Onde armazenar** | Secrets do Claude Code, variável `GH_TOKEN_MCP`. |
+| **Onde armazenar** | Secrets do Claude Code, variável `GH_CLAUDE_CODE_MCP`. |
 
 ### GITHUB_PAT (GitHub Personal Access Token para a aplicação)
 
@@ -103,7 +103,7 @@ Esta tabela mapeia cada variável ao erro exato que aparece quando está ausente
 |---|---|---|---|
 | `DD_API_KEY` | Pipeline Docker prossegue sem Datadog; `/health` retorna `Unhealthy` | `Unexpected response code from the API Key validation endpoint` | `docker compose up`, `GET /health` |
 | `DD_APP_KEY` | MCP Datadog inacessível; ferramentas MCP não respondem | HTTP 403 do servidor MCP | Ferramentas MCP do Claude Code |
-| `GH_TOKEN_MCP` | Servidor MCP do GitHub inacessível; ferramentas MCP não respondem | HTTP 401 do servidor MCP do GitHub | Ferramentas MCP do Claude Code (PRs, Actions) |
+| `GH_CLAUDE_CODE_MCP` | Servidor MCP do GitHub inacessível; ferramentas MCP não respondem | HTTP 401 do servidor MCP do GitHub | Ferramentas MCP do Claude Code (PRs, Actions) |
 | `GITHUB_PAT` | `/github-repo-search` retorna HTTP 500 | HTTP 401 da API GitHub | `GET /github-repo-search` via Docker |
 | `EXTRA_CA_CERT` | `UntrustedRoot` em `dotnet restore` dentro do Docker build | CA inválida; mesmo erro `UntrustedRoot` | `docker compose build` |
 | `HTTP_PROXY` | `Temporary failure resolving 'archive.ubuntu.com'` em `apt-get` | Proxy inacessível; timeout de conexão | `docker compose build`, `apt-get`, `dotnet restore` |
@@ -129,4 +129,4 @@ Esta tabela mapeia cada variável ao erro exato que aparece quando está ausente
 | 2026-03-19 | Estrutura inicial criada | Bootstrap de governança |
 | 2026-03-19 | Adicionado: ciclo de vida de credenciais, mapa de erros por variável, instruções detalhadas para obtenção de secrets | Instrução do usuário |
 | 2026-03-21 | Adicionado: GITHUB_PAT documentada como variável condicional para a aplicação .NET consultar API GitHub; diferenciação entre GH_TOKEN (CLI) e GITHUB_PAT (aplicação) | Auditoria de governança |
-| 2026-03-21 | Migração: GH_TOKEN substituído por GH_TOKEN_MCP; acesso ao GitHub via MCP (usuário ClaudeCode-Bot) em vez de CLI gh; ciclo de vida atualizado com instruções de token Fine-grained | Migração API → MCP |
+| 2026-03-21 | Migração: GH_TOKEN substituído por GH_CLAUDE_CODE_MCP; acesso ao GitHub via MCP (usuário ClaudeCode-Bot) em vez de CLI gh; ciclo de vida atualizado com instruções de token Fine-grained | Migração API → MCP |

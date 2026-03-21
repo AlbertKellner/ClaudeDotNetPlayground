@@ -127,7 +127,7 @@ Esta tabela consolida os problemas de ambiente mais frequentes, extraídos de `b
 | PokéAPI | `pokeapi.co` | Nenhuma (API pública) | `ExternalApi:Pokemon:HttpRequest:BaseUrl` em `appsettings.json` | `/pokemon` retorna HTTP 500 |
 | Datadog | `app.datadoghq.com` | API Key | `DD_API_KEY` no ambiente/`.env` | `/health` retorna `Degraded` ou `Unhealthy`; logs não fluem ao Datadog |
 | Datadog MCP | `mcp.datadoghq.com` | API Key + App Key | `DD_API_KEY` + `DD_APP_KEY` no ambiente | Ferramentas MCP do Datadog ficam indisponíveis para o assistente |
-| GitHub MCP | `api.githubcopilot.com` | Bearer Token (PAT) | `GH_TOKEN_MCP` no ambiente | Ferramentas MCP do GitHub ficam indisponíveis para o assistente (criação/atualização de PRs, monitoramento de Actions) |
+| GitHub MCP | `api.githubcopilot.com` | Bearer Token (PAT) | `GH_CLAUDE_CODE_MCP` no ambiente | Ferramentas MCP do GitHub ficam indisponíveis para o assistente (criação/atualização de PRs, monitoramento de Actions) |
 
 ---
 
