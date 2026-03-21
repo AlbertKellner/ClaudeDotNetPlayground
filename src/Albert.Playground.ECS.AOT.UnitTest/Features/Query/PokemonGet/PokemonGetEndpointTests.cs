@@ -15,7 +15,7 @@ public sealed class PokemonGetEndpointTests
         {
             var output = new PokemonOutput
             {
-                Id = 25,
+                Id = id,
                 Name = "pikachu",
                 Height = 4,
                 Weight = 60,
@@ -48,7 +48,7 @@ public sealed class PokemonGetEndpointTests
                 ],
                 Sprites = new PokemonSprites
                 {
-                    FrontDefault = "https://example.com/25.png"
+                    FrontDefault = $"https://example.com/{id}.png"
                 }
             };
 
@@ -64,13 +64,14 @@ public sealed class PokemonGetEndpointTests
         var useCase = new PokemonGetUseCase(fakeClient, fakeLoggerUseCase);
         var fakeLoggerEndpoint = new FakeLogger<PokemonGetEndpoint>();
         var endpoint = new PokemonGetEndpoint(useCase, fakeLoggerEndpoint);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        var actionResult = await endpoint.Get(CancellationToken.None);
+        var actionResult = await endpoint.Get(pokemonId, CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
         var output = Assert.IsType<PokemonGetOutput>(okResult.Value);
         Assert.Equal("pikachu", output.Name);
-        Assert.Equal(25, output.Id);
+        Assert.Equal(pokemonId, output.Id);
     }
 
     [Fact]
@@ -81,8 +82,9 @@ public sealed class PokemonGetEndpointTests
         var useCase = new PokemonGetUseCase(fakeClient, fakeLoggerUseCase);
         var fakeLoggerEndpoint = new FakeLogger<PokemonGetEndpoint>();
         var endpoint = new PokemonGetEndpoint(useCase, fakeLoggerEndpoint);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        await endpoint.Get(CancellationToken.None);
+        await endpoint.Get(pokemonId, CancellationToken.None);
 
         var logs = fakeLoggerEndpoint.GetSnapshot();
 
@@ -99,8 +101,9 @@ public sealed class PokemonGetEndpointTests
         var useCase = new PokemonGetUseCase(fakeClient, fakeLoggerUseCase);
         var fakeLoggerEndpoint = new FakeLogger<PokemonGetEndpoint>();
         var endpoint = new PokemonGetEndpoint(useCase, fakeLoggerEndpoint);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        await endpoint.Get(CancellationToken.None);
+        await endpoint.Get(pokemonId, CancellationToken.None);
 
         var logs = fakeLoggerEndpoint.GetSnapshot();
 

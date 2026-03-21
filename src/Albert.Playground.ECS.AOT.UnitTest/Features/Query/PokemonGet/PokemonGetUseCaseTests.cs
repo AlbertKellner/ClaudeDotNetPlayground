@@ -63,8 +63,8 @@ public sealed class PokemonGetUseCaseTests
                 ],
                 Sprites = new PokemonSprites
                 {
-                    FrontDefault = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
-                    FrontShiny = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/25.png"
+                    FrontDefault = $"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{id}.png",
+                    FrontShiny = $"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/{id}.png"
                 }
             };
 
@@ -78,8 +78,9 @@ public sealed class PokemonGetUseCaseTests
         var fakeClient = new FakePokemonApiClient();
         var fakeLogger = new FakeLogger<PokemonGetUseCase>();
         var useCase = new PokemonGetUseCase(fakeClient, fakeLogger);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        await useCase.ExecuteAsync();
+        await useCase.ExecuteAsync(pokemonId);
 
         var logs = fakeLogger.GetSnapshot();
 
@@ -89,15 +90,16 @@ public sealed class PokemonGetUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_DevePassarIdDoPikachuParaApi()
+    public async Task ExecuteAsync_DevePassarIdRecebidoParaApi()
     {
         var fakeClient = new FakePokemonApiClient();
         var fakeLogger = new FakeLogger<PokemonGetUseCase>();
         var useCase = new PokemonGetUseCase(fakeClient, fakeLogger);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        await useCase.ExecuteAsync();
+        await useCase.ExecuteAsync(pokemonId);
 
-        Assert.Equal(25, fakeClient.LastId);
+        Assert.Equal(pokemonId, fakeClient.LastId);
     }
 
     [Fact]
@@ -106,11 +108,12 @@ public sealed class PokemonGetUseCaseTests
         var fakeClient = new FakePokemonApiClient();
         var fakeLogger = new FakeLogger<PokemonGetUseCase>();
         var useCase = new PokemonGetUseCase(fakeClient, fakeLogger);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        var result = await useCase.ExecuteAsync();
+        var result = await useCase.ExecuteAsync(pokemonId);
 
         Assert.IsType<PokemonGetOutput>(result);
-        Assert.Equal(25, result.Id);
+        Assert.Equal(pokemonId, result.Id);
         Assert.Equal("pikachu", result.Name);
         Assert.Equal(4, result.Height);
         Assert.Equal(60, result.Weight);
@@ -123,8 +126,9 @@ public sealed class PokemonGetUseCaseTests
         var fakeClient = new FakePokemonApiClient();
         var fakeLogger = new FakeLogger<PokemonGetUseCase>();
         var useCase = new PokemonGetUseCase(fakeClient, fakeLogger);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        var result = await useCase.ExecuteAsync();
+        var result = await useCase.ExecuteAsync(pokemonId);
 
         Assert.Single(result.Types);
         Assert.Equal("electric", result.Types[0].Name);
@@ -137,8 +141,9 @@ public sealed class PokemonGetUseCaseTests
         var fakeClient = new FakePokemonApiClient();
         var fakeLogger = new FakeLogger<PokemonGetUseCase>();
         var useCase = new PokemonGetUseCase(fakeClient, fakeLogger);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        var result = await useCase.ExecuteAsync();
+        var result = await useCase.ExecuteAsync(pokemonId);
 
         Assert.Equal(2, result.Abilities.Count);
         Assert.Equal("static", result.Abilities[0].Name);
@@ -153,8 +158,9 @@ public sealed class PokemonGetUseCaseTests
         var fakeClient = new FakePokemonApiClient();
         var fakeLogger = new FakeLogger<PokemonGetUseCase>();
         var useCase = new PokemonGetUseCase(fakeClient, fakeLogger);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        var result = await useCase.ExecuteAsync();
+        var result = await useCase.ExecuteAsync(pokemonId);
 
         Assert.Equal(2, result.Stats.Count);
         Assert.Equal("hp", result.Stats[0].Name);
@@ -169,13 +175,14 @@ public sealed class PokemonGetUseCaseTests
         var fakeClient = new FakePokemonApiClient();
         var fakeLogger = new FakeLogger<PokemonGetUseCase>();
         var useCase = new PokemonGetUseCase(fakeClient, fakeLogger);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        var result = await useCase.ExecuteAsync();
+        var result = await useCase.ExecuteAsync(pokemonId);
 
         Assert.NotNull(result.FrontDefaultSprite);
-        Assert.Contains("25.png", result.FrontDefaultSprite);
+        Assert.Contains($"{pokemonId}.png", result.FrontDefaultSprite);
         Assert.NotNull(result.FrontShinySprite);
-        Assert.Contains("shiny/25.png", result.FrontShinySprite);
+        Assert.Contains($"shiny/{pokemonId}.png", result.FrontShinySprite);
     }
 
     [Fact]
@@ -184,8 +191,9 @@ public sealed class PokemonGetUseCaseTests
         var fakeClient = new FakePokemonApiClient();
         var fakeLogger = new FakeLogger<PokemonGetUseCase>();
         var useCase = new PokemonGetUseCase(fakeClient, fakeLogger);
+        var pokemonId = Random.Shared.Next(1, 1025);
 
-        await useCase.ExecuteAsync();
+        await useCase.ExecuteAsync(pokemonId);
 
         var logs = fakeLogger.GetSnapshot();
 

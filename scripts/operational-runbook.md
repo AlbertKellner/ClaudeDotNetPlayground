@@ -92,7 +92,7 @@ docker compose down
 | `GET` | `/test` | Sim | Endpoint de teste; retorna `"funcionando"` | RN-001 |
 | `GET` | `/weather-conditions` | Sim | Condições climáticas atuais de São Paulo via Open-Meteo | RN-004 |
 | `GET` | `/github-repo-search` | Sim | Pesquisa de repositórios GitHub da conta AlbertKellner | RN-008 |
-| `GET` | `/pokemon` | Sim | Consulta de Pokémon por ID (Pikachu hardcoded) via PokéAPI | RN-009 |
+| `GET` | `/pokemon/{id}` | Sim | Consulta de Pokémon por ID via PokéAPI | RN-009 |
 
 ---
 
