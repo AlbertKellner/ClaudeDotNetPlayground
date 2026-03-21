@@ -84,7 +84,7 @@ Antes de qualquer commit, executar obrigatoriamente esta sequência:
 
 **O Passo 11 é obrigatório e encerra a tarefa.** A tarefa só está concluída quando todos os jobs do CI passarem **e** os logs no Datadog forem verificados sem erros. O agente não deve encerrar a interação, apresentar relatório final ou considerar a tarefa finalizada enquanto houver jobs em execução, jobs falhando ou logs não verificados. Ver `.claude/rules/pr-metadata-governance.md` para a política completa.
 
-**Os passos 9–11 são obrigatórios mesmo em tarefas exclusivamente de governança** (sem mudança de código, sem build, sem Docker). Quando a tarefa não altera código da aplicação, os passos 0–8 são inaplicáveis e devem ser omitidos, mas o commit (passo 9), a criação/atualização do PR (passo 10) e o acompanhamento das GitHub Actions (passo 11) continuam obrigatórios.
+**Os passos 9 e 10 são obrigatórios mesmo em tarefas exclusivamente de governança** (sem mudança de código, sem build, sem Docker). Quando a tarefa não altera código da aplicação, os passos 0–8 e o passo 11 são inaplicáveis e devem ser omitidos. Apenas o commit (passo 9) e a criação/atualização do PR (passo 10) são obrigatórios.
 
 **`scripts/setup-env.sh` é um modelo declarativo** copiado manualmente pelo usuário em ferramenta externa de configuração de container. O agente não executa esse script — o ambiente deve chegar já pronto. Se um pré-requisito estiver ausente, o agente atualiza o script e sinaliza ao usuário para sincronizar a ferramenta externa.
 

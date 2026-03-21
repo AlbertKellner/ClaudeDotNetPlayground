@@ -157,7 +157,7 @@ Esta política **não se aplica** quando a tarefa é uma análise de PR via skil
 > Código pushado não está validado até que o CI confirme. O acompanhamento das Actions é a etapa final obrigatória do pipeline e **condição de encerramento da tarefa**.
 
 ### Quando se aplica:
-Esta política é ativada automaticamente **após o push e a criação/atualização do PR**, como passo 11 do pipeline de validação pré-commit definido em `CLAUDE.md`. **Aplica-se a toda tarefa que resulte em push — incluindo tarefas exclusivamente de governança** (sem código, sem build, sem Docker). A ausência de passos 0–8 não dispensa este passo.
+Esta política é ativada automaticamente **após o push e a criação/atualização do PR**, como passo 11 do pipeline de validação pré-commit definido em `CLAUDE.md`. **Não se aplica a tarefas exclusivamente de governança** (sem código, sem build, sem Docker) — para essas tarefas, apenas os passos 9 e 10 são obrigatórios.
 
 ### Workflow obrigatório:
 
@@ -326,3 +326,4 @@ Criar um branch novo ou usar um branch atribuído pelo sistema para resolver com
 | 2026-03-20 | Reforço: branch atribuído pelo sistema externo é ignorado em pr-analysis; passo 10 do pipeline não se aplica em análise de PR; exceção explícita adicionada à Política de Verificação e Criação de PR | Comportamento incorreto observado — novo PR criado em vez de usar PR existente |
 | 2026-03-20 | Adicionado: Política de Merge e Fechamento — Restrição Absoluta; merge e fechamento de PRs proibidos sem solicitação explícita do usuário | Instrução explícita do usuário |
 | 2026-03-21 | Refatorado: workflow de acompanhamento de GitHub Actions — polling adaptativo baseado em tempo médio da página Actions Performance Metrics; informar esteiras ao usuário antes de monitorar | Instrução do usuário |
+| 2026-03-21 | Alterado: passo 11 (acompanhamento de Actions) não se aplica a tarefas exclusivamente de governança | Instrução do usuário |
