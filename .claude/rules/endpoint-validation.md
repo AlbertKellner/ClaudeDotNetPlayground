@@ -119,6 +119,33 @@ docker logs $(docker compose ps -q app) --tail 30 2>&1
 
 Os logs capturados devem ser filtrados para incluir apenas as linhas correspondentes à requisição validada, identificáveis pelo CorrelationId presente na resposta ou pela proximidade temporal (logs emitidos entre a chamada e a captura). Estes logs serão apresentados no relatório (Passo 5, item 4).
 
+### Passo 3.2: Validar cache via segunda requisição consecutiva (quando aplicável)
+
+**Quando se aplica**: sempre que o endpoint validado utilizar cache de requisição (Memory Cache). Endpoints com cache são identificados pela presença de um decorator `Cached*Client` na cadeia de dependências da Feature (ex: `CachedOpenMeteoApiClient`, `CachedGitHubApiClient`).
+
+**Endpoints com cache conhecidos**:
+- `GET /weather-conditions` — cache via `CachedOpenMeteoApiClient`
+- `GET /github-repo-search` — cache via `CachedGitHubApiClient`
+
+**Workflow**:
+
+1. Imediatamente após a primeira requisição (Passo 3) e captura de logs (Passo 3.1), executar uma **segunda requisição idêntica** ao mesmo endpoint, com o mesmo token e mesmos parâmetros
+2. Capturar o body completo e o status code da segunda requisição (mesmo procedimento do Passo 3)
+3. Capturar os logs da segunda requisição (mesmo procedimento do Passo 3.1)
+
+**Validações obrigatórias**:
+- A segunda requisição deve retornar o **mesmo status code** da primeira (normalmente 200)
+- A segunda requisição deve retornar **resposta válida** (estrutura consistente com a primeira)
+- Os logs da **primeira requisição** devem conter evidência de **cache miss** (ex: `Cache miss. Consultar API externa`)
+- Os logs da **segunda requisição** devem conter evidência de **cache hit** (ex: `Retornar resposta do cache`)
+
+**Se a validação de cache falhar** (segunda requisição não retornar cache hit):
+1. Exibir os logs de ambas as requisições
+2. Registrar o erro em `bash-errors-log.md`
+3. **Não prosseguir para o commit** — investigar a causa
+
+**Reportar no relatório** (Passo 5): para endpoints com cache, incluir obrigatoriamente ambas as requisições (primeira e segunda), identificando qual foi cache miss e qual foi cache hit, com os respectivos logs de storytelling.
+
 ### Passo 4: Verificar resultado
 
 Para cada chamada, verificar:
@@ -205,3 +232,4 @@ Todas as chamadas de validação devem usar `http://localhost:8080` como base UR
 | 2026-03-17 | Criado: rule de validação obrigatória de endpoints após implementação de feature | Instrução do usuário |
 | 2026-03-20 | Adicionado: relatório de sucesso deve incluir status code, endpoint completo com parâmetros e JSON completo da resposta formatado em Markdown | Instrução do usuário |
 | 2026-03-20 | Adicionado: Passo 3.1 (captura de logs por requisição) e item 4 no Passo 5 (logs de storytelling obrigatórios no relatório, com verificação visual do padrão SNP-001) | Instrução do usuário |
+| 2026-03-21 | Adicionado: Passo 3.2 (validação de cache via segunda requisição consecutiva para endpoints com Memory Cache; validação de cache miss na primeira e cache hit na segunda) | Instrução do usuário |
