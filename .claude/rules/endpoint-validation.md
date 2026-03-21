@@ -14,6 +14,27 @@ Esta rule define a política de validação obrigatória de endpoints HTTP após
 
 ---
 
+## Política de Exibição de Logs de Storytelling
+
+Os logs de storytelling (SNP-001) de cada requisição HTTP validada devem ser **exibidos na íntegra** no relatório de validação. Esta é uma exigência absoluta, não sugestiva.
+
+### Obrigatório:
+- Exibir os logs **completos** de cada requisição como bloco de código Markdown independente
+- Exibir logs **por requisição individual** — cada chamada HTTP deve ter seu próprio bloco de logs
+- Para endpoints com cache: exibir logs separados da requisição de cache miss e da requisição de cache hit
+- O bloco de logs deve conter **todas as linhas** emitidas pela aplicação durante a requisição (filtradas pelo CorrelationId ou proximidade temporal)
+
+### Proibido:
+- Resumir os logs em bullets ou listas parciais
+- Parafrasear ou reescrever o conteúdo dos logs
+- Omitir linhas de log em favor de uma descrição textual
+- Mencionar que "logs foram gerados" sem exibi-los literalmente
+
+### Finalidade:
+O usuário precisa verificar visualmente que o padrão SNP-001 está sendo seguido: prefixo `[Classe][Método]`, logs de entrada e saída, iterações com log antes/depois, e sequência narrativa coerente.
+
+---
+
 ## Quando Esta Rule Se Aplica
 
 Esta rule é ativada toda vez que a implementação criar ou alterar uma feature que possua endpoint HTTP acessível, incluindo:
@@ -87,3 +108,4 @@ Todas as chamadas de validação devem usar `http://localhost:8080` como base UR
 | 2026-03-20 | Adicionado: Passo 3.1 (captura de logs por requisição) e item 4 no Passo 5 (logs de storytelling obrigatórios no relatório, com verificação visual do padrão SNP-001) | Instrução do usuário |
 | 2026-03-21 | Adicionado: Passo 3.2 (validação de cache via segunda requisição consecutiva para endpoints com Memory Cache; validação de cache miss na primeira e cache hit na segunda) | Instrução do usuário |
 | 2026-03-21 | Refatorado: workflow procedural extraído para skill validate-endpoints; rule simplificada para conter apenas política | Auditoria de governança |
+| 2026-03-21 | Adicionado: Política de Exibição de Logs de Storytelling — exibição íntegra obrigatória; proibição explícita de resumir, parafrasear ou omitir logs | Instrução do usuário |

@@ -141,10 +141,14 @@ No relatório final da tarefa, incluir obrigatoriamente:
 1. **Status code** da requisição (ex: `200`)
 2. **Endpoint completo** com método HTTP, URL e todos os parâmetros, headers e body utilizados na chamada
 3. **JSON completo** retornado pelo endpoint, formatado como bloco de código Markdown JSON
-4. **Logs de storytelling da requisição** capturados do container da aplicação imediatamente após a chamada ao endpoint (Passo 3.1). Os logs devem ser apresentados como bloco de código Markdown, filtrados para mostrar apenas as linhas correspondentes à requisição validada. O usuário deve poder verificar visualmente que o padrão SNP-001 (storytelling por classe e método) está sendo seguido:
+4. **Logs de storytelling da requisição na íntegra** — exibir os logs **completos e literais** capturados do container da aplicação (Passo 3.1), como bloco de código Markdown independente por requisição. **Não resumir, não parafrasear, não listar parcialmente.** Cada requisição HTTP executada deve ter seu próprio bloco de logs exibido. O bloco deve conter todas as linhas de log emitidas durante a requisição, filtradas pelo CorrelationId ou proximidade temporal. O usuário precisa verificar visualmente que o padrão SNP-001 (storytelling por classe e método) está sendo seguido:
    - Prefixo `[NomeDaClasse][NomeDoMétodo]` presente em cada linha de log
    - Logs de entrada e saída de cada método visíveis
    - Sequência narrativa coerente do fluxo da requisição
+
+**Para endpoints com cache** (Passo 3.2), exibir obrigatoriamente:
+5. **Logs da primeira requisição (cache miss)** — bloco de código Markdown com os logs completos da primeira chamada, contendo evidência de cache miss
+6. **Logs da segunda requisição (cache hit)** — bloco de código Markdown separado com os logs completos da segunda chamada, contendo evidência de cache hit
 
 ---
 
@@ -161,3 +165,4 @@ No relatório final da tarefa, incluir obrigatoriamente:
 | Data | Mudança | Referência |
 |---|---|---|
 | 2026-03-21 | Criado: workflow extraído de endpoint-validation.md (separação rules/skills) | Auditoria de governança |
+| 2026-03-21 | Passo 5 reforçado: exibição de logs na íntegra obrigatória; proibição de resumir; bloco independente por requisição; itens 5-6 para cache miss/hit | Instrução do usuário |
