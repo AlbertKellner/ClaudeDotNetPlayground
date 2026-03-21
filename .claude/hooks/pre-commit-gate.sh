@@ -16,6 +16,17 @@ REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
 echo "[Pre-commit gate] Verificando pré-requisitos..."
 
+# Verificar governança (passo 0.1 do pipeline)
+AUDIT_SCRIPT="$REPO_ROOT/scripts/governance-audit.sh"
+if [ -f "$AUDIT_SCRIPT" ]; then
+  echo "[Pre-commit gate] Executando auditoria de governança..."
+  if ! bash "$AUDIT_SCRIPT"; then
+    echo "[BLOQUEADO] Auditoria de governança falhou. Corrija as inconsistências antes de fazer commit."
+    exit 1
+  fi
+  echo "[Pre-commit gate] Auditoria de governança OK."
+fi
+
 # Descobrir projeto API dinamicamente (único .csproj em src/ que não é UnitTest/IntegrationTest)
 API_PROJECT=$(find "$REPO_ROOT/src" -maxdepth 2 -name "*.csproj" -type f \
   | grep -v -i "test" \

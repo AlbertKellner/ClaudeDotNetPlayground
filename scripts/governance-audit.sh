@@ -463,6 +463,146 @@ if [ -f "$README" ]; then
 fi
 
 # ---------------------------------------------------------------------------
+# 16. Cada diretório em .claude/skills/ contém SKILL.md
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 16. Integridade das skills ---"
+
+SKILLS_WITHOUT_MD=""
+while IFS= read -r skill_dir; do
+  skill_name=$(basename "$skill_dir")
+  if [ ! -f "$skill_dir/SKILL.md" ]; then
+    SKILLS_WITHOUT_MD="$SKILLS_WITHOUT_MD $skill_name"
+  fi
+done < <(find "$REPO_ROOT/.claude/skills" -mindepth 1 -maxdepth 1 -type d | sort)
+
+if [ -z "$SKILLS_WITHOUT_MD" ]; then
+  pass "Todos os diretórios de skills contêm SKILL.md"
+else
+  fail "Diretórios de skills sem SKILL.md" "$SKILLS_WITHOUT_MD"
+fi
+
+# ---------------------------------------------------------------------------
+# 17. wiki/Architecture.md lista todas as features implementadas
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 17. Completude da wiki: Architecture.md vs Features ---"
+
+WIKI_ARCH="$REPO_ROOT/wiki/Architecture.md"
+
+if [ -f "$WIKI_ARCH" ] && [ -d "$FEATURES_DIR" ]; then
+  MISSING_IN_ARCH=""
+  while IFS= read -r feature_dir; do
+    feature_name=$(basename "$feature_dir")
+    if ! grep -qi "$feature_name" "$WIKI_ARCH" 2>/dev/null; then
+      MISSING_IN_ARCH="$MISSING_IN_ARCH $feature_name"
+    fi
+  done < <(find "$FEATURES_DIR" -mindepth 2 -maxdepth 2 -type d | sort)
+
+  if [ -z "$MISSING_IN_ARCH" ]; then
+    pass "wiki/Architecture.md lista todas as features implementadas"
+  else
+    fail "Features ausentes em wiki/Architecture.md" "$MISSING_IN_ARCH"
+  fi
+else
+  pass "wiki/Architecture.md ou Features/ não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 18. wiki/Architecture.md lista todas as subpastas de Infra/
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 18. Completude da wiki: Architecture.md vs Infra/ ---"
+
+if [ -f "$WIKI_ARCH" ] && [ -d "$INFRA_DIR" ]; then
+  MISSING_INFRA_WIKI=""
+  while IFS= read -r infra_subdir; do
+    subdir_name=$(basename "$infra_subdir")
+    if ! grep -qi "$subdir_name" "$WIKI_ARCH" 2>/dev/null; then
+      MISSING_INFRA_WIKI="$MISSING_INFRA_WIKI Infra/$subdir_name"
+    fi
+  done < <(find "$INFRA_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
+
+  if [ -z "$MISSING_INFRA_WIKI" ]; then
+    pass "wiki/Architecture.md lista todas as subpastas de Infra/"
+  else
+    fail "Subpastas de Infra/ ausentes em wiki/Architecture.md" "$MISSING_INFRA_WIKI"
+  fi
+else
+  pass "wiki/Architecture.md ou Infra/ não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 19. wiki/Architecture.md lista todas as integrações Shared/ExternalApi/
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 19. Completude da wiki: Architecture.md vs Shared/ExternalApi/ ---"
+
+if [ -f "$WIKI_ARCH" ] && [ -d "$EXTERNAL_API_DIR" ]; then
+  MISSING_API_WIKI=""
+  while IFS= read -r api_subdir; do
+    api_name=$(basename "$api_subdir")
+    if ! grep -qi "$api_name" "$WIKI_ARCH" 2>/dev/null; then
+      MISSING_API_WIKI="$MISSING_API_WIKI Shared/ExternalApi/$api_name"
+    fi
+  done < <(find "$EXTERNAL_API_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
+
+  if [ -z "$MISSING_API_WIKI" ]; then
+    pass "wiki/Architecture.md lista todas as integrações de Shared/ExternalApi/"
+  else
+    fail "Integrações ausentes em wiki/Architecture.md" "$MISSING_API_WIKI"
+  fi
+else
+  pass "wiki/Architecture.md ou Shared/ExternalApi/ não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 20. Cada rule tem seção "Propósito"
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 20. Estrutura mínima das rules ---"
+
+RULES_WITHOUT_PURPOSE=""
+while IFS= read -r rule_file; do
+  rule_name=$(basename "$rule_file")
+  if ! grep -q '## Propósito' "$rule_file" 2>/dev/null; then
+    RULES_WITHOUT_PURPOSE="$RULES_WITHOUT_PURPOSE $rule_name"
+  fi
+done < <(find "$REPO_ROOT/.claude/rules" -name "*.md" -type f | sort)
+
+if [ -z "$RULES_WITHOUT_PURPOSE" ]; then
+  pass "Todas as rules possuem seção 'Propósito'"
+else
+  fail "Rules sem seção 'Propósito'" "$RULES_WITHOUT_PURPOSE"
+fi
+
+# ---------------------------------------------------------------------------
+# 21. wiki/Architecture.md tabela Features Implementadas lista todas as features
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 21. Completude da tabela de features na wiki ---"
+
+if [ -f "$WIKI_ARCH" ] && [ -d "$FEATURES_DIR" ]; then
+  # Extrair apenas a seção "Features Implementadas" da Architecture.md
+  FEATURES_TABLE=$(sed -n '/## Features Implementadas/,/^##\s/p' "$WIKI_ARCH" 2>/dev/null)
+  MISSING_IN_TABLE=""
+  while IFS= read -r feature_dir; do
+    feature_name=$(basename "$feature_dir")
+    if ! echo "$FEATURES_TABLE" | grep -qi "$feature_name" 2>/dev/null; then
+      MISSING_IN_TABLE="$MISSING_IN_TABLE $feature_name"
+    fi
+  done < <(find "$FEATURES_DIR" -mindepth 2 -maxdepth 2 -type d | sort)
+
+  if [ -z "$MISSING_IN_TABLE" ]; then
+    pass "Tabela 'Features Implementadas' na wiki lista todas as features"
+  else
+    fail "Features ausentes na tabela 'Features Implementadas' da wiki" "$MISSING_IN_TABLE"
+  fi
+else
+  pass "wiki/Architecture.md ou Features/ não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
 # Resumo
 # ---------------------------------------------------------------------------
 echo ""

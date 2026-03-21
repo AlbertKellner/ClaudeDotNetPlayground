@@ -48,6 +48,12 @@ O script `scripts/governance-audit.sh` verifica automaticamente:
 | 16 | Integrações em `Shared/ExternalApi/` estão documentadas em `technical-overview.md` | Código vs. Governança |
 | 17 | Hooks configurados em `settings.json` existem como arquivos | Integridade de hooks |
 | 18 | Contagens de skills são consistentes em todas as ocorrências do `README.md` | Consistência documental |
+| 19 | Todos os diretórios de skills contêm `SKILL.md` | Integridade estrutural |
+| 20 | `wiki/Architecture.md` lista todas as features implementadas | Completude wiki |
+| 21 | `wiki/Architecture.md` lista todas as subpastas de `Infra/` | Completude wiki |
+| 22 | `wiki/Architecture.md` lista todas as integrações de `Shared/ExternalApi/` | Completude wiki |
+| 23 | Todas as rules possuem seção "Propósito" | Estrutura mínima |
+| 24 | Tabela "Features Implementadas" na wiki lista todas as features | Completude wiki |
 
 ---
 
@@ -89,3 +95,4 @@ Quando uma nova categoria de inconsistência for identificada (manualmente ou po
 |---|---|---|
 | 2026-03-21 | Criado: regra de auditoria automatizada de governança | Análise de inconsistências do repositório |
 | 2026-03-21 | Expandido: verificações 14–18 adicionadas (código vs. governança, integridade de hooks, consistência interna do README) | Análise de causas-raiz |
+| 2026-03-21 | Expandido: verificações 19–24 adicionadas (integridade de skills, completude da wiki Architecture.md, estrutura mínima de rules) | Análise de governança — completude vs. existência |
