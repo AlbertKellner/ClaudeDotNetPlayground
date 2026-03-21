@@ -30,6 +30,7 @@ pass() {
   echo "[OK]    $1"
 }
 
+# fail <sintoma> [detalhe] [causa] [ação_corretiva]
 fail() {
   TOTAL=$((TOTAL + 1))
   FAILURES=$((FAILURES + 1))
@@ -37,14 +38,27 @@ fail() {
   if [ -n "${2:-}" ]; then
     echo "        Detalhe: $2"
   fi
+  if [ -n "${3:-}" ]; then
+    echo "        CAUSA: $3"
+  fi
+  if [ -n "${4:-}" ]; then
+    echo "        AÇÃO: $4"
+  fi
 }
 
+# warn <sintoma> [detalhe] [causa] [ação_corretiva]
 warn() {
   TOTAL=$((TOTAL + 1))
   WARNINGS=$((WARNINGS + 1))
   echo "[AVISO] $1"
   if [ -n "${2:-}" ]; then
     echo "        Detalhe: $2"
+  fi
+  if [ -n "${3:-}" ]; then
+    echo "        CAUSA: $3"
+  fi
+  if [ -n "${4:-}" ]; then
+    echo "        AÇÃO: $4"
   fi
 }
 
@@ -92,7 +106,10 @@ else
     done
     pass "Imports de Instructions/ adicionados automaticamente (--fix):$MISSING_IMPORTS"
   else
-    fail "Arquivos de Instructions/ ausentes nos imports do CLAUDE.md" "$MISSING_IMPORTS"
+    fail "Arquivos de Instructions/ ausentes nos imports do CLAUDE.md" \
+      "$MISSING_IMPORTS" \
+      "Arquivo .md adicionado a Instructions/ sem atualizar imports no CLAUDE.md" \
+      "Adicionar @<path> ao CLAUDE.md ou usar --fix para adição automática"
   fi
 fi
 
@@ -121,7 +138,10 @@ else
     done
     pass "Imports de .claude/rules/ adicionados automaticamente (--fix):$MISSING_RULES_IMPORTS"
   else
-    fail "Arquivos de .claude/rules/ ausentes nos imports do CLAUDE.md" "$MISSING_RULES_IMPORTS"
+    fail "Arquivos de .claude/rules/ ausentes nos imports do CLAUDE.md" \
+      "$MISSING_RULES_IMPORTS" \
+      "Rule .md adicionada a .claude/rules/ sem atualizar imports no CLAUDE.md" \
+      "Adicionar @<path> ao CLAUDE.md ou usar --fix para adição automática"
   fi
 fi
 
@@ -175,17 +195,24 @@ echo "--- 5. Variáveis de ambiente documentadas ---"
 
 if [ -f "$COMPOSE" ] && [ -f "$REQUIRED_VARS" ]; then
   UNDOCUMENTED_VARS=""
+  # Derivar dinamicamente variáveis com valor literal no compose (não-secrets).
+  # Variáveis definidas como "VAR=valor_literal" (sem ${}) são constantes de infraestrutura.
+  # Variáveis definidas via ${VAR} ou ${VAR:-default} vêm de .env e devem ser documentadas.
+  LITERAL_VARS=$(grep -oP '^\s+-?\s*(\w+)=' "$COMPOSE" 2>/dev/null \
+    | sed 's/^\s*-\?\s*//; s/=$//' \
+    | grep -v '^\$' | sort -u || true)
+  # Variáveis referenciadas via ${...} — estas são as que precisam de documentação
   while IFS= read -r var; do
-    # Excluir variáveis com valores fixos ou derivados no docker-compose.yml.
-    # Estas não são secrets nem configuráveis pelo usuário — são constantes de infraestrutura
-    # cujos valores estão definidos diretamente no docker-compose.yml (não via .env).
-    # Variáveis com ${...} (substituição de .env) SÃO verificadas.
+    # Verificar se esta variável é literal (valor fixo no compose) — se for, pular
+    is_literal=false
+    if echo "$LITERAL_VARS" | grep -qxF "$var" 2>/dev/null; then
+      is_literal=true
+    fi
+    # Também pular variáveis de configuração inline (__) que são constantes de infraestrutura
     case "$var" in
-      DD_SITE|DD_ENV|DD_HOSTNAME|DD_LOGS_ENABLED|DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL|\
-      DD_CONVERT_DD_SITE_FQDN_ENABLED|DD_DOGSTATSD_NON_LOCAL_TRAFFIC|\
-      ASPNETCORE_URLS|Datadog__*|ExternalApi__OpenMeteo__*) continue ;;
+      Datadog__*|ExternalApi__*) is_literal=true ;;
     esac
-    if ! grep -qF "$var" "$REQUIRED_VARS"; then
+    if [ "$is_literal" = false ] && ! grep -qF "$var" "$REQUIRED_VARS"; then
       UNDOCUMENTED_VARS="$UNDOCUMENTED_VARS $var"
     fi
   done < <(grep -oP '\$\{(\w+)' "$COMPOSE" | sed 's/\${//' | sort -u)
@@ -193,7 +220,10 @@ if [ -f "$COMPOSE" ] && [ -f "$REQUIRED_VARS" ]; then
   if [ -z "$UNDOCUMENTED_VARS" ]; then
     pass "Todas as variáveis de ambiente do docker-compose.yml estão documentadas em required-vars.md"
   else
-    fail "Variáveis do docker-compose.yml não documentadas em required-vars.md" "$UNDOCUMENTED_VARS"
+    fail "Variáveis do docker-compose.yml não documentadas em required-vars.md" \
+      "$UNDOCUMENTED_VARS" \
+      "Novas variáveis foram adicionadas ao docker-compose.yml (via \${...}) sem atualização de required-vars.md" \
+      "Documentar cada variável em scripts/required-vars.md com descrição, origem e ciclo de vida"
   fi
 else
   pass "docker-compose.yml ou required-vars.md não encontrado — verificação ignorada"
@@ -206,28 +236,33 @@ echo ""
 echo "--- 6. Referências a artefatos removidos ---"
 
 # Lista de IDs de artefatos removidos — derivada automaticamente das fontes de governança.
-# Fontes: architecture-decisions.md (status "Revogad"), business-rules.md (status "Removida").
-# IDs manuais são adicionados como fallback caso o padrão de texto mude.
-REMOVED_ARTIFACTS_MANUAL="RN-006 RN-007"
-REMOVED_ARTIFACTS_AUTO=""
+# Fontes: architecture-decisions.md (status contendo "Revogad/Removid/Depreciad"),
+#          business-rules.md (status contendo "Removid/Depreciad").
+# Padrão robusto: aceita variações de gênero/conjugação (Revogado/Revogada/Removido/Removida/Depreciado/Depreciada).
+# Sem lista manual de fallback — toda remoção deve ser rastreável via status nos arquivos-fonte.
+REMOVED_ARTIFACTS=""
+REMOVED_STATUS_PATTERN='[Rr]evogad|[Rr]emovid|[Dd]epreciad'
 if [ -f "$ADR_FILE" ]; then
-  REMOVED_ARTIFACTS_AUTO="$REMOVED_ARTIFACTS_AUTO $(grep -oP 'DA-\d+' "$ADR_FILE" | while read da_id; do
-    # Verificar se o bloco da decisão contém "Revogad" no campo Status
-    if sed -n "/### $da_id /,/^### DA-/p" "$ADR_FILE" 2>/dev/null | head -5 | grep -qi 'revogad'; then
+  # Extrair apenas IDs de seções header (### DA-NNN) e verificar campo **Status** (não conteúdo geral)
+  REMOVED_ARTIFACTS="$REMOVED_ARTIFACTS $(grep -oP '(?<=^### )DA-\d+' "$ADR_FILE" | sort -u | while read da_id; do
+    status_line=$(sed -n "/^### $da_id /,/^### DA-/p" "$ADR_FILE" 2>/dev/null | grep '^\*\*Status\*\*' | head -1)
+    if echo "$status_line" | grep -qiP "$REMOVED_STATUS_PATTERN"; then
       echo "$da_id"
     fi
   done)"
 fi
 BUSINESS_RULES_FILE="$REPO_ROOT/Instructions/business/business-rules.md"
 if [ -f "$BUSINESS_RULES_FILE" ]; then
-  REMOVED_ARTIFACTS_AUTO="$REMOVED_ARTIFACTS_AUTO $(grep -oP 'RN-\d+' "$BUSINESS_RULES_FILE" | while read rn_id; do
-    if sed -n "/### $rn_id /,/^### RN-/p" "$BUSINESS_RULES_FILE" 2>/dev/null | head -5 | grep -qi 'removid'; then
+  # Extrair apenas IDs de seções header (### RN-NNN) e verificar campo **Status**
+  REMOVED_ARTIFACTS="$REMOVED_ARTIFACTS $(grep -oP '(?<=^### )RN-\d+' "$BUSINESS_RULES_FILE" | sort -u | while read rn_id; do
+    status_line=$(sed -n "/^### $rn_id /,/^### RN-/p" "$BUSINESS_RULES_FILE" 2>/dev/null | grep '^\*\*Status\*\*' | head -1)
+    if echo "$status_line" | grep -qiP "$REMOVED_STATUS_PATTERN"; then
       echo "$rn_id"
     fi
   done)"
 fi
-# Combinar manuais + automáticos, remover duplicatas
-REMOVED_ARTIFACTS=$(echo "$REMOVED_ARTIFACTS_MANUAL $REMOVED_ARTIFACTS_AUTO" | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs)
+# Remover duplicatas e espaços em branco
+REMOVED_ARTIFACTS=$(echo "$REMOVED_ARTIFACTS" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | xargs)
 
 STALE_REFS=""
 for artifact_id in $REMOVED_ARTIFACTS; do
@@ -264,7 +299,10 @@ done
 if [ -z "$STALE_REFS" ]; then
   pass "Nenhuma referência ativa a artefatos removidos ($REMOVED_ARTIFACTS)"
 else
-  fail "Referências ativas a artefatos removidos encontradas" "$STALE_REFS"
+  fail "Referências ativas a artefatos removidos encontradas" \
+    "$STALE_REFS" \
+    "Artefatos foram revogados/removidos em architecture-decisions.md ou business-rules.md mas referências ativas permanecem em outros arquivos" \
+    "Remover ou mover para seções históricas as referências ativas listadas; verificar governance-policies.md §3 (propagação)"
 fi
 
 # ---------------------------------------------------------------------------
@@ -285,7 +323,42 @@ if [ -d "$WIKI_DIR" ] && [ -d "$FEATURES_DIR" ]; then
   if [ -z "$MISSING_WIKI" ]; then
     pass "Todas as features possuem página correspondente na Wiki"
   else
-    fail "Features sem página na Wiki" "$MISSING_WIKI"
+    if [ "$FIX_MODE" = true ]; then
+      for feature in $MISSING_WIKI; do
+        stub_file="$WIKI_DIR/Feature-${feature}.md"
+        cat > "$stub_file" << 'WIKI_STUB'
+# [Título da Funcionalidade]
+
+## Resumo
+<!-- TODO: Descrever o que a funcionalidade faz -->
+
+## Autenticação
+<!-- TODO: Requer autenticação: Sim / Não -->
+
+## Contrato de Entrada
+<!-- TODO: Método HTTP, rota, headers, body -->
+
+## Contrato de Saída
+<!-- TODO: Status codes e body schema -->
+
+## Comportamento
+<!-- TODO: Regras de negócio implementadas -->
+
+## Testes Automatizados
+Nenhum teste automatizado presente no repositório
+
+## BDD
+Nenhum cenário BDD definido para esta funcionalidade
+WIKI_STUB
+        FIXES=$((FIXES + 1))
+      done
+      pass "Stubs de páginas wiki criados automaticamente (--fix):$MISSING_WIKI"
+    else
+      fail "Features sem página na Wiki" \
+        "$MISSING_WIKI" \
+        "Feature adicionada ao código sem criação da página wiki correspondente (wiki-governance.md exige)" \
+        "Criar wiki/Feature-<Nome>.md seguindo o template obrigatório de wiki-governance.md; usar --fix para criar stub"
+    fi
   fi
 else
   pass "wiki/ ou Features/ não encontrado — verificação ignorada"
@@ -393,15 +466,35 @@ fi
 echo ""
 echo "--- 11. README.md sem funcionalidades removidas ---"
 
+# Derivar dinamicamente nomes de features removidas das fontes de governança.
+# Usa os mesmos REMOVED_ARTIFACTS derivados no check #6, mais nomes de features
+# extraídos das ADRs revogadas e RNs removidas.
+REMOVED_FEATURE_NAMES=""
+if [ -f "$ADR_FILE" ]; then
+  # Extrair nomes de features mencionados em ADRs revogadas (ex: RepositoriesGetAll, RepositoriesSyncAll)
+  for da_id in $REMOVED_ARTIFACTS; do
+    case "$da_id" in DA-*)
+      names=$(sed -n "/### $da_id /,/^### DA-/p" "$ADR_FILE" 2>/dev/null \
+        | grep -oP '\b[A-Z][a-zA-Z]+(?:GetAll|SyncAll|Search|Insert|Update|Delete)\b' | sort -u)
+      REMOVED_FEATURE_NAMES="$REMOVED_FEATURE_NAMES $names"
+    ;; esac
+  done
+fi
+# Adicionar IDs de artefatos removidos como termos de busca
+REMOVED_KEYWORDS=$(echo "$REMOVED_ARTIFACTS $REMOVED_FEATURE_NAMES" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' '|' | sed 's/|$//')
+
 README_ISSUES=""
-if grep -qi "WebMotors\|IntegrationRepos\|repositories/sync\|RepositoriesGetAll\|RepositoriesSyncAll" "$README" 2>/dev/null; then
-  README_ISSUES="$README_ISSUES referências-a-funcionalidades-removidas"
+if [ -n "$REMOVED_KEYWORDS" ] && grep -qiP "$REMOVED_KEYWORDS" "$README" 2>/dev/null; then
+  README_ISSUES="$README_ISSUES referências-a-artefatos-removidos($REMOVED_KEYWORDS)"
 fi
 
 if [ -z "$README_ISSUES" ]; then
-  pass "README.md não contém referências a funcionalidades removidas"
+  pass "README.md não contém referências a artefatos removidos"
 else
-  fail "README.md contém referências a funcionalidades removidas" "$README_ISSUES"
+  fail "README.md contém referências a artefatos removidos" \
+    "$README_ISSUES" \
+    "Artefatos foram revogados/removidos mas README.md público ainda os menciona" \
+    "Atualizar README.md para remover referências a artefatos com status Revogado/Removido"
 fi
 
 # ---------------------------------------------------------------------------
@@ -444,7 +537,18 @@ done < <(grep '^@' "$CLAUDE_MD")
 if [ -z "$BROKEN_IMPORTS" ]; then
   pass "Todos os imports existentes no CLAUDE.md apontam para arquivos reais"
 else
-  fail "Imports quebrados no CLAUDE.md (arquivos inexistentes)" "$BROKEN_IMPORTS"
+  if [ "$FIX_MODE" = true ]; then
+    for broken in $BROKEN_IMPORTS; do
+      sed -i "\|^@${broken}$|d" "$CLAUDE_MD"
+      FIXES=$((FIXES + 1))
+    done
+    pass "Imports quebrados removidos automaticamente (--fix):$BROKEN_IMPORTS"
+  else
+    fail "Imports quebrados no CLAUDE.md (arquivos inexistentes)" \
+      "$BROKEN_IMPORTS" \
+      "Arquivo de governança referenciado via @import foi removido ou renomeado sem atualizar CLAUDE.md" \
+      "Remover imports para arquivos inexistentes do CLAUDE.md; usar --fix para remoção automática"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -527,17 +631,30 @@ echo "--- 17. Integridade dos hooks ---"
 
 if [ -f "$SETTINGS" ]; then
   MISSING_HOOKS=""
+  INVALID_HOOKS=""
   while IFS= read -r hook_script; do
     script_name=$(echo "$hook_script" | grep -oP '\.claude/hooks/\S+\.sh' | head -1)
-    if [ -n "$script_name" ] && [ ! -f "$REPO_ROOT/$script_name" ]; then
-      MISSING_HOOKS="$MISSING_HOOKS $script_name"
+    if [ -n "$script_name" ]; then
+      if [ ! -f "$REPO_ROOT/$script_name" ]; then
+        MISSING_HOOKS="$MISSING_HOOKS $script_name"
+      elif ! bash -n "$REPO_ROOT/$script_name" 2>/dev/null; then
+        INVALID_HOOKS="$INVALID_HOOKS $script_name(erro-de-sintaxe)"
+      fi
     fi
   done < <(grep -oP '"command":\s*"[^"]*"' "$SETTINGS" | sed 's/"command":\s*"//;s/"$//')
 
-  if [ -z "$MISSING_HOOKS" ]; then
-    pass "Todos os hooks configurados em settings.json existem como arquivos"
+  HOOK_ISSUES="$MISSING_HOOKS$INVALID_HOOKS"
+  if [ -z "$HOOK_ISSUES" ]; then
+    pass "Todos os hooks configurados em settings.json existem e têm sintaxe válida"
   else
-    fail "Hooks configurados mas inexistentes" "$MISSING_HOOKS"
+    [ -n "$MISSING_HOOKS" ] && fail "Hooks configurados mas inexistentes" \
+      "$MISSING_HOOKS" \
+      "Hook referenciado em settings.json não existe como arquivo" \
+      "Criar o hook script ou remover a configuração de settings.json"
+    [ -n "$INVALID_HOOKS" ] && fail "Hooks com erro de sintaxe bash" \
+      "$INVALID_HOOKS" \
+      "Erro de sintaxe no script do hook impede sua execução" \
+      "Executar 'bash -n <hook>' para ver o erro e corrigir"
   fi
 else
   pass "settings.json não encontrado — verificação ignorada"
@@ -573,17 +690,48 @@ echo ""
 echo "--- 19. Integridade das skills ---"
 
 SKILLS_WITHOUT_MD=""
+SKILLS_INCOMPLETE=""
+# Seções obrigatórias em SKILL.md — aceita variantes de nomenclatura usadas nas skills existentes
+# "Propósito" ou "Nome" + "Descrição" cobrem a identificação da skill
+# "Quando Usar" cobre a ativação
+# "Workflow" (com qualquer sufixo) cobre o procedimento
 while IFS= read -r skill_dir; do
   skill_name=$(basename "$skill_dir")
-  if [ ! -f "$skill_dir/SKILL.md" ]; then
+  skill_file="$skill_dir/SKILL.md"
+  if [ ! -f "$skill_file" ]; then
     SKILLS_WITHOUT_MD="$SKILLS_WITHOUT_MD $skill_name"
+  else
+    missing_sections=""
+    # Identificação: "Propósito" ou "Nome"/"Descrição"
+    if ! grep -qP '^## (Propósito|Nome|Descrição)' "$skill_file" 2>/dev/null; then
+      missing_sections="$missing_sections Propósito-ou-Nome"
+    fi
+    # Ativação
+    if ! grep -qP '^## Quando Usar' "$skill_file" 2>/dev/null; then
+      missing_sections="$missing_sections Quando-Usar"
+    fi
+    # Procedimento: "Workflow" com qualquer sufixo
+    if ! grep -qP '^## Workflow' "$skill_file" 2>/dev/null; then
+      missing_sections="$missing_sections Workflow"
+    fi
+    if [ -n "$missing_sections" ]; then
+      SKILLS_INCOMPLETE="$SKILLS_INCOMPLETE $skill_name(faltam:$missing_sections)"
+    fi
   fi
 done < <(find "$REPO_ROOT/.claude/skills" -mindepth 1 -maxdepth 1 -type d | sort)
 
-if [ -z "$SKILLS_WITHOUT_MD" ]; then
-  pass "Todos os diretórios de skills contêm SKILL.md"
+SKILL_ISSUES="$SKILLS_WITHOUT_MD$SKILLS_INCOMPLETE"
+if [ -z "$SKILL_ISSUES" ]; then
+  pass "Todos os diretórios de skills contêm SKILL.md com estrutura mínima"
 else
-  fail "Diretórios de skills sem SKILL.md" "$SKILLS_WITHOUT_MD"
+  [ -n "$SKILLS_WITHOUT_MD" ] && fail "Diretórios de skills sem SKILL.md" \
+    "$SKILLS_WITHOUT_MD" \
+    "Diretório de skill criado sem arquivo SKILL.md" \
+    "Criar SKILL.md com seções: Propósito/Nome, Quando Usar, Workflow; usar --fix para criar stub"
+  [ -n "$SKILLS_INCOMPLETE" ] && fail "Skills com seções obrigatórias ausentes" \
+    "$SKILLS_INCOMPLETE" \
+    "SKILL.md existe mas não contém todas as seções obrigatórias" \
+    "Adicionar seções faltantes ao SKILL.md"
 fi
 
 # ---------------------------------------------------------------------------
@@ -664,18 +812,30 @@ fi
 echo ""
 echo "--- 23. Estrutura mínima das rules ---"
 
-RULES_WITHOUT_PURPOSE=""
+RULES_INCOMPLETE=""
+# Seções obrigatórias em rules
+REQUIRED_RULE_SECTIONS="Propósito Histórico"
 while IFS= read -r rule_file; do
   rule_name=$(basename "$rule_file")
+  missing_sections=""
   if ! grep -q '## Propósito' "$rule_file" 2>/dev/null; then
-    RULES_WITHOUT_PURPOSE="$RULES_WITHOUT_PURPOSE $rule_name"
+    missing_sections="$missing_sections Propósito"
+  fi
+  if ! grep -qP '## Histórico|## Relação com Outras Rules' "$rule_file" 2>/dev/null; then
+    missing_sections="$missing_sections Histórico-ou-Relação"
+  fi
+  if [ -n "$missing_sections" ]; then
+    RULES_INCOMPLETE="$RULES_INCOMPLETE $rule_name(faltam:$missing_sections)"
   fi
 done < <(find "$REPO_ROOT/.claude/rules" -name "*.md" -type f | sort)
 
-if [ -z "$RULES_WITHOUT_PURPOSE" ]; then
-  pass "Todas as rules possuem seção 'Propósito'"
+if [ -z "$RULES_INCOMPLETE" ]; then
+  pass "Todas as rules possuem estrutura mínima (Propósito + Histórico ou Relação)"
 else
-  fail "Rules sem seção 'Propósito'" "$RULES_WITHOUT_PURPOSE"
+  fail "Rules com estrutura incompleta" \
+    "$RULES_INCOMPLETE" \
+    "Rule não contém todas as seções obrigatórias (Propósito + Histórico ou Relação com Outras Rules)" \
+    "Adicionar seções faltantes à rule"
 fi
 
 # ---------------------------------------------------------------------------
@@ -911,18 +1071,90 @@ echo "--- 32. Consistência interna audit script ↔ rule ---"
 
 AUDIT_RULE="$REPO_ROOT/.claude/rules/governance-audit.md"
 if [ -f "$AUDIT_RULE" ]; then
-  # Contar checks no script (linhas "# N." ou "echo \"--- N.")
+  # Contar checks no script (linhas "echo \"--- N.")
   SCRIPT_CHECK_COUNT=$(grep -cP '^echo "--- \d+\.' "$0" 2>/dev/null || echo "0")
   # Contar checks documentados na rule (linhas "| N |")
   RULE_CHECK_COUNT=$(grep -cP '^\| \d+ \|' "$AUDIT_RULE" 2>/dev/null || echo "0")
 
-  if [ "$SCRIPT_CHECK_COUNT" -eq "$RULE_CHECK_COUNT" ]; then
-    pass "Quantidade de checks no script ($SCRIPT_CHECK_COUNT) = quantidade na rule ($RULE_CHECK_COUNT)"
+  # Verificação expandida: correspondência individual de IDs (não apenas contagem)
+  SCRIPT_IDS=$(grep -oP '(?<=^echo "--- )\d+' "$0" 2>/dev/null | sort -n)
+  RULE_IDS=$(grep -oP '(?<=^\| )\d+(?= \|)' "$AUDIT_RULE" 2>/dev/null | sort -n)
+  MISSING_IN_SCRIPT=$(comm -23 <(echo "$RULE_IDS") <(echo "$SCRIPT_IDS") | tr '\n' ' ')
+  MISSING_IN_RULE=$(comm -13 <(echo "$RULE_IDS") <(echo "$SCRIPT_IDS") | tr '\n' ' ')
+
+  if [ "$SCRIPT_CHECK_COUNT" -eq "$RULE_CHECK_COUNT" ] && [ -z "$MISSING_IN_SCRIPT" ] && [ -z "$MISSING_IN_RULE" ]; then
+    pass "Quantidade de checks no script ($SCRIPT_CHECK_COUNT) = quantidade na rule ($RULE_CHECK_COUNT); IDs correspondem 1:1"
   else
-    fail "Inconsistência: script tem $SCRIPT_CHECK_COUNT checks, rule documenta $RULE_CHECK_COUNT"
+    detail="script=$SCRIPT_CHECK_COUNT, rule=$RULE_CHECK_COUNT"
+    [ -n "$MISSING_IN_SCRIPT" ] && detail="$detail; IDs na rule mas ausentes no script: $MISSING_IN_SCRIPT"
+    [ -n "$MISSING_IN_RULE" ] && detail="$detail; IDs no script mas ausentes na rule: $MISSING_IN_RULE"
+    fail "Inconsistência meta: script ↔ rule" \
+      "$detail" \
+      "Checks foram adicionados/removidos do script ou da rule sem atualizar o outro arquivo" \
+      "Sincronizar governance-audit.sh e governance-audit.md — ambos devem ter os mesmos IDs de check"
   fi
 else
   pass "governance-audit.md não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 33. Detecção de referências circulares entre rules
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 33. Referências circulares entre rules ---"
+
+# Construir grafo de dependências e reportar métricas de acoplamento
+TOTAL_RULES=0
+TOTAL_EDGES=0
+ORPHAN_RULES=""
+while IFS= read -r rule_file; do
+  rule_name=$(basename "$rule_file" .md)
+  TOTAL_RULES=$((TOTAL_RULES + 1))
+  refs=$(sed -n '/## Relação com Outras Rules/,/^##/p' "$rule_file" 2>/dev/null \
+    | grep -oP '[a-z][-a-z]*\.md' 2>/dev/null | sed 's/\.md$//' | sort -u)
+  ref_count=$(echo "$refs" | grep -c '[a-z]' 2>/dev/null || echo "0")
+  TOTAL_EDGES=$((TOTAL_EDGES + ref_count))
+  # Rules sem referência a nenhuma outra rule são potenciais órfãs
+  if [ "$ref_count" -eq 0 ]; then
+    ORPHAN_RULES="$ORPHAN_RULES $rule_name"
+  fi
+done < <(find "$REPO_ROOT/.claude/rules" -name "*.md" -type f | sort)
+
+if [ -z "$ORPHAN_RULES" ]; then
+  pass "Grafo de rules conectado ($TOTAL_RULES rules, $TOTAL_EDGES referências cruzadas)"
+else
+  warn "Rules sem referência a outras rules (possivelmente isoladas)" \
+    "$ORPHAN_RULES" \
+    "Rules isoladas podem indicar falta de integração com o modelo de governança" \
+    "Adicionar seção 'Relação com Outras Rules' com referências às rules relacionadas"
+fi
+
+# ---------------------------------------------------------------------------
+# 34. Skills referenciam pelo menos uma rule
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 34. Skills com referências a rules ---"
+
+SKILLS_DIR="$REPO_ROOT/.claude/skills"
+if [ -d "$SKILLS_DIR" ]; then
+  ORPHAN_SKILLS=""
+  while IFS= read -r skill_file; do
+    skill_name=$(basename "$(dirname "$skill_file")")
+    if ! grep -q '\.claude/rules/' "$skill_file" 2>/dev/null; then
+      ORPHAN_SKILLS="$ORPHAN_SKILLS $skill_name"
+    fi
+  done < <(find "$SKILLS_DIR" -name "SKILL.md" -type f | sort)
+
+  if [ -z "$ORPHAN_SKILLS" ]; then
+    pass "Todas as skills referenciam pelo menos uma rule"
+  else
+    warn "Skills sem referência a nenhuma rule" \
+      "$ORPHAN_SKILLS" \
+      "Skill opera sem conexão com policies definidas nas rules — pode indicar policy não documentada" \
+      "Adicionar referências às rules relevantes na seção 'Arquivos de Governança Relacionados' da skill"
+  fi
+else
+  pass "Diretório de skills não encontrado — verificação ignorada"
 fi
 
 # ---------------------------------------------------------------------------

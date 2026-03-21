@@ -38,25 +38,25 @@ O script `scripts/governance-audit.sh` verifica automaticamente.
 | 2 | Todos os arquivos `.md` de `.claude/rules/` estão importados no `CLAUDE.md` | Estrutura de governança |
 | 3 | Contagem de rules no `README.md` corresponde ao número real | Consistência documental |
 | 4 | Contagem de skills no `README.md` corresponde ao número real | Consistência documental |
-| 5 | Variáveis de ambiente do `docker-compose.yml` estão documentadas em `required-vars.md` | Configuração |
-| 6 | Nenhuma referência ativa a artefatos removidos em arquivos não-históricos | Higiene |
+| 5 | Variáveis de ambiente do `docker-compose.yml` (via `${...}`) estão documentadas em `required-vars.md` — variáveis com valor literal e inline config (`__`) são excluídas dinamicamente | Configuração |
+| 6 | Nenhuma referência ativa a artefatos removidos em arquivos não-históricos — IDs derivados do campo `**Status**` em `architecture-decisions.md` e `business-rules.md` | Higiene |
 | 7 | Todas as features possuem página correspondente na Wiki | Cobertura documental |
 | 8 | Páginas estruturais obrigatórias existem na Wiki | Cobertura documental |
 | 9 | Rules não contêm workflows procedurais extensos (headings procedurais + maior sequência contígua > 8) | Separação rules/skills |
 | 10 | Referências cruzadas entre rules apontam para arquivos existentes | Integridade referencial |
-| 11 | `README.md` não referencia funcionalidades removidas | Higiene |
+| 11 | `README.md` não referencia artefatos removidos — derivação dinâmica dos mesmos IDs do check #6 | Higiene |
 | 12 | ADRs revogadas possuem justificativa ou redirecionamento (substituição por outra DA ou razão da remoção) | Rastreabilidade |
 | 13 | Imports existentes no CLAUDE.md apontam para arquivos reais | Integridade referencial |
 | 14 | Subpastas de `Infra/` estão documentadas em `technical-overview.md` | Código vs. Governança |
 | 15 | Subpastas de `Infra/` estão registradas em `folder-structure.md` | Código vs. Governança |
 | 16 | Integrações em `Shared/ExternalApi/` estão documentadas em `technical-overview.md` | Código vs. Governança |
-| 17 | Hooks configurados em `settings.json` existem como arquivos | Integridade de hooks |
+| 17 | Hooks configurados em `settings.json` existem como arquivos e têm sintaxe bash válida | Integridade de hooks |
 | 18 | Contagens de skills são consistentes em todas as ocorrências do `README.md` | Consistência documental |
-| 19 | Todos os diretórios de skills contêm `SKILL.md` | Integridade estrutural |
+| 19 | Todos os diretórios de skills contêm `SKILL.md` com estrutura mínima (Propósito/Nome, Quando Usar, Workflow) | Integridade estrutural |
 | 20 | `wiki/Architecture.md` lista todas as features implementadas | Completude wiki |
 | 21 | `wiki/Architecture.md` lista todas as subpastas de `Infra/` | Completude wiki |
 | 22 | `wiki/Architecture.md` lista todas as integrações de `Shared/ExternalApi/` | Completude wiki |
-| 23 | Todas as rules possuem seção "Propósito" | Estrutura mínima |
+| 23 | Todas as rules possuem estrutura mínima (Propósito + Histórico ou Relação com Outras Rules) | Estrutura mínima |
 | 24 | Tabela "Features Implementadas" na wiki lista todas as features | Completude wiki |
 
 ### Verificações não-bloqueantes (aviso, não bloqueia commit)
@@ -70,11 +70,13 @@ O script `scripts/governance-audit.sh` verifica automaticamente.
 | 29 | Referências em skills apontam para arquivos existentes | Integridade referencial |
 | 30 | Skills reais estão referenciadas em `operating-model.md` | Alinhamento operacional |
 | 31 | `wiki/Business-Rules.md` lista todas as RNs ativas | Completude wiki |
-| 32 | Quantidade de checks no script corresponde à documentação na rule | Meta-consistência |
+| 32 | Quantidade e IDs de checks no script correspondem 1:1 à documentação na rule | Meta-consistência |
+| 33 | Grafo de rules conectado — nenhuma rule isolada (sem referências a outras rules) | Integridade referencial |
+| 34 | Todas as skills referenciam pelo menos uma rule | Integridade referencial |
 
-### Sobre a lista de artefatos removidos (check #6)
+### Sobre a lista de artefatos removidos (checks #6 e #11)
 
-O check #6 deriva automaticamente a lista de IDs removidos das fontes de governança: `architecture-decisions.md` (status "Revogad") e `business-rules.md` (status "Removida"). Uma lista manual de fallback (`REMOVED_ARTIFACTS_MANUAL`) garante cobertura caso o padrão de texto mude. Ao remover qualquer artefato, verificar que o padrão de status está presente na fonte primária.
+Os checks #6 e #11 derivam automaticamente a lista de IDs removidos do campo `**Status**` das fontes de governança: `architecture-decisions.md` e `business-rules.md`. O padrão robusto aceita variações de gênero e conjugação (`Revogado/Revogada/Removido/Removida/Depreciado/Depreciada`). Não há lista manual de fallback — toda remoção deve ser rastreável via campo Status nos arquivos-fonte. Ao remover qualquer artefato, garantir que o campo `**Status**` contém uma dessas palavras-chave.
 
 ### Sobre verificações de completude semântica (checks #27-28)
 
@@ -93,11 +95,22 @@ bash scripts/governance-audit.sh --fix
 ### Correções automáticas suportadas:
 - Checks #1 e #2: adiciona imports faltantes ao `CLAUDE.md`
 - Checks #3 e #4: atualiza contagens de rules e skills no `README.md`
+- Check #7: cria stub de página wiki `Feature-<Nome>.md` com template obrigatório
+- Check #13: remove imports quebrados (arquivos inexistentes) do `CLAUDE.md`
 
 ### O que NÃO é corrigido automaticamente:
 - Problemas semânticos (categorização incorreta, referências a artefatos removidos em contexto ativo)
-- Problemas que requerem julgamento (separação rules/skills, conteúdo de wiki)
+- Problemas que requerem julgamento (separação rules/skills, conteúdo de wiki, conflitos de referência)
+- Estrutura de SKILL.md (check #19) — requer conteúdo contextual
 - Referências cruzadas quebradas (requer decisão sobre qual arquivo corrigir)
+
+### Mensagens de diagnóstico enriquecidas
+
+A partir da quarta rodada, toda falha e aviso inclui campos de diagnóstico opcionais:
+- **CAUSA**: explica por que o problema ocorreu (não apenas o sintoma)
+- **AÇÃO**: indica a ação corretiva específica para resolver o problema
+
+Isso transforma o script de detector de sintomas em diagnosticador de causas-raiz.
 
 ---
 
@@ -143,3 +156,4 @@ Quando uma nova categoria de inconsistência for identificada (manualmente ou po
 | 2026-03-21 | Expandido: verificações 19–24 adicionadas (integridade de skills, completude da wiki Architecture.md, estrutura mínima de rules) | Análise de governança — completude vs. existência |
 | 2026-03-21 | Reestruturado: numeração 1:1 entre rule e script; heurística de workflows melhorada (listas numeradas); check #6 generalizado para artefatos removidos; checks 25–28 adicionados (wiki órfãs, runbook↔endpoints, completude BDD, completude contratos); nível AVISO adicionado | Segunda análise de causas-raiz |
 | 2026-03-21 | Terceira rodada: check #6 com derivação automática de REMOVED_ARTIFACTS; check #12 com heurística corrigida para revogações sem substituição; checks 29–32 adicionados (skills→rules, operating-model↔skills, wiki Business-Rules↔RNs, meta-consistência script↔rule); modo --fix para correções triviais automáticas | Análise estrutural de governança |
+| 2026-03-21 | Quarta rodada — maturidade de auto-diagnóstico: (1) valores hardcoded eliminados nos checks #5, #6, #11 — derivação dinâmica de variáveis e artefatos removidos; (2) check #6 restrito ao campo `**Status**` para evitar falsos positivos; (3) mensagens de diagnóstico enriquecidas (CAUSA + AÇÃO) em todos os fails/warns; (4) auto-fix expandido: check #7 cria stubs wiki, check #13 remove imports quebrados; (5) check #17 expandido com validação de sintaxe bash; (6) check #19 expandido com validação de estrutura mínima do SKILL.md; (7) check #23 expandido com validação de Histórico/Relação; (8) check #32 expandido com correspondência individual de IDs (não apenas contagem); (9) checks 33–34 adicionados (conectividade do grafo de rules, skills→rules) | Análise de maturidade de governança |
