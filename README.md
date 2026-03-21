@@ -5,8 +5,8 @@
 ```
 .claude/
   hooks/         (3 scripts + settings.json)
-  rules/         (12 rules operacionais)
-  skills/        (11 skills com SKILL.md cada)
+  rules/         (13 rules operacionais)
+  skills/        (12 skills com SKILL.md cada)
 CLAUDE.md
 Instructions/
   architecture/  (6 arquivos)
@@ -30,8 +30,8 @@ open-questions.md
 | Grupo | Propósito |
 |---|---|
 | `CLAUDE.md` | Ponto de entrada: pipeline obrigatório de execução e imports de governança |
-| `.claude/rules/` | **Comportamento operacional persistente do assistente** — 12 rules que definem como interpretar, classificar, priorizar, propagar, auditar e implementar |
-| `.claude/skills/` | 11 skills que mapeiam tipos de solicitação e passos de pipeline a workflows completos de execução |
+| `.claude/rules/` | **Comportamento operacional persistente do assistente** — 13 rules que definem como interpretar, classificar, priorizar, propagar, auditar e implementar |
+| `.claude/skills/` | 12 skills que mapeiam tipos de solicitação e passos de pipeline a workflows completos de execução |
 | `.claude/hooks/` | Scripts de enforcement automatizado — detecção de mudanças em governança, proteção de branch e auditoria |
 | `Instructions/operating-model.md` | Documento central: explica como tudo funciona junto em runtime |
 | `Instructions/architecture/` | Memória arquitetural: princípios, padrões, decisões, nomenclatura, estrutura |
@@ -54,7 +54,7 @@ open-questions.md
 - **Hierarquia de prioridade** entre fontes de verdade com regras de conflito (`source-of-truth-priority.md`)
 - **Meta-governança** com checklist de revisão obrigatória para instruções (`REVIEW.md`, `instruction-review.md`)
 - **Auditoria automatizada** de consistência estrutural via script (`governance-audit.md`, `governance-audit.sh`)
-- **11 skills operacionais** com workflows internos completos para cada tipo de solicitação
+- **12 skills operacionais** com workflows internos completos para cada tipo de solicitação
 - **Estrutura durável** em todos os arquivos de `Instructions/` — prontos para receber conteúdo específico do domínio
 
 ---
