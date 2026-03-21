@@ -20,6 +20,7 @@
 - [Test Get](Feature-TestGet)
 - [Condições Climáticas](Feature-WeatherConditionsGet)
 - [Repositórios GitHub](Feature-GitHubRepoSearch)
+- [Pokémon](Feature-PokemonGet)
 
 ---
 
