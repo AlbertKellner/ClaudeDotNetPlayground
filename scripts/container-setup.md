@@ -17,7 +17,6 @@ Estas dependências devem estar pré-instaladas no container. O script `scripts/
 | CA do proxy TLS | — | Copiar certificado para `/usr/local/share/ca-certificates/` e executar `update-ca-certificates` |
 | `base64` | qualquer | Pré-instalado na maioria das imagens (coreutils) |
 | `curl` | qualquer | `apt-get install curl` |
-| `gh` (GitHub CLI) | qualquer estável | `apt-get install gh` (via repositório oficial: https://cli.github.com/packages) |
 
 ---
 
@@ -112,13 +111,10 @@ docker info >/dev/null 2>&1 && echo "OK" || echo "FALHOU"
 # 3. CA do proxy
 ls /usr/local/share/ca-certificates/swp-ca-production.crt
 
-# 4. GitHub CLI
-gh --version >/dev/null 2>&1 && echo "OK" || echo "FALHOU"
-
-# 5. Variáveis obrigatórias (ver required-vars.md)
+# 4. Variáveis obrigatórias (ver required-vars.md)
 echo "DD_API_KEY=${DD_API_KEY:-(AUSENTE)}"
 echo "DD_APP_KEY=${DD_APP_KEY:-(AUSENTE — necessário para MCP Datadog)}"
-echo "GH_TOKEN=${GH_TOKEN:-(AUSENTE — necessário para GitHub API)}"
+echo "GH_TOKEN_MCP=${GH_TOKEN_MCP:-(AUSENTE — necessário para MCP GitHub)}"
 echo "HTTP_PROXY=${HTTP_PROXY:-(não definido)}"
 ```
 
@@ -167,3 +163,4 @@ Se todos os passos retornarem OK, o ambiente está pronto para desenvolvimento.
 |---|---|---|
 | 2026-03-19 | Estrutura inicial criada | Bootstrap de governança |
 | 2026-03-19 | Adicionado: seção Portas e Serviços, Verificação Pós-Setup com sequência de validação ponta a ponta | Instrução do usuário |
+| 2026-03-21 | Migração: `gh` CLI removido das dependências (GitHub agora via MCP); checklist atualizado de GH_TOKEN para GH_TOKEN_MCP | Migração API → MCP |

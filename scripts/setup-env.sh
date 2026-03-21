@@ -196,15 +196,16 @@ check_dotnet() {
 }
 
 # =============================================================================
-# 6. Verificar GitHub CLI (gh)
+# 6. Verificar GH_TOKEN_MCP (GitHub MCP)
 # =============================================================================
-check_gh_cli() {
-  if command -v gh >/dev/null 2>&1; then
-    local gh_version
-    gh_version="$(gh --version 2>/dev/null | head -1 | awk '{print $3}')"
-    print_item "OK" "GitHub CLI (gh)" "versão ${gh_version}"
+check_gh_token_mcp() {
+  local gh_token_mcp
+  gh_token_mcp="$(printenv GH_TOKEN_MCP 2>/dev/null || true)"
+
+  if [ -n "$gh_token_mcp" ]; then
+    print_item "OK" "GH_TOKEN_MCP" "presente no ambiente"
   else
-    print_item "WARN" "GitHub CLI (gh)" "não encontrado — criação automática de PRs não funcionará"
+    print_item "WARN" "GH_TOKEN_MCP" "ausente — servidor MCP do GitHub não funcionará (ver scripts/required-vars.md)"
   fi
 }
 
@@ -238,7 +239,7 @@ main() {
   setup_docker_proxy
   check_ca_cert
   check_dotnet
-  check_gh_cli
+  check_gh_token_mcp
   check_dd_app_key
 
   print_summary

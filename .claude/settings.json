@@ -10,7 +10,6 @@
       "Bash(docker exec:*)",
       "Bash(curl:*)",
       "Bash(git:*)",
-      "Bash(gh:*)",
       "Bash(ls:*)",
       "Bash(mkdir:*)",
       "Bash(cat:*)",

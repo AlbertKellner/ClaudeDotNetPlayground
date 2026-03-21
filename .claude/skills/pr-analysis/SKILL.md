@@ -26,14 +26,12 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
 ```
 1. IDENTIFICAR O PR
    - Se o usuário forneceu número/URL → usar diretamente
-   - Se não forneceu → identificar o PR aberto para o branch atual:
-     gh api repos/<owner>/<repo>/pulls --jq '.[] | select(.head.ref == "<branch>") | .number'
+   - Se não forneceu → identificar o PR aberto para o branch atual via ferramenta MCP `list_pull_requests`
    - Validar que o PR está em estado "open"
    - Se não houver PR aberto → reportar e encerrar
 
 1b. GARANTIR BRANCH CORRETO (obrigatório — antes de qualquer outra ação)
-    - Obter o head.ref do PR identificado:
-        HEAD_REF=$(gh api repos/<owner>/<repo>/pulls/<number> --jq '.head.ref')
+    - Obter o head.ref do PR identificado via ferramenta MCP `get_pull_request`
     - O branch atribuído pelo sistema externo de configuração de tarefas
       (ex: "Develop on branch claude/...") é IGNORADO.
       O único branch válido para pr-analysis é o head.ref do PR.
@@ -58,10 +56,8 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
         o PR original sem as correções
 
 2. COLETAR SOLICITAÇÕES DE MUDANÇA
-   - Buscar reviews com estado CHANGES_REQUESTED:
-     gh api repos/<owner>/<repo>/pulls/<number>/reviews --jq '.[] | select(.state == "CHANGES_REQUESTED")'
-   - Buscar comentários individuais de revisão (inline comments):
-     gh api repos/<owner>/<repo>/pulls/<number>/comments
+   - Buscar reviews com estado CHANGES_REQUESTED via ferramenta MCP `list_pull_request_reviews`
+   - Buscar comentários individuais de revisão (inline comments) via ferramenta MCP `list_review_comments`
    - Filtrar apenas threads abertas (não resolvidas)
    - Consolidar todas as solicitações em uma lista unificada com:
      - Id do comentário/review
@@ -145,8 +141,7 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
      - Passo 9 (commit): aplicável — o commit é feito no branch do PR (head.ref)
      - Passo 10 (criar/atualizar PR): NÃO APLICÁVEL — o PR já existe.
        Em vez de criar ou buscar PR, atualizar título e descrição do PR existente
-       via gh api se as mudanças alterarem o escopo:
-         gh api repos/<owner>/<repo>/pulls/<number> -X PATCH -f title="..." -f body="..."
+       via ferramenta MCP `update_pull_request` se as mudanças alterarem o escopo
      - Passo 11 (acompanhar GitHub Actions): APLICÁVEL — acompanhar normalmente após o push
 
 7. PUSH E RESPONDER A CADA SOLICITAÇÃO INDIVIDUALMENTE
@@ -155,7 +150,7 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
    NUNCA fazer push para um branch diferente do head.ref do PR.
    Os novos commits aparecem automaticamente na timeline do PR existente.
 
-   Em seguida, responder a cada comentário de revisão via gh api.
+   Em seguida, responder a cada comentário de revisão via ferramenta MCP.
 
    a) Solicitações conformes implementadas:
       → Informar o que foi feito, referenciando o commit
@@ -170,14 +165,10 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
       → Explicar a ambiguidade identificada
       → Informar qual esclarecimento é necessário para prosseguir
 
-   Comando para responder a review comment:
-     gh api repos/<owner>/<repo>/pulls/<number>/comments/<comment_id>/replies \
-       -f body="<resposta>"
+   Usar ferramenta MCP `create_pull_request_review_comment_reply` para responder a cada review comment.
 
 8. VERIFICAR STATUS DE APROVAÇÃO
-   Consultar o estado de todas as reviews:
-     gh api repos/<owner>/<repo>/pulls/<number>/reviews \
-       --jq '.[] | {user: .user.login, state: .state}'
+   Consultar o estado de todas as reviews via ferramenta MCP `list_pull_request_reviews`.
    - Se todas estão approved → reportar que o PR está pronto para merge
    - Se alguma não está approved → reportar quais revisores têm status pendente
 
@@ -191,8 +182,7 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
    c) Nenhuma outra restrição de governança impede o merge
 
    Se todas as condições forem satisfeitas:
-     gh api repos/<owner>/<repo>/pulls/<number>/merge \
-       -X PUT -f merge_method="merge"
+     Usar ferramenta MCP `merge_pull_request` com merge_method="merge"
 
    Se alguma condição não for satisfeita → reportar o estado atual e aguardar instrução do usuário.
    O assistente também **nunca deve fechar** um PR sem solicitação explícita do usuário.
@@ -224,7 +214,7 @@ Ativar esta skill **exclusivamente** quando o usuário solicitar explicitamente:
 - `.claude/rules/source-of-truth-priority.md` — hierarquia de prioridade entre fontes de verdade
 - `.claude/rules/architecture-governance.md` — governança de decisões arquiteturais
 - `.claude/rules/naming-governance.md` — governança de nomenclatura
-- `.claude/rules/pr-metadata-governance.md` — governança de metadados de PR e uso de `gh api`
+- `.claude/rules/pr-metadata-governance.md` — governança de metadados de PR e uso de ferramentas MCP do GitHub
 - `.claude/rules/endpoint-validation.md` — validação de endpoints após implementação
 - `.claude/rules/environment-readiness.md` — pré-requisitos de ambiente
 - `Instructions/architecture/technical-overview.md` — visão técnica e restrições
