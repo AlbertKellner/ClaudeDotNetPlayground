@@ -48,7 +48,7 @@ Em toda tarefa, antes de iniciar qualquer sequência de operações, avaliar ati
 - Existe abordagem mais rápida e reversível que produz o mesmo resultado?
 
 Aplicar a otimização quando a resposta for sim. Registrar quando a otimização não for possível e por quê.
-Ver detalhamento completo em `.claude/rules/environment-readiness.md`.
+Ver política em `.claude/rules/environment-readiness.md`. Ver workflow procedural em `.claude/skills/verify-environment/SKILL.md`.
 
 ### 10. Proteção de branch em análise de PR
 Quando a tarefa for análise de solicitações de mudança em pull request (skill pr-analysis), o branch atribuído pelo sistema externo de configuração de tarefas (ex: "Develop on branch claude/...") deve ser **IGNORADO**. O único branch válido é o `head.ref` do PR sendo analisado. O assistente deve executar `git fetch origin <head.ref> && git checkout <head.ref>` como primeiro comando antes de qualquer alteração. Criar um branch novo durante pr-analysis é um erro — todos os commits e pushes devem ser feitos no branch de origem do PR. Nunca criar um PR novo quando a tarefa é análise de PR existente.

@@ -61,6 +61,7 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 | GitHubAuthenticationHandler | `Shared/ExternalApi/GitHub/GitHubAuthenticationHandler.cs` | DelegatingHandler que adiciona PAT e User-Agent ao header das requisições GitHub |
 | GitHubRepositoryOutput | `Shared/ExternalApi/GitHub/Models/GitHubRepositoryOutput.cs` | Modelo de resposta da API GitHub; inclui GitHubJsonContext para AOT |
 | Exception Handler | `Infra/ExceptionHandling/GlobalExceptionHandler.cs` | Handler centralizado de exceções; retorna Problem Details (RFC 7807) |
+| DatadogAgentHealthCheck | `Infra/HealthChecks/DatadogAgentHealthCheck.cs` | Verifica disponibilidade do Datadog Agent via HTTP; determina status Healthy/Degraded/Unhealthy (RN-005) |
 | Correlation ID Middleware | `Infra/Middlewares/CorrelationIdMiddleware.cs` | Garante GUID v7 por request; enriquece logs via Serilog LogContext; completamente opaco para Features |
 | GuidV7 | `Infra/Correlation/GuidV7.cs` | Utilitário de geração e validação de GUID v7 (uso interno da Infra) |
 | ITokenService | `Infra/Security/ITokenService.cs` | Contrato de geração e validação de JWT Bearer Token |
@@ -68,6 +69,8 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 | TokenService | `Infra/Security/TokenService.cs` | Implementação JWT HS256: geração e validação de Bearer Token |
 | AuthenticateFilter | `Infra/Security/AuthenticateFilter.cs` | IAsyncActionFilter: valida Bearer Token, retorna 401 se inválido, enriquece logs com UserId e UserName, armazena AuthenticatedUser em HttpContext.Items para acesso por camadas downstream |
 | AuthenticateAttribute | `Infra/Security/AuthenticateAttribute.cs` | TypeFilterAttribute: decorador aplicado nos Controllers para ativar AuthenticateFilter via DI |
+| DatadogHttpSink | `Infra/Logging/DatadogHttpSink.cs` | Serilog ILogEventSink customizado: envia logs diretamente ao Datadog via HTTP (`/api/v2/logs`); batching assíncrono via Channel; ativado condicionalmente por `Datadog:DirectLogs` em `appsettings.json` |
+| DatadogLogEntry | `Infra/Logging/DatadogLogEntry.cs` | Modelo de entrada de log para o Datadog HTTP Sink; inclui DatadogLogJsonContext para serialização AOT-compatível |
 | AppJsonContext | `Infra/Json/AppJsonContext.cs` | JsonSerializerContext source-generated para serialização AOT-compatível; inserido no TypeInfoResolverChain do MVC |
 | NullModelBinderProvider | `Infra/ModelBinding/NullModelBinderProvider.cs` | Substitui providers de model binding incompatíveis com AOT (TryParse, FloatingPoint) por implementação no-op |
 | FallbackSimpleTypeModelBinderProvider | `Infra/ModelBinding/FallbackSimpleTypeModelBinderProvider.cs` | Substitui SimpleTypeModelBinderProvider por versão AOT-compatível |
@@ -198,3 +201,4 @@ Quando o usuário disponibilizar um novo recurso operacional (MCP server, integr
 | 2026-03-19 | Restrição adicionada: models de Input e Output de Features devem residir exclusivamente em `<Feature>Models/`, não em Shared | DA-020 |
 | 2026-03-20 | Features RepositoriesGetAll e RepositoriesSyncAll removidas; Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos; DA-019 revogada; integração GitHub API removida da stack | Instrução do usuário |
 | 2026-03-20 | Integração GitHub API adicionada: Refit + Polly + DelegatingHandler para PAT; Shared/ExternalApi/GitHub/ criada; Feature GitHubRepoSearch implementada; RN-008 | DA-021, RN-008 |
+| 2026-03-21 | Infra/Logging/ documentada: DatadogHttpSink e DatadogLogEntry adicionados à tabela de componentes; lacuna de governança corrigida | Análise de causas-raiz |

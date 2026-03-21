@@ -83,12 +83,22 @@ Ativar esta skill quando a mensagem do usuário:
    - Aplicar snippets normativos na íntegra
    - Adaptar exemplos ilustrativos conforme contexto
 
-10. RELATAR
+10. VERIFICAR COBERTURA DE GOVERNANÇA (obrigatório pós-implementação)
+    - Para cada arquivo .cs criado ou alterado, verificar:
+      a. Se é em Infra/ → componente registrado em technical-overview.md? Subpasta em folder-structure.md?
+      b. Se é em Shared/ExternalApi/ → integração registrada em technical-overview.md? Subpasta em folder-structure.md?
+      c. Se é em Features/ → feature registrada em business-rules.md? Página na Wiki?
+    - Se qualquer registro estiver ausente → atualizar ANTES de prosseguir para o relatório
+    - Este passo NÃO é opcional — é o enforcement do passo 7 (governança antes de implementação)
+    - Este passo previne a causa-raiz de componentes implementados sem registro na governança
+
+11. RELATAR
     - Intenção interpretada
     - Arquivos de governança consultados
     - Arquivos alterados (governança + implementação)
     - Trechos classificados (normativos preservados, ilustrativos adaptados)
     - Governança atualizada (o que mudou antes da implementação)
+    - Verificação de cobertura de governança (resultado do passo 10)
     - Premissas adotadas
     - Conflitos encontrados e resolução
     - Dúvidas registradas
