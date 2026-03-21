@@ -14,6 +14,7 @@
 set -euo pipefail
 
 # Modo --fix: corrige automaticamente problemas triviais (imports faltantes, contagens)
+# Segurança: cria backup de cada arquivo antes de alterar (restaurável via .bak)
 FIX_MODE=false
 if [ "${1:-}" = "--fix" ]; then
   FIX_MODE=true
@@ -24,6 +25,29 @@ FAILURES=0
 WARNINGS=0
 FIXES=0
 TOTAL=0
+
+# --- Constantes configuráveis ---
+# Threshold de passos contíguos para classificar conteúdo como workflow (vs. policy).
+# Rules podem ter listas curtas (até ~7-8 ações) como parte da definição de política.
+# Sequências contíguas acima deste valor indicam workflow, que pertence a uma skill.
+MAX_POLICY_STEPS=8
+
+# Prefixos de variáveis de configuração inline (__) no docker-compose que são constantes
+# de infraestrutura, não secrets de ambiente. Atualizar esta lista ao adicionar novas integrações.
+INLINE_CONFIG_PREFIXES="Datadog__|ExternalApi__"
+
+# Padrão de status para detecção de artefatos removidos/revogados/depreciados.
+# Aceita variações de gênero e conjugação em português.
+REMOVED_STATUS_PATTERN='[Rr]evogad|[Rr]emovid|[Dd]epreciad|[Oo]bsolet'
+
+# safe_fix: cria backup de arquivo antes de modificá-lo via --fix
+# Uso: safe_fix <arquivo>
+safe_fix() {
+  local target="$1"
+  if [ -f "$target" ] && [ ! -f "${target}.bak" ]; then
+    cp "$target" "${target}.bak"
+  fi
+}
 
 pass() {
   TOTAL=$((TOTAL + 1))
@@ -99,6 +123,7 @@ if [ -z "$MISSING_IMPORTS" ]; then
   pass "Todos os arquivos de Instructions/ estão importados no CLAUDE.md"
 else
   if [ "$FIX_MODE" = true ]; then
+    safe_fix "$CLAUDE_MD"
     for missing in $MISSING_IMPORTS; do
       # Adicionar import antes da última linha de imports (antes de "### Rules")
       sed -i "/### Rules operacionais ativas/i @$missing" "$CLAUDE_MD"
@@ -131,6 +156,7 @@ if [ -z "$MISSING_RULES_IMPORTS" ]; then
   pass "Todos os arquivos de .claude/rules/ estão importados no CLAUDE.md"
 else
   if [ "$FIX_MODE" = true ]; then
+    safe_fix "$CLAUDE_MD"
     for missing in $MISSING_RULES_IMPORTS; do
       # Adicionar import antes da seção de meta-governança
       sed -i "/### Meta-governança/i @$missing" "$CLAUDE_MD"
@@ -158,6 +184,7 @@ if [ "$ACTUAL_RULES_COUNT" = "$README_RULES_COUNT" ]; then
   pass "Contagem de rules no README.md ($README_RULES_COUNT) corresponde ao real ($ACTUAL_RULES_COUNT)"
 else
   if [ "$FIX_MODE" = true ]; then
+    safe_fix "$README"
     sed -i "s/${README_RULES_COUNT} rules/${ACTUAL_RULES_COUNT} rules/g" "$README"
     FIXES=$((FIXES + 1))
     pass "Contagem de rules atualizada automaticamente (--fix): $README_RULES_COUNT → $ACTUAL_RULES_COUNT"
@@ -179,6 +206,7 @@ if [ "$ACTUAL_SKILLS_COUNT" = "$README_SKILLS_COUNT" ]; then
   pass "Contagem de skills no README.md ($README_SKILLS_COUNT) corresponde ao real ($ACTUAL_SKILLS_COUNT)"
 else
   if [ "$FIX_MODE" = true ]; then
+    safe_fix "$README"
     sed -i "s/${README_SKILLS_COUNT} skills/${ACTUAL_SKILLS_COUNT} skills/g" "$README"
     FIXES=$((FIXES + 1))
     pass "Contagem de skills atualizada automaticamente (--fix): $README_SKILLS_COUNT → $ACTUAL_SKILLS_COUNT"
@@ -208,10 +236,11 @@ if [ -f "$COMPOSE" ] && [ -f "$REQUIRED_VARS" ]; then
     if echo "$LITERAL_VARS" | grep -qxF "$var" 2>/dev/null; then
       is_literal=true
     fi
-    # Também pular variáveis de configuração inline (__) que são constantes de infraestrutura
-    case "$var" in
-      Datadog__*|ExternalApi__*) is_literal=true ;;
-    esac
+    # Também pular variáveis de configuração inline (__) que são constantes de infraestrutura.
+    # Prefixos configuráveis via INLINE_CONFIG_PREFIXES no topo do script.
+    for prefix in $(echo "$INLINE_CONFIG_PREFIXES" | tr '|' ' '); do
+      case "$var" in ${prefix}*) is_literal=true ;; esac
+    done
     if [ "$is_literal" = false ] && ! grep -qF "$var" "$REQUIRED_VARS"; then
       UNDOCUMENTED_VARS="$UNDOCUMENTED_VARS $var"
     fi
@@ -238,10 +267,10 @@ echo "--- 6. Referências a artefatos removidos ---"
 # Lista de IDs de artefatos removidos — derivada automaticamente das fontes de governança.
 # Fontes: architecture-decisions.md (status contendo "Revogad/Removid/Depreciad"),
 #          business-rules.md (status contendo "Removid/Depreciad").
-# Padrão robusto: aceita variações de gênero/conjugação (Revogado/Revogada/Removido/Removida/Depreciado/Depreciada).
+# Padrão robusto: aceita variações de gênero/conjugação (Revogado/Revogada/Removido/Removida/Depreciado/Depreciada/Obsoleto/Obsoleta).
 # Sem lista manual de fallback — toda remoção deve ser rastreável via status nos arquivos-fonte.
+# O padrão REMOVED_STATUS_PATTERN é definido como constante no topo do script.
 REMOVED_ARTIFACTS=""
-REMOVED_STATUS_PATTERN='[Rr]evogad|[Rr]emovid|[Dd]epreciad'
 if [ -f "$ADR_FILE" ]; then
   # Extrair apenas IDs de seções header (### DA-NNN) e verificar campo **Status** (não conteúdo geral)
   REMOVED_ARTIFACTS="$REMOVED_ARTIFACTS $(grep -oP '(?<=^### )DA-\d+' "$ADR_FILE" | sort -u | while read da_id; do
@@ -274,17 +303,32 @@ for artifact_id in $REMOVED_ARTIFACTS; do
     if grep -qF "$artifact_id" "$file" 2>/dev/null; then
       has_active_ref=false
       while IFS= read -r line; do
-        if echo "$line" | grep -qiP 'remov|substituíd|depreciad|histórico|revogad|^\|.*20[0-9]{2}-[0-9]{2}-[0-9]{2}'; then
+        # Heurística melhorada: verificar se a linha está em contexto histórico.
+        # 1. Linha contém keywords de remoção/depreciação/substituição → contexto de transição
+        # 2. Linha é uma entrada de tabela com data (formato | YYYY-MM-DD) → seção de histórico
+        # 3. Linha menciona explicitamente o status do artefato → contexto de documentação de remoção
+        if echo "$line" | grep -qiP 'remov|substituíd|depreciad|histórico|revogad|obsolet|^\|.*20[0-9]{2}-[0-9]{2}-[0-9]{2}'; then
           :
         else
+          # Verificação estrutural: checar se a linha está dentro de seção "Histórico de Mudanças"
           line_num=$(grep -nF "$line" "$file" 2>/dev/null | head -1 | cut -d: -f1)
           if [ -n "$line_num" ]; then
-            context_after=$(sed -n "$((line_num)),$((line_num + 3))p" "$file" 2>/dev/null)
-            if echo "$context_after" | grep -qiP 'remov|substituíd|depreciad|status.*remov'; then
+            # Verificar se há heading "Histórico" acima sem heading de outro tipo entre ele e a linha
+            in_history_section=false
+            last_heading=$(sed -n "1,${line_num}p" "$file" 2>/dev/null | grep -n '^## ' | tail -1)
+            if echo "$last_heading" | grep -qi 'histórico\|mudanças\|substituíd\|depreciad'; then
+              in_history_section=true
+            fi
+            if [ "$in_history_section" = true ]; then
               :
             else
-              has_active_ref=true
-              break
+              context_after=$(sed -n "$((line_num)),$((line_num + 3))p" "$file" 2>/dev/null)
+              if echo "$context_after" | grep -qiP 'remov|substituíd|depreciad|status.*remov|obsolet'; then
+                :
+              else
+                has_active_ref=true
+                break
+              fi
             fi
           fi
         fi
@@ -326,6 +370,7 @@ if [ -d "$WIKI_DIR" ] && [ -d "$FEATURES_DIR" ]; then
     if [ "$FIX_MODE" = true ]; then
       for feature in $MISSING_WIKI; do
         stub_file="$WIKI_DIR/Feature-${feature}.md"
+        safe_fix "$stub_file"
         cat > "$stub_file" << 'WIKI_STUB'
 # [Título da Funcionalidade]
 
@@ -426,14 +471,14 @@ while IFS= read -r rule_file; do
   total_steps=$((step_count + max_sequence))
   # Limiar: headings procedurais + maior sequência contígua > 8 indica workflow extenso.
   # Rules podem ter listas de até ~7-8 ações como parte da definição de política.
-  # Sequências >8 passos contíguos indicam workflow detalhado que pertence a uma skill.
-  if [ "$total_steps" -gt 8 ]; then
+  # Sequências acima de MAX_POLICY_STEPS indicam workflow detalhado que pertence a uma skill.
+  if [ "$total_steps" -gt "$MAX_POLICY_STEPS" ]; then
     RULES_WITH_WORKFLOWS="$RULES_WITH_WORKFLOWS $rule_name(${total_steps}_passos)"
   fi
 done < <(find "$REPO_ROOT/.claude/rules" -name "*.md" -type f | sort)
 
 if [ -z "$RULES_WITH_WORKFLOWS" ]; then
-  pass "Nenhuma rule contém workflows procedurais extensos (>8 passos)"
+  pass "Nenhuma rule contém workflows procedurais extensos (>$MAX_POLICY_STEPS passos)"
 else
   fail "Rules com workflows procedurais extensos (deveriam ser skills)" "$RULES_WITH_WORKFLOWS"
 fi
@@ -538,6 +583,7 @@ if [ -z "$BROKEN_IMPORTS" ]; then
   pass "Todos os imports existentes no CLAUDE.md apontam para arquivos reais"
 else
   if [ "$FIX_MODE" = true ]; then
+    safe_fix "$CLAUDE_MD"
     for broken in $BROKEN_IMPORTS; do
       sed -i "\|^@${broken}$|d" "$CLAUDE_MD"
       FIXES=$((FIXES + 1))
@@ -904,7 +950,8 @@ echo "--- 26. Alinhamento runbook ↔ endpoints reais ---"
 
 if [ -f "$RUNBOOK" ] && [ -d "$FEATURES_DIR" ]; then
   # Extrair rotas do runbook (coluna "Rota" da tabela de endpoints)
-  RUNBOOK_ROUTES=$(grep -oP '`/[a-z][a-z0-9-]*`' "$RUNBOOK" 2>/dev/null | sed 's/`//g' | sort -u)
+  # Padrão expandido: aceita rotas com letras, dígitos, hífens e parâmetros ({id})
+  RUNBOOK_ROUTES=$(grep -oP '`/[a-zA-Z][a-zA-Z0-9{}-]*`' "$RUNBOOK" 2>/dev/null | sed 's/`//g' | sort -u)
   # Extrair rotas dos Controllers (atributos [Route("...")] e [Http*("...")])
   CODE_ROUTES=$(grep -rhoP '\[Route\("([^"]+)"\)\]|\[Http(Get|Post|Put|Delete|Patch)\("([^"]+)"\)\]' "$FEATURES_DIR" 2>/dev/null \
     | grep -oP '"[^"]+"' | sed 's/"//g' | sort -u)
@@ -1049,7 +1096,7 @@ if [ -f "$WIKI_BR" ] && [ -f "$BUSINESS_RULES_SRC" ]; then
     fi
   done < <(grep -oP '^### (RN-\d+)' "$BUSINESS_RULES_SRC" | sed 's/### //' | while read rn_id; do
     # Excluir RNs removidas/depreciadas
-    if ! sed -n "/### $rn_id /,/^### RN-/p" "$BUSINESS_RULES_SRC" 2>/dev/null | grep -qi 'removid\|depreciad'; then
+    if ! sed -n "/### $rn_id /,/^### RN-/p" "$BUSINESS_RULES_SRC" 2>/dev/null | grep -qiP 'removid|depreciad|obsolet|revogad'; then
       echo "$rn_id"
     fi
   done)
@@ -1103,10 +1150,12 @@ fi
 echo ""
 echo "--- 33. Referências circulares entre rules ---"
 
-# Construir grafo de dependências e reportar métricas de acoplamento
+# Construir grafo de dependências, reportar métricas de acoplamento e detectar circularidade sem hierarquia
 TOTAL_RULES=0
 TOTAL_EDGES=0
 ORPHAN_RULES=""
+# Armazenar referências para análise bidirecional
+declare -A RULE_REFS
 while IFS= read -r rule_file; do
   rule_name=$(basename "$rule_file" .md)
   TOTAL_RULES=$((TOTAL_RULES + 1))
@@ -1114,11 +1163,31 @@ while IFS= read -r rule_file; do
     | grep -oP '[a-z][-a-z]*\.md' 2>/dev/null | sed 's/\.md$//' | sort -u)
   ref_count=$(echo "$refs" | grep -c '[a-z]' 2>/dev/null || echo "0")
   TOTAL_EDGES=$((TOTAL_EDGES + ref_count))
+  RULE_REFS["$rule_name"]="$refs"
   # Rules sem referência a nenhuma outra rule são potenciais órfãs
   if [ "$ref_count" -eq 0 ]; then
     ORPHAN_RULES="$ORPHAN_RULES $rule_name"
   fi
 done < <(find "$REPO_ROOT/.claude/rules" -name "*.md" -type f | sort)
+
+# Detectar pares bidirecionais (A→B e B→A) — indicam possível circularidade sem hierarquia explícita
+BIDIRECTIONAL_PAIRS=""
+CHECKED_PAIRS=""
+for rule_a in "${!RULE_REFS[@]}"; do
+  for ref_b in ${RULE_REFS[$rule_a]}; do
+    # Verificar se B também referencia A
+    if [[ -n "${RULE_REFS[$ref_b]+x}" ]]; then
+      if echo "${RULE_REFS[$ref_b]}" | grep -qwF "$rule_a"; then
+        # Evitar duplicatas (A↔B = B↔A)
+        pair_key=$(echo -e "$rule_a\n$ref_b" | sort | tr '\n' ':')
+        if ! echo "$CHECKED_PAIRS" | grep -qF "$pair_key"; then
+          CHECKED_PAIRS="$CHECKED_PAIRS $pair_key"
+          BIDIRECTIONAL_PAIRS="$BIDIRECTIONAL_PAIRS ${rule_a}↔${ref_b}"
+        fi
+      fi
+    fi
+  done
+done
 
 if [ -z "$ORPHAN_RULES" ]; then
   pass "Grafo de rules conectado ($TOTAL_RULES rules, $TOTAL_EDGES referências cruzadas)"
@@ -1127,6 +1196,12 @@ else
     "$ORPHAN_RULES" \
     "Rules isoladas podem indicar falta de integração com o modelo de governança" \
     "Adicionar seção 'Relação com Outras Rules' com referências às rules relacionadas"
+fi
+if [ -n "$BIDIRECTIONAL_PAIRS" ]; then
+  warn "Pares de rules com referência bidirecional (verificar se há hierarquia explícita)" \
+    "$BIDIRECTIONAL_PAIRS" \
+    "Rules que se referenciam mutuamente sem hierarquia explícita criam ambiguidade na resolução de conflitos" \
+    "Definir subordinação explícita em source-of-truth-priority.md ou na seção Relação de cada rule"
 fi
 
 # ---------------------------------------------------------------------------
@@ -1155,6 +1230,74 @@ if [ -d "$SKILLS_DIR" ]; then
   fi
 else
   pass "Diretório de skills não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 35. Auto-fix usa backup antes de alterações destrutivas (meta-check)
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 35. Segurança do modo --fix (meta-check) ---"
+
+# Verificar se toda ocorrência de 'sed -i' no script é precedida por 'safe_fix'
+# dentro do mesmo bloco if FIX_MODE=true
+UNSAFE_FIX=false
+while IFS= read -r line_num; do
+  # Verificar se nas 10 linhas anteriores existe uma chamada a safe_fix
+  start=$((line_num - 10))
+  [ "$start" -lt 1 ] && start=1
+  context=$(sed -n "${start},${line_num}p" "$0" 2>/dev/null)
+  if ! echo "$context" | grep -q 'safe_fix'; then
+    UNSAFE_FIX=true
+    break
+  fi
+done < <(grep -n 'sed -i' "$0" 2>/dev/null | grep -v '^#' | cut -d: -f1)
+
+if [ "$UNSAFE_FIX" = false ]; then
+  pass "Todas as operações sed -i no modo --fix são precedidas por safe_fix (backup)"
+else
+  warn "Operações sed -i sem safe_fix detectadas no script" \
+    "" \
+    "Alterações destrutivas no modo --fix sem backup podem causar perda de dados irreversível" \
+    "Adicionar safe_fix <arquivo> antes de cada sed -i no script"
+fi
+
+# ---------------------------------------------------------------------------
+# 36. Conceitos usados em rules existem no glossário (check semântico leve)
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 36. Conceitos de rules no glossário ---"
+
+GLOSSARY="$REPO_ROOT/Instructions/glossary/ubiquitous-language.md"
+if [ -f "$GLOSSARY" ]; then
+  # Verificar termos-chave usados nas rules que deveriam estar no glossário
+  MISSING_CONCEPTS=""
+  # Extrair termos entre aspas duplas ou em negrito que parecem conceitos de domínio
+  # Foco: termos do mapa de propagação de governance-policies.md
+  GOV_POLICIES="$REPO_ROOT/.claude/rules/governance-policies.md"
+  if [ -f "$GOV_POLICIES" ]; then
+    # Extrair conceitos do mapa de propagação (primeira coluna da tabela)
+    while IFS= read -r concept; do
+      clean_concept=$(echo "$concept" | sed 's/^\*\*//;s/\*\*$//' | xargs)
+      if [ -n "$clean_concept" ] && ! grep -qi "$clean_concept" "$GLOSSARY" 2>/dev/null; then
+        # Apenas reportar conceitos substantivos (>3 palavras provavelmente são frases, não termos)
+        word_count=$(echo "$clean_concept" | wc -w)
+        if [ "$word_count" -le 3 ]; then
+          MISSING_CONCEPTS="$MISSING_CONCEPTS \"$clean_concept\""
+        fi
+      fi
+    done < <(sed -n '/### Mapa de propagação/,/### Limites/p' "$GOV_POLICIES" 2>/dev/null \
+      | grep '^|' | grep -v '^\|---' | cut -d'|' -f2 | sed 's/Se muda\.\.\.//;s/^\s*//;s/\s*$//' | grep -v '^$')
+  fi
+  if [ -z "$MISSING_CONCEPTS" ]; then
+    pass "Conceitos de rules encontrados no glossário ou são termos genéricos"
+  else
+    warn "Conceitos usados em rules ausentes no glossário" \
+      "$MISSING_CONCEPTS" \
+      "Termos usados como conceitos de governança devem estar definidos no glossário para garantir interpretação consistente" \
+      "Adicionar definição em Instructions/glossary/ubiquitous-language.md"
+  fi
+else
+  pass "Glossário não encontrado — verificação ignorada"
 fi
 
 # ---------------------------------------------------------------------------

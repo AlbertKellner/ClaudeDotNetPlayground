@@ -87,6 +87,14 @@ Os seguintes termos são usados internamente no sistema de governança e têm de
 **Definição**: Suposição mínima adotada na ausência de informação completa, que prefere o comportamento menos destrutivo e mais reversível.
 **Contexto**: Tratamento de ambiguidades
 
+### Ferramenta Operacional
+**Definição**: Recurso externo disponível para o assistente durante o desenvolvimento que amplia suas capacidades operacionais. Inclui MCP servers, CLIs autenticados, APIs com tokens, integrações configuradas via variáveis de ambiente ou `.mcp.json`.
+**Sinônimos permitidos**: recurso operacional, integração externa
+**Termos proibidos**: "plugin" (genérico demais), "serviço" (ambíguo com serviços de domínio)
+**Contexto**: Registro e propagação de dependências operacionais em `governance-policies.md` §3, `technical-overview.md` (seção Recursos Operacionais) e `environment-readiness.md`
+**Exemplos**: Datadog MCP, GitHub CLI (`gh`), tokens PAT, chaves de API
+**Notas**: Quando uma nova ferramenta operacional é disponibilizada, deve ser registrada em `technical-overview.md` e propagada para `environment-readiness.md` e `required-vars.md` conforme o protocolo em `technical-overview.md` seção "Como Novos Recursos São Registrados".
+
 ---
 
 ## Termos Pendentes de Definição
@@ -113,3 +121,4 @@ Os seguintes termos são usados internamente no sistema de governança e têm de
 | Data | Mudança | Referência |
 |---|---|---|
 | Bootstrap | Termos do sistema de governança criados | — |
+| 2026-03-21 | Adicionado: "Ferramenta Operacional" — conceito usado em governance-policies.md §3 sem definição formal | Análise de capacidade de auto-diagnóstico |

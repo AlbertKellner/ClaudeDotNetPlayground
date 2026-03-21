@@ -16,13 +16,19 @@ REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
 echo "[Pre-commit gate] Verificando pré-requisitos..."
 
-# Verificar governança (passo 0.1 do pipeline)
+# Verificar governança (passo 0.1 do pipeline) — ciclo verify→fix→re-verify
 AUDIT_SCRIPT="$REPO_ROOT/scripts/governance-audit.sh"
 if [ -f "$AUDIT_SCRIPT" ]; then
   echo "[Pre-commit gate] Executando auditoria de governança..."
   if ! bash "$AUDIT_SCRIPT"; then
-    echo "[BLOQUEADO] Auditoria de governança falhou. Corrija as inconsistências antes de fazer commit."
-    exit 1
+    echo "[Pre-commit gate] Auditoria falhou. Tentando correção automática (--fix)..."
+    bash "$AUDIT_SCRIPT" --fix || true
+    echo "[Pre-commit gate] Re-executando auditoria para confirmar correções..."
+    if ! bash "$AUDIT_SCRIPT"; then
+      echo "[BLOQUEADO] Auditoria de governança ainda falha após --fix. Corrija manualmente antes de fazer commit."
+      exit 1
+    fi
+    echo "[Pre-commit gate] Correções automáticas aplicadas e verificadas."
   fi
   echo "[Pre-commit gate] Auditoria de governança OK."
 fi

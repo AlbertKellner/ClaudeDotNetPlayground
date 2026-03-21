@@ -187,6 +187,7 @@ Toda a documentação da Wiki deve ser escrita em **português brasileiro**.
 - `Instructions/business/business-rules.md` — fonte de verdade das regras de negócio que alimenta `Business-Rules.md` e as seções "Comportamento" das Features
 - `.github/workflows/` — fonte de verdade que alimenta `CI-CD.md`
 - `src/` — fonte de verdade dos contratos de entrada/saída de cada Feature
+- `.claude/rules/governance-audit.md` — checks #7, #8, #20-22, #24-25, #31 verificam automaticamente completude e alinhamento da wiki com o código
 
 ---
 
@@ -198,3 +199,4 @@ Toda a documentação da Wiki deve ser escrita em **português brasileiro**.
 | 2026-03-15 | Publicação alterada para automática via wiki-publish.yml | Instrução do usuário |
 | 2026-03-19 | Adicionado: gatilhos de atualização da wiki para BDD, regras de negócio, contratos e testes | Instrução do usuário |
 | 2026-03-21 | Esclarecido: nomenclatura de páginas wiki distingue Feature (Vertical Slice), Feature (Infra com RN) e Infra (sem RN) | Análise estrutural de governança |
+| 2026-03-21 | Adicionado: referência cruzada para checks de auditoria automatizada que verificam completude da wiki | Análise de capacidade de auto-diagnóstico |

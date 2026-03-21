@@ -61,18 +61,18 @@ Quando a tarefa for análise de solicitações de mudança em pull request (skil
 
 Antes de iniciar o pipeline, classificar o escopo da tarefa:
 
-| Escopo | Critério | Passos aplicáveis |
-|---|---|---|
-| **Código** | A tarefa altera arquivos `.cs`, `.csproj`, `Dockerfile`, `docker-compose.yml`, `appsettings.json`, workflows de CI ou qualquer artefato que afete build, execução ou comportamento da aplicação | Todos: 0 → 11 |
-| **Governança** | A tarefa altera **exclusivamente** arquivos `.md`, `.sh`, scripts de governança, hooks ou documentação — sem impacto em build, execução ou comportamento da aplicação | Apenas: 0.1 → 9 → 10. O passo 10 (PR) aplica-se sempre que houver commits a serem integrados — mesmo para mudanças exclusivamente de governança. |
-| **Análise de PR** | A tarefa é análise de solicitações de mudança em PR existente (skill pr-analysis) | Ver skill pr-analysis — o branch atribuído pelo sistema externo é ignorado; usar head.ref do PR |
+| Escopo | Critério | Passos aplicáveis | Passos NÃO aplicáveis |
+|---|---|---|---|
+| **Código** | A tarefa altera arquivos `.cs`, `.csproj`, `Dockerfile`, `docker-compose.yml`, `appsettings.json`, workflows de CI ou qualquer artefato que afete build, execução ou comportamento da aplicação | Todos: 0 → 11 | Nenhum — todos os passos são obrigatórios |
+| **Governança** | A tarefa altera **exclusivamente** arquivos `.md`, `.sh`, scripts de governança, hooks ou documentação — sem impacto em build, execução ou comportamento da aplicação | Apenas: 0.1 → 9 → 10. O passo 10 (PR) aplica-se sempre que houver commits a serem integrados — mesmo para mudanças exclusivamente de governança. | Passos 0, 1–8 e 11 — não há build, execução, testes, Docker nem acompanhamento de CI |
+| **Análise de PR** | A tarefa é análise de solicitações de mudança em PR existente (skill pr-analysis) | Ver skill pr-analysis — o branch atribuído pelo sistema externo é ignorado; usar head.ref do PR | Passo 10 (criação de PR) — o PR já existe |
 
 **Esta classificação é o primeiro ato obrigatório.** Executar passos inaplicáveis ao escopo é um erro — desperdiça tempo e gera ruído. Omitir passos aplicáveis ao escopo também é um erro.
 
 ### Sequência de passos
 
 0. Verificar pré-requisitos de ambiente (checklist em `.claude/rules/environment-readiness.md`). O ambiente deve estar pronto — se não estiver, seguir o protocolo de ambiente não pronto antes de prosseguir.
-0.1. `bash scripts/governance-audit.sh` — executar auditoria automatizada de governança. **Gate obrigatório**: falhas bloqueiam o commit. Corrigir todas as falhas antes de prosseguir. Em tarefas de escopo **governança**, este é o gate principal antes do commit (passo 9). Ver `.claude/rules/governance-audit.md` para a política completa.
+0.1. `bash scripts/governance-audit.sh` — executar auditoria automatizada de governança. **Gate obrigatório**: falhas bloqueiam o commit. Se houver falhas, executar `bash scripts/governance-audit.sh --fix` para correções automáticas e **re-executar `bash scripts/governance-audit.sh`** para confirmar que todas as falhas foram resolvidas. Se ainda houver falhas após o `--fix`, corrigir manualmente e re-executar. Em tarefas de escopo **governança**, este é o gate principal antes do commit (passo 9). Ver `.claude/rules/governance-audit.md` para a política completa.
 1. `dotnet build` — verificar compilação em modo Debug sem erros
 2. `dotnet run` (modo debug) — iniciar a aplicação localmente, aguardar `/health` responder (qualquer código HTTP confirma inicialização), encerrar o processo. Primeira validação em modo debug antes de executar os testes.
 3. `dotnet test` — executar todos os testes em modo debug. **Gate obrigatório**: falha em qualquer teste bloqueia o avanço para os passos seguintes. Somente se todos os testes passarem, prosseguir.

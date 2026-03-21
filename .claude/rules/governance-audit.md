@@ -38,11 +38,11 @@ O script `scripts/governance-audit.sh` verifica automaticamente.
 | 2 | Todos os arquivos `.md` de `.claude/rules/` estão importados no `CLAUDE.md` | Estrutura de governança |
 | 3 | Contagem de rules no `README.md` corresponde ao número real | Consistência documental |
 | 4 | Contagem de skills no `README.md` corresponde ao número real | Consistência documental |
-| 5 | Variáveis de ambiente do `docker-compose.yml` (via `${...}`) estão documentadas em `required-vars.md` — variáveis com valor literal e inline config (`__`) são excluídas dinamicamente | Configuração |
+| 5 | Variáveis de ambiente do `docker-compose.yml` (via `${...}`) estão documentadas em `required-vars.md` — variáveis com valor literal são excluídas dinamicamente; prefixos de configuração inline (`__`) são excluídos via lista configurável (`INLINE_CONFIG_PREFIXES` no topo do script) | Configuração |
 | 6 | Nenhuma referência ativa a artefatos removidos em arquivos não-históricos — IDs derivados do campo `**Status**` em `architecture-decisions.md` e `business-rules.md` | Higiene |
 | 7 | Todas as features possuem página correspondente na Wiki | Cobertura documental |
 | 8 | Páginas estruturais obrigatórias existem na Wiki | Cobertura documental |
-| 9 | Rules não contêm workflows procedurais extensos (headings procedurais + maior sequência contígua > 8) | Separação rules/skills |
+| 9 | Rules não contêm workflows procedurais extensos (headings procedurais + maior sequência contígua > `MAX_POLICY_STEPS`, configurável no topo do script, default 8) | Separação rules/skills |
 | 10 | Referências cruzadas entre rules apontam para arquivos existentes | Integridade referencial |
 | 11 | `README.md` não referencia artefatos removidos — derivação dinâmica dos mesmos IDs do check #6 | Higiene |
 | 12 | ADRs revogadas possuem justificativa ou redirecionamento (substituição por outra DA ou razão da remoção) | Rastreabilidade |
@@ -71,12 +71,14 @@ O script `scripts/governance-audit.sh` verifica automaticamente.
 | 30 | Skills reais estão referenciadas em `operating-model.md` | Alinhamento operacional |
 | 31 | `wiki/Business-Rules.md` lista todas as RNs ativas | Completude wiki |
 | 32 | Quantidade e IDs de checks no script correspondem 1:1 à documentação na rule | Meta-consistência |
-| 33 | Grafo de rules conectado — nenhuma rule isolada (sem referências a outras rules) | Integridade referencial |
+| 33 | Grafo de rules conectado — nenhuma rule isolada (sem referências a outras rules); detecta pares bidirecionais sem hierarquia explícita | Integridade referencial |
 | 34 | Todas as skills referenciam pelo menos uma rule | Integridade referencial |
+| 35 | Auto-fix usa backup (`safe_fix`) antes de alterações destrutivas (`sed -i`) — meta-análise do próprio script | Meta-segurança |
+| 36 | Conceitos usados no mapa de propagação de `governance-policies.md` existem no glossário | Completude semântica |
 
 ### Sobre a lista de artefatos removidos (checks #6 e #11)
 
-Os checks #6 e #11 derivam automaticamente a lista de IDs removidos do campo `**Status**` das fontes de governança: `architecture-decisions.md` e `business-rules.md`. O padrão robusto aceita variações de gênero e conjugação (`Revogado/Revogada/Removido/Removida/Depreciado/Depreciada`). Não há lista manual de fallback — toda remoção deve ser rastreável via campo Status nos arquivos-fonte. Ao remover qualquer artefato, garantir que o campo `**Status**` contém uma dessas palavras-chave.
+Os checks #6 e #11 derivam automaticamente a lista de IDs removidos do campo `**Status**` das fontes de governança: `architecture-decisions.md` e `business-rules.md`. O padrão robusto aceita variações de gênero e conjugação (`Revogado/Revogada/Removido/Removida/Depreciado/Depreciada/Obsoleto/Obsoleta`). O padrão é definido como constante `REMOVED_STATUS_PATTERN` no topo do script. Não há lista manual de fallback — toda remoção deve ser rastreável via campo Status nos arquivos-fonte. Ao remover qualquer artefato, garantir que o campo `**Status**` contém uma dessas palavras-chave.
 
 ### Sobre verificações de completude semântica (checks #27-28)
 
@@ -91,6 +93,16 @@ O script suporta o modo `--fix` que corrige automaticamente problemas triviais:
 ```bash
 bash scripts/governance-audit.sh --fix
 ```
+
+### Segurança do modo --fix
+
+Toda operação de escrita (`sed -i`, `cat >`) é precedida por `safe_fix <arquivo>`, que cria backup (`<arquivo>.bak`) antes da modificação. Isso garante reversibilidade. O check #35 verifica automaticamente que esta prática é seguida em todo o script.
+
+**Ciclo recomendado** (documentado no pipeline passo 0.1 do CLAUDE.md):
+1. Executar `bash scripts/governance-audit.sh` (verificação)
+2. Se falhar: executar `bash scripts/governance-audit.sh --fix` (correção)
+3. Re-executar `bash scripts/governance-audit.sh` (re-verificação)
+4. Se ainda falhar: corrigir manualmente
 
 ### Correções automáticas suportadas:
 - Checks #1 e #2: adiciona imports faltantes ao `CLAUDE.md`
@@ -157,3 +169,4 @@ Quando uma nova categoria de inconsistência for identificada (manualmente ou po
 | 2026-03-21 | Reestruturado: numeração 1:1 entre rule e script; heurística de workflows melhorada (listas numeradas); check #6 generalizado para artefatos removidos; checks 25–28 adicionados (wiki órfãs, runbook↔endpoints, completude BDD, completude contratos); nível AVISO adicionado | Segunda análise de causas-raiz |
 | 2026-03-21 | Terceira rodada: check #6 com derivação automática de REMOVED_ARTIFACTS; check #12 com heurística corrigida para revogações sem substituição; checks 29–32 adicionados (skills→rules, operating-model↔skills, wiki Business-Rules↔RNs, meta-consistência script↔rule); modo --fix para correções triviais automáticas | Análise estrutural de governança |
 | 2026-03-21 | Quarta rodada — maturidade de auto-diagnóstico: (1) valores hardcoded eliminados nos checks #5, #6, #11 — derivação dinâmica de variáveis e artefatos removidos; (2) check #6 restrito ao campo `**Status**` para evitar falsos positivos; (3) mensagens de diagnóstico enriquecidas (CAUSA + AÇÃO) em todos os fails/warns; (4) auto-fix expandido: check #7 cria stubs wiki, check #13 remove imports quebrados; (5) check #17 expandido com validação de sintaxe bash; (6) check #19 expandido com validação de estrutura mínima do SKILL.md; (7) check #23 expandido com validação de Histórico/Relação; (8) check #32 expandido com correspondência individual de IDs (não apenas contagem); (9) checks 33–34 adicionados (conectividade do grafo de rules, skills→rules) | Análise de maturidade de governança |
+| 2026-03-21 | Quinta rodada — auto-diagnóstico e prevenção: (1) safe_fix com backup obrigatório antes de sed -i no modo --fix; (2) constantes configuráveis extraídas para topo do script (MAX_POLICY_STEPS, INLINE_CONFIG_PREFIXES, REMOVED_STATUS_PATTERN); (3) "Obsoleto/Obsoleta" adicionado ao padrão de status removido; (4) heurística do check #6 melhorada — verificação estrutural de seção Histórico em vez de keyword matching; (5) check #26 regex expandido para rotas parametrizadas e case-insensitive; (6) check #31 padrão de status expandido; (7) check #33 expandido com detecção de circularidade bidirecional; (8) checks 35–36 adicionados (meta-segurança do --fix, conceitos de rules no glossário); (9) ciclo verify→fix→re-verify documentado no pipeline CLAUDE.md e implementado em pre-commit-gate.sh | Análise de capacidade de auto-diagnóstico |

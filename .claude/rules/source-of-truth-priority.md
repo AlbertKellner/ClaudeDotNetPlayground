@@ -109,7 +109,28 @@ Se uma convenção técnica de nomenclatura conflitar com a terminologia de neg�
 
 ---
 
+## Hierarquia entre Rules
+
+A ordem de prioridade acima governa conflitos entre **artefatos de domínio** (contratos, BDD, regras, arquitetura, convenções). Quando duas **rules de governança** conflitam entre si, aplicar os seguintes princípios:
+
+1. **`source-of-truth-priority.md` prevalece sobre todas as demais rules** — esta rule é a autoridade final para resolução de conflitos.
+2. **Rule mais específica prevalece sobre rule mais genérica** — ex: `endpoint-validation.md` (específica para endpoints) prevalece sobre `governance-policies.md` (genérica) em matéria de validação de endpoints.
+3. **Rule que define política prevalece sobre rule que apenas referencia** — quando rule A define uma política e rule B a referencia, a definição em A é a fonte de verdade.
+4. **Em caso de ambiguidade não resolvível**: registrar em `open-questions.md` e aplicar premissa conservadora (menor impacto, mais reversível).
+
+### Subordinações explícitas
+
+| Rule | Subordinada a |
+|---|---|
+| `governance-policies.md` | `source-of-truth-priority.md` (para resolução de conflitos) |
+| `naming-governance.md` | `source-of-truth-priority.md` (quando conflita com negócio ou contratos) |
+| `folder-governance.md` | `architecture-governance.md` (para decisões estruturais) |
+| `endpoint-validation.md` | `pr-metadata-governance.md` (para políticas de pipeline) |
+
+---
+
 ## Relação com Outras Rules
 
-- `governance-policies.md` — políticas de ambiguidade (§4) e propagação (§3) usam esta rule para resolver conflitos
-- `naming-governance.md` está subordinada a esta rule nos casos de conflito com negócio ou contratos
+- `governance-policies.md` — políticas de ambiguidade (§4) e propagação (§3) usam esta rule para resolver conflitos; subordinada a esta rule
+- `naming-governance.md` — subordinada a esta rule nos casos de conflito com negócio ou contratos
+- `architecture-governance.md` — decisões arquiteturais são priorizadas conforme a hierarquia de artefatos definida aqui
