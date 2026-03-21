@@ -19,7 +19,7 @@
 - [Login de Usuário](Feature-UserLogin)
 - [Test Get](Feature-TestGet)
 - [Condições Climáticas](Feature-WeatherConditionsGet)
-- [Repositórios GitHub](Feature-GitHubRepoSearch)
+- [Pesquisa de Repositórios GitHub](Feature-GitHubRepoSearch)
 
 ---
 
