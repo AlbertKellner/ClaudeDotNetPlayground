@@ -14,7 +14,7 @@ Esta skill é ativada pelos passos 10 e 11 do pipeline de validação pré-commi
 
 ## Workflow — Verificação e Criação/Atualização de PR (Passo 10)
 
-Todas as operações de PR são realizadas exclusivamente via ferramentas MCP do GitHub (servidor `github` em `.mcp.json`), autenticadas pelo usuário ClaudeCode-Bot via `GH_TOKEN_MCP`.
+Todas as operações de PR são realizadas exclusivamente via ferramentas MCP do GitHub (servidor `github` em `.mcp.json`), autenticadas pelo usuário ClaudeCode-Bot via `GH_CLAUDE_CODE_MCP`.
 
 ### Passo 1: Verificar PR existente
 

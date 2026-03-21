@@ -27,7 +27,7 @@ Aplicar o checklist antes de qualquer operação Docker:
 | 5 | CA do proxy disponível no host | `ls /usr/local/share/ca-certificates/swp-ca-production.crt` | Arquivo presente |
 | 6 | `DD_APP_KEY` no host (MCP Datadog) | `env \| grep DD_APP_KEY` | Linha não vazia retornada |
 | 7 | `.mcp.json` presente e configurado | `ls .mcp.json && grep -q mcpServers .mcp.json && echo ok` | Saída `ok` |
-| 8 | `GH_TOKEN_MCP` no host (GitHub MCP) | `env \| grep GH_TOKEN_MCP` | Linha não vazia retornada |
+| 8 | `GH_CLAUDE_CODE_MCP` no host (GitHub MCP) | `env \| grep GH_CLAUDE_CODE_MCP` | Linha não vazia retornada |
 | 9 | .NET SDK disponível no PATH | `dotnet --version` | Versão 10.x retornada |
 
 **Os pré-requisitos 1–5 devem estar satisfeitos antes de executar `docker compose up`.** Os pré-requisitos 6–8 são necessários para recursos operacionais do assistente (MCP Datadog e MCP GitHub). O pré-requisito 9 deve estar satisfeito antes de qualquer operação `dotnet`.
