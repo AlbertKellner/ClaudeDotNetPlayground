@@ -109,3 +109,4 @@ O assistente pode lançar subagents especializados quando a tarefa beneficiar de
 | Bootstrap | Estrutura inicial criada | — |
 | 2026-03-18 | Simplificado: removidas seções duplicadas com rules e CLAUDE.md; adicionada separação rules/skills/hooks; adicionada seção de subagents; adicionada referência a review-instructions | Reestruturação de governança |
 | 2026-03-19 | Adicionado: ferramentas, recursos MCP e capacidades operacionais como definições duráveis | Lacuna de governança identificada |
+| 2026-03-21 | Adicionado: 3 skills de pipeline extraídas das rules (validate-endpoints, verify-environment, manage-pr-lifecycle); rule governance-audit.md e script governance-audit.sh criados | Auditoria de governança |
