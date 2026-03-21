@@ -122,6 +122,19 @@ Cada regra segue a estrutura:
 
 ---
 
+### RN-009 — Consulta de Pokémon por ID via PokéAPI
+**Enunciado**: A aplicação deve expor um endpoint autenticado para consultar dados de um Pokémon por ID via PokéAPI, retornando informações básicas (id, nome, altura, peso, experiência base, tipos, habilidades, stats e sprites). Neste primeiro momento, o ID permanece hardcoded como 25 (Pikachu). A resposta deve ser cacheada por usuário autenticado com duração configurável.
+**Condição**: Quando uma requisição GET autenticada é recebida no endpoint de consulta de Pokémon.
+**Ação**: O sistema verifica o Memory Cache usando o ID do usuário autenticado e o ID do Pokémon como chave. Se houver cache válido, retorna a resposta cacheada sem consultar a API externa. Se não houver cache, consulta a PokéAPI (`GET /api/v2/pokemon/25`), armazena o resultado no cache e retorna HTTP 200 com os dados do Pokémon mapeados para o model da Feature.
+**Exceções**: Nenhuma.
+**Dependências**: RN-003 (autenticação obrigatória).
+**BDD relacionado**: Nenhum no momento.
+**Contrato relacionado**: Nenhum no momento.
+**Workflows relacionados**: Nenhum.
+**Status**: Ativo
+
+---
+
 ## Regras Substituídas ou Depreciadas
 
 ### RN-006 — Busca de repositórios do team IntegrationRepos no GitHub
@@ -162,3 +175,4 @@ Cada regra segue a estrutura:
 | 2026-03-19 | RN-007 criada: sincronização local de repositórios com clone/pull e registro de data | Instrução do usuário |
 | 2026-03-20 | RN-006 e RN-007 removidas: funcionalidades de busca e sincronização de repositórios removidas do sistema | Instrução do usuário |
 | 2026-03-20 | RN-008 criada: pesquisa de repositórios GitHub da conta AlbertKellner | Instrução do usuário |
+| 2026-03-21 | RN-009 criada: consulta de Pokémon por ID via PokéAPI (Pikachu hardcoded) | Instrução do usuário |

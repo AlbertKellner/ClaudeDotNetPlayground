@@ -25,10 +25,14 @@ src/Albert.Playground.ECS.AOT.Api/
 │       ├── WeatherConditionsGet/
 │       │   ├── WeatherConditionsGetEndpoint/  # Controller + Action
 │       │   └── WeatherConditionsGetUseCase/   # Orquestração da lógica de negócio
-│       └── GitHubRepoSearch/
-│           ├── GitHubRepoSearchEndpoint/ # Controller + Action
-│           ├── GitHubRepoSearchUseCase/  # Orquestração da lógica de negócio
-│           └── GitHubRepoSearchModels/   # Contratos de saída
+│       ├── GitHubRepoSearch/
+│       │   ├── GitHubRepoSearchEndpoint/ # Controller + Action
+│       │   ├── GitHubRepoSearchUseCase/  # Orquestração da lógica de negócio
+│       │   └── GitHubRepoSearchModels/   # Contratos de saída
+│       └── PokemonGet/
+│           ├── PokemonGetEndpoint/       # Controller + Action
+│           ├── PokemonGetUseCase/        # Orquestração da lógica de negócio
+│           └── PokemonGetModels/         # Contratos de saída
 ├── Infra/
 │   ├── Correlation/                      # Utilitário de GUID v7
 │   ├── ExceptionHandling/                # Handler centralizado de exceções
@@ -42,7 +46,8 @@ src/Albert.Playground.ECS.AOT.Api/
 └── Shared/                               # Abstrações compartilhadas entre Slices
     └── ExternalApi/
         ├── OpenMeteo/                    # Cliente HTTP para API Open-Meteo (Refit + Polly)
-        └── GitHub/                       # Cliente HTTP para API GitHub (Refit + Polly + PAT)
+        ├── GitHub/                       # Cliente HTTP para API GitHub (Refit + Polly + PAT)
+        └── Pokemon/                      # Cliente HTTP para PokéAPI (Refit + Polly)
 ```
 
 ---
@@ -86,11 +91,16 @@ Requisição HTTP
                     │                                                          Enriquece logs com UserId e UserName
                     │                                                      └── WeatherConditionsGetUseCase
                     │                                                              └── CachedOpenMeteoApiClient → OpenMeteoApiClient (Refit + Polly)
-                    └── [com autenticação] GET /github-repo-search → AuthenticateFilter
-                                                                          Valida Bearer Token
-                                                                          Enriquece logs com UserId e UserName
-                                                                      └── GitHubRepoSearchUseCase
-                                                                              └── CachedGitHubApiClient → GitHubApiClient (Refit + Polly)
+                    ├── [com autenticação] GET /github-repo-search → AuthenticateFilter
+                    │                                                          Valida Bearer Token
+                    │                                                          Enriquece logs com UserId e UserName
+                    │                                                      └── GitHubRepoSearchUseCase
+                    │                                                              └── CachedGitHubApiClient → GitHubApiClient (Refit + Polly)
+                    └── [com autenticação] GET /pokemon → AuthenticateFilter
+                                                                Valida Bearer Token
+                                                                Enriquece logs com UserId e UserName
+                                                            └── PokemonGetUseCase
+                                                                    └── CachedPokemonApiClient → PokemonApiClient (Refit + Polly)
 ```
 
 ---
@@ -163,15 +173,19 @@ Request autenticado
     │       ├── Cache hit → retorna resposta cacheada (sem chamada HTTP)
     │       └── Cache miss → OpenMeteoApiClient → API Open-Meteo
     │                           └── Armazena resposta no cache
-    └── CachedGitHubApiClient (github-repo-search)
+    ├── CachedGitHubApiClient (github-repo-search)
+    │       ├── Cache hit → retorna resposta cacheada (sem chamada HTTP)
+    │       └── Cache miss → GitHubApiClient → API GitHub
+    │                           └── Armazena resposta no cache
+    └── CachedPokemonApiClient (pokemon)
             ├── Cache hit → retorna resposta cacheada (sem chamada HTTP)
-            └── Cache miss → GitHubApiClient → API GitHub
+            └── Cache miss → PokemonApiClient → PokéAPI
                                 └── Armazena resposta no cache
 ```
 
 ### Implementação Arquitetural — Decorator Pattern
 
-O cache é implementado como **decorators** que envolvem os clientes HTTP originais. Tanto `CachedOpenMeteoApiClient` quanto `CachedGitHubApiClient` implementam as respectivas interfaces de serviço (`IOpenMeteoApiClient` e `IGitHubApiClient`). As Features injetam apenas a interface — o decorator é transparente.
+O cache é implementado como **decorators** que envolvem os clientes HTTP originais. `CachedOpenMeteoApiClient`, `CachedGitHubApiClient` e `CachedPokemonApiClient` implementam as respectivas interfaces de serviço (`IOpenMeteoApiClient`, `IGitHubApiClient` e `IPokemonApiClient`). As Features injetam apenas a interface — o decorator é transparente.
 
 ---
 
@@ -204,3 +218,4 @@ Para execução local: copie `.env.example` para `.env`, preencha `DD_API_KEY` e
 | [Test Get](Feature-TestGet) | Query | `GET /test` |
 | [Condições Climáticas](Feature-WeatherConditionsGet) | Query | `GET /weather-conditions` |
 | [Pesquisa de Repositórios GitHub](Feature-GitHubRepoSearch) | Query | `GET /github-repo-search` |
+| [Consulta de Pokémon](Feature-PokemonGet) | Query | `GET /pokemon` |
