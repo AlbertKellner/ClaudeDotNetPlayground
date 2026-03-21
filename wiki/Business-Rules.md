@@ -69,3 +69,14 @@ A aplicação expõe um endpoint autenticado para pesquisar e exibir todos os re
 - **Comportamento:** consulta a API GitHub (`GET /users/AlbertKellner/repos`) com paginação automática e cache por usuário; retorna `HTTP 200` com lista de repositórios contendo nome e endereço Git
 - **Documentação completa:** [Feature: Pesquisa de Repositórios GitHub](Feature-GitHubRepoSearch)
 
+---
+
+## RN-009 — Consulta de Pokémon por ID via PokéAPI
+
+A aplicação expõe um endpoint autenticado para consultar dados de um Pokémon por ID via PokéAPI. Neste primeiro momento, o ID permanece hardcoded como 25 (Pikachu). A resposta é cacheada por usuário autenticado com duração configurável.
+
+- **Endpoint:** `GET /pokemon`
+- **Autenticação:** exigida — Bearer Token JWT válido no header `Authorization`
+- **Comportamento:** consulta a PokéAPI (`GET /api/v2/pokemon/25`) com ID hardcoded e cache por usuário; retorna `HTTP 200` com dados do Pokémon (id, nome, altura, peso, experiência base, tipos, habilidades, stats e sprites)
+- **Documentação completa:** [Feature: Consulta de Pokémon](Feature-PokemonGet)
+

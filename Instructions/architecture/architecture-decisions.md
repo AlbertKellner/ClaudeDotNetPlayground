@@ -282,6 +282,18 @@ Este arquivo mantém um registro de alto nível das decisões arquiteturais mais
 - `governance-audit.sh` emite avisos (não falhas) para features sem BDD e contratos placeholder.
 - Quando uma feature de domínio real for implementada, esta decisão deve ser revisitada.
 
+### DA-023 — Integração PokéAPI com Refit + Polly e Consulta de Pokémon por ID
+**Data**: 2026-03-21
+**Status**: Ativo
+**Decisão**: A integração com a PokéAPI segue o padrão de `Shared/ExternalApi/` (DA-017): interface Refit (`IPokemonApi`), resiliência Polly v8, sem autenticação (API pública). A feature `PokemonGet` expõe um endpoint GET autenticado que consulta dados do Pokémon com ID hardcoded (25 — Pikachu). O resultado é cacheado por usuário autenticado via Memory Cache (DA-018) com duração configurável.
+**Motivação**: Consistência com o padrão já estabelecido em DA-017 para integrações HTTP externas. Reutilização dos padrões de cache (DA-018) e autenticação (DA-013) já implementados.
+**Alternativas consideradas**: `HttpClient` manual — descartado por boilerplate. Integração sem cache — descartada para reduzir chamadas repetidas à API pública.
+**Trade-offs**: A PokéAPI não requer autenticação, então não há `DelegatingHandler` de auth. Rate limiting da PokéAPI é generoso (100 requests/minuto).
+**Consequências**:
+- `Shared/ExternalApi/Pokemon/` criada com `IPokemonApi`, `IPokemonApiClient`, `PokemonApiClient`, `CachedPokemonApiClient`.
+- `Shared/ExternalApi/Pokemon/Models/PokemonOutput.cs` criada com modelo de resposta e `PokemonJsonContext`.
+- Feature `PokemonGet` criada em `Features/Query/PokemonGet/` com Endpoint, UseCase e Models próprios (DA-020).
+
 ---
 
 ## Decisões Pendentes
@@ -343,3 +355,4 @@ Ao adicionar uma nova decisão:
 | 2026-03-20 | DA-019 revogada: funcionalidades de busca e sincronização de repositórios removidas; Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos | Instrução do usuário |
 | 2026-03-20 | DA-021 criada: integração GitHub API com Refit + Polly + DelegatingHandler para PAT; Feature GitHubRepoSearch com cache por usuário | RN-008 |
 | 2026-03-21 | DA-022 criada: contratos OpenAPI e cenários BDD diferidos para escopo de playground; auditoria emite avisos | Análise de causas-raiz |
+| 2026-03-21 | DA-023 criada: integração PokéAPI com Refit + Polly; Feature PokemonGet com cache por usuário | RN-009 |

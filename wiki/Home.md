@@ -9,6 +9,7 @@ API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native 
 - Endpoint protegido por Bearer Token (`GET /test`)
 - Consulta de condições climáticas de São Paulo via Open-Meteo (`GET /weather-conditions`)
 - Pesquisa de repositórios GitHub da conta AlbertKellner (`GET /github-repo-search`)
+- Consulta de Pokémon por ID via PokéAPI (`GET /pokemon`)
 - Infraestrutura transversal: rastreabilidade por Correlation ID, tratamento centralizado de exceções, autenticação JWT
 
 ---
@@ -36,6 +37,7 @@ API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native 
 | [Test Get](Feature-TestGet) | Endpoint protegido que retorna confirmação de funcionamento (`GET /test`) |
 | [Condições Climáticas de São Paulo](Feature-WeatherConditionsGet) | Consulta das condições climáticas atuais de São Paulo via Open-Meteo API (`GET /weather-conditions`) |
 | [Pesquisa de Repositórios GitHub](Feature-GitHubRepoSearch) | Pesquisa e exibição dos repositórios da conta AlbertKellner (`GET /github-repo-search`) |
+| [Consulta de Pokémon](Feature-PokemonGet) | Consulta de dados de Pokémon por ID via PokéAPI (`GET /pokemon`) |
 
 ### Infraestrutura
 

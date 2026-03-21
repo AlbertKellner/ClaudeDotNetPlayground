@@ -250,3 +250,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-20 | Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos; Features RepositoriesGetAll e RepositoriesSyncAll removidas | DA-019 revogada |
 | 2026-03-20 | Shared/ExternalApi/GitHub/ recriada (integração GitHub API); Feature GitHubRepoSearch adicionada em Features/Query/ | DA-021, RN-008 |
 | 2026-03-21 | Infra/Logging/ documentada: DatadogHttpSink.cs e DatadogLogEntry.cs adicionados à estrutura; lacuna de governança corrigida | Análise de causas-raiz |
+| 2026-03-21 | Shared/ExternalApi/Pokemon/ criada (integração PokéAPI); Feature PokemonGet adicionada em Features/Query/ | DA-023, RN-009 |
