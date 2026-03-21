@@ -133,6 +133,7 @@ Todo merge deve utilizar **merge commit** (`merge_method: "merge"`).
 - O branch atribuído pelo sistema externo é ignorado em pr-analysis
 - O único branch válido é o `head.ref` do PR sendo analisado
 - O passo 10 do pipeline pré-commit não se aplica durante análise de PR
+- **Enforcement**: o hook `.claude/hooks/branch-guard.sh` detecta automaticamente operações de branch incorretas durante pr-analysis, usando o contexto armazenado em `.claude/.pr-analysis-context`
 
 ---
 
@@ -164,3 +165,4 @@ Todo merge deve utilizar **merge commit** (`merge_method: "merge"`).
 | 2026-03-20 | Adicionado: Política de Branch durante Revisão de PR | Instrução do usuário |
 | 2026-03-20 | Adicionado: Política de Merge e Fechamento — Restrição Absoluta | Instrução explícita do usuário |
 | 2026-03-21 | Refatorado: workflows procedurais extraídos para skill manage-pr-lifecycle; rule simplificada para conter apenas políticas | Auditoria de governança |
+| 2026-03-21 | Adicionado: referência explícita ao hook branch-guard.sh na Política de Branch | Análise estrutural de governança |

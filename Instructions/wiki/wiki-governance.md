@@ -114,8 +114,9 @@ Isso inclui:
 
 | Tipo | Padrão | Exemplos |
 |------|--------|---------|
-| Feature | `Feature-[NomeDaFeature].md` | `Feature-UserLogin.md`, `Feature-TestGet.md` |
-| Infra | `Infra-[NomeDaFuncionalidade].md` | `Infra-Authentication.md`, `Infra-Correlation-ID.md` |
+| Feature (Vertical Slice) | `Feature-[NomeDaFeature].md` | `Feature-UserLogin.md`, `Feature-TestGet.md` |
+| Feature (Infra com RN) | `Feature-[NomeDaFuncionalidade].md` | `Feature-Health.md` (RN-005 — endpoint de infra com regra de negócio) |
+| Infra (sem RN) | `Infra-[NomeDaFuncionalidade].md` | `Infra-Authentication.md`, `Infra-Correlation-ID.md` |
 | Páginas estruturais | PascalCase | `Home.md`, `Architecture.md`, `Business-Rules.md` |
 | Sidebar | `_Sidebar.md` | (padrão GitHub Wiki) |
 
@@ -196,3 +197,4 @@ Toda a documentação da Wiki deve ser escrita em **português brasileiro**.
 | 2026-03-15 | Criado: governança inicial da GitHub Wiki | Instrução do usuário |
 | 2026-03-15 | Publicação alterada para automática via wiki-publish.yml | Instrução do usuário |
 | 2026-03-19 | Adicionado: gatilhos de atualização da wiki para BDD, regras de negócio, contratos e testes | Instrução do usuário |
+| 2026-03-21 | Esclarecido: nomenclatura de páginas wiki distingue Feature (Vertical Slice), Feature (Infra com RN) e Infra (sem RN) | Análise estrutural de governança |
