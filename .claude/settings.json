@@ -17,7 +17,8 @@
       "Write(**)",
       "Edit(**)",
       "Glob(**)",
-      "Grep(**)"
+      "Grep(**)",
+      "mcp__github__*"
     ],
     "deny": [
       "Bash(rm -rf /)",
