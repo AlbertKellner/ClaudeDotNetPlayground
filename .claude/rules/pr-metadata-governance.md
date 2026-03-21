@@ -161,18 +161,48 @@ Esta política é ativada automaticamente **após o push e a criação/atualiza�
 
 ### Workflow obrigatório:
 
-1. **Identificar a execução ativa** vinculada ao PR/branch:
+#### Passo 0: Informar esteiras e tempo médio
+
+Antes de iniciar o acompanhamento, o assistente deve:
+
+1. **Identificar todas as esteiras (workflows)** que serão executadas pelo push/PR
+2. **Consultar a página "Actions Performance Metrics"** do repositório para cada esteira:
+   ```bash
+   # Acessar via WebFetch a página de métricas de performance do workflow
+   # URL: https://github.com/<owner>/<repo>/actions/workflows/<workflow-file>/performance
+   ```
+3. **Informar ao usuário** quais esteiras serão monitoradas e qual é o tempo médio total de conclusão de cada uma
+
+#### Passo 1: Calcular estratégia de polling por esteira
+
+Para cada esteira identificada, aplicar a seguinte lógica:
+
+| Tempo médio de conclusão | Estratégia de polling |
+|---|---|
+| **≤ 30 segundos** | Consultar o status a cada **10 segundos** desde o início |
+| **> 30 segundos** | Aguardar **(tempo médio − 15 segundos)** antes da primeira verificação, depois consultar a cada **5 segundos** até a conclusão |
+
+**Justificativa**: Essa estratégia reduz a quantidade de verificações desnecessárias no repositório durante o acompanhamento e oferece ao usuário uma estimativa mais precisa do tempo restante.
+
+#### Passo 2: Identificar a execução ativa
+
+Identificar a execução ativa vinculada ao PR/branch:
    ```bash
    gh api repos/<owner>/<repo>/actions/runs --jq '.workflow_runs[:1] | .[].id'
    ```
 
-2. **Acompanhar os jobs** até a conclusão de todos:
+#### Passo 3: Acompanhar os jobs com a estratégia calculada
+
+Acompanhar os jobs usando o intervalo de polling calculado no Passo 1:
    ```bash
    gh api repos/<owner>/<repo>/actions/runs/<run-id>/jobs --jq '.jobs[] | {name, status, conclusion}'
    ```
-   - Polling a cada 30–90 segundos até que todos os jobs tenham `status: completed`
+   - Aplicar o intervalo de espera conforme a estratégia calculada para cada esteira
+   - Continuar até que todos os jobs tenham `status: completed`
 
-3. **Se todos os jobs passarem** (`conclusion: success`):
+#### Passo 4: Avaliar resultado
+
+**Se todos os jobs passarem** (`conclusion: success`):
    - Verificar os logs no Datadog usando os filtros referentes ao pipeline:
      - Filtrar por `env` correspondente ao contexto de execução (`ci`)
      - Filtrar por `service` correspondente à aplicação
@@ -181,7 +211,9 @@ Esta política é ativada automaticamente **após o push e a criação/atualiza�
    - Se não houver erros nos logs: reportar o resultado final com a lista de jobs, seus status e a confirmação de logs limpos no Datadog. A tarefa está concluída.
    - Se houver erros nos logs: diagnosticar, corrigir, registrar em `bash-errors-log.md` e reiniciar o ciclo
 
-4. **Se algum job falhar** (`conclusion: failure`):
+#### Passo 5: Tratar falhas
+
+**Se algum job falhar** (`conclusion: failure`):
    - Obter os logs do job que falhou:
      ```bash
      gh api repos/<owner>/<repo>/actions/runs/<run-id>/jobs --jq '.jobs[] | select(.conclusion == "failure") | {name, id}'
@@ -293,3 +325,4 @@ Criar um branch novo ou usar um branch atribuído pelo sistema para resolver com
 | 2026-03-20 | Adicionado: Política de Branch durante Revisão de PR — proibição de criar branch novo para atender review comments | Instrução do usuário |
 | 2026-03-20 | Reforço: branch atribuído pelo sistema externo é ignorado em pr-analysis; passo 10 do pipeline não se aplica em análise de PR; exceção explícita adicionada à Política de Verificação e Criação de PR | Comportamento incorreto observado — novo PR criado em vez de usar PR existente |
 | 2026-03-20 | Adicionado: Política de Merge e Fechamento — Restrição Absoluta; merge e fechamento de PRs proibidos sem solicitação explícita do usuário | Instrução explícita do usuário |
+| 2026-03-21 | Refatorado: workflow de acompanhamento de GitHub Actions — polling adaptativo baseado em tempo médio da página Actions Performance Metrics; informar esteiras ao usuário antes de monitorar | Instrução do usuário |
