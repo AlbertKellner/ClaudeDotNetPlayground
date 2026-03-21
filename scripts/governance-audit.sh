@@ -13,9 +13,16 @@
 
 set -euo pipefail
 
+# Modo --fix: corrige automaticamente problemas triviais (imports faltantes, contagens)
+FIX_MODE=false
+if [ "${1:-}" = "--fix" ]; then
+  FIX_MODE=true
+fi
+
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 FAILURES=0
 WARNINGS=0
+FIXES=0
 TOTAL=0
 
 pass() {
@@ -77,7 +84,16 @@ done < <(find "$REPO_ROOT/Instructions" -name "*.md" -type f | sort)
 if [ -z "$MISSING_IMPORTS" ]; then
   pass "Todos os arquivos de Instructions/ estão importados no CLAUDE.md"
 else
-  fail "Arquivos de Instructions/ ausentes nos imports do CLAUDE.md" "$MISSING_IMPORTS"
+  if [ "$FIX_MODE" = true ]; then
+    for missing in $MISSING_IMPORTS; do
+      # Adicionar import antes da última linha de imports (antes de "### Rules")
+      sed -i "/### Rules operacionais ativas/i @$missing" "$CLAUDE_MD"
+      FIXES=$((FIXES + 1))
+    done
+    pass "Imports de Instructions/ adicionados automaticamente (--fix):$MISSING_IMPORTS"
+  else
+    fail "Arquivos de Instructions/ ausentes nos imports do CLAUDE.md" "$MISSING_IMPORTS"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -97,7 +113,16 @@ done < <(find "$REPO_ROOT/.claude/rules" -name "*.md" -type f | sort)
 if [ -z "$MISSING_RULES_IMPORTS" ]; then
   pass "Todos os arquivos de .claude/rules/ estão importados no CLAUDE.md"
 else
-  fail "Arquivos de .claude/rules/ ausentes nos imports do CLAUDE.md" "$MISSING_RULES_IMPORTS"
+  if [ "$FIX_MODE" = true ]; then
+    for missing in $MISSING_RULES_IMPORTS; do
+      # Adicionar import antes da seção de meta-governança
+      sed -i "/### Meta-governança/i @$missing" "$CLAUDE_MD"
+      FIXES=$((FIXES + 1))
+    done
+    pass "Imports de .claude/rules/ adicionados automaticamente (--fix):$MISSING_RULES_IMPORTS"
+  else
+    fail "Arquivos de .claude/rules/ ausentes nos imports do CLAUDE.md" "$MISSING_RULES_IMPORTS"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -112,7 +137,13 @@ README_RULES_COUNT=$(grep -oP '\d+(?=\s*rules)' "$README" 2>/dev/null | head -1 
 if [ "$ACTUAL_RULES_COUNT" = "$README_RULES_COUNT" ]; then
   pass "Contagem de rules no README.md ($README_RULES_COUNT) corresponde ao real ($ACTUAL_RULES_COUNT)"
 else
-  fail "Contagem de rules no README.md ($README_RULES_COUNT) não corresponde ao real ($ACTUAL_RULES_COUNT)"
+  if [ "$FIX_MODE" = true ]; then
+    sed -i "s/${README_RULES_COUNT} rules/${ACTUAL_RULES_COUNT} rules/g" "$README"
+    FIXES=$((FIXES + 1))
+    pass "Contagem de rules atualizada automaticamente (--fix): $README_RULES_COUNT → $ACTUAL_RULES_COUNT"
+  else
+    fail "Contagem de rules no README.md ($README_RULES_COUNT) não corresponde ao real ($ACTUAL_RULES_COUNT)"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -127,7 +158,13 @@ README_SKILLS_COUNT=$(grep -oP '\d+(?=\s*skills)' "$README" 2>/dev/null | head -
 if [ "$ACTUAL_SKILLS_COUNT" = "$README_SKILLS_COUNT" ]; then
   pass "Contagem de skills no README.md ($README_SKILLS_COUNT) corresponde ao real ($ACTUAL_SKILLS_COUNT)"
 else
-  fail "Contagem de skills no README.md ($README_SKILLS_COUNT) não corresponde ao real ($ACTUAL_SKILLS_COUNT)"
+  if [ "$FIX_MODE" = true ]; then
+    sed -i "s/${README_SKILLS_COUNT} skills/${ACTUAL_SKILLS_COUNT} skills/g" "$README"
+    FIXES=$((FIXES + 1))
+    pass "Contagem de skills atualizada automaticamente (--fix): $README_SKILLS_COUNT → $ACTUAL_SKILLS_COUNT"
+  else
+    fail "Contagem de skills no README.md ($README_SKILLS_COUNT) não corresponde ao real ($ACTUAL_SKILLS_COUNT)"
+  fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -139,6 +176,10 @@ echo "--- 5. Variáveis de ambiente documentadas ---"
 if [ -f "$COMPOSE" ] && [ -f "$REQUIRED_VARS" ]; then
   UNDOCUMENTED_VARS=""
   while IFS= read -r var; do
+    # Excluir variáveis com valores fixos ou derivados no docker-compose.yml.
+    # Estas não são secrets nem configuráveis pelo usuário — são constantes de infraestrutura
+    # cujos valores estão definidos diretamente no docker-compose.yml (não via .env).
+    # Variáveis com ${...} (substituição de .env) SÃO verificadas.
     case "$var" in
       DD_SITE|DD_ENV|DD_HOSTNAME|DD_LOGS_ENABLED|DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL|\
       DD_CONVERT_DD_SITE_FQDN_ENABLED|DD_DOGSTATSD_NON_LOCAL_TRAFFIC|\
@@ -164,8 +205,29 @@ fi
 echo ""
 echo "--- 6. Referências a artefatos removidos ---"
 
-# Lista de IDs de artefatos removidos — ADICIONAR NOVOS IDs AQUI ao remover artefatos
-REMOVED_ARTIFACTS="RN-006 RN-007"
+# Lista de IDs de artefatos removidos — derivada automaticamente das fontes de governança.
+# Fontes: architecture-decisions.md (status "Revogad"), business-rules.md (status "Removida").
+# IDs manuais são adicionados como fallback caso o padrão de texto mude.
+REMOVED_ARTIFACTS_MANUAL="RN-006 RN-007"
+REMOVED_ARTIFACTS_AUTO=""
+if [ -f "$ADR_FILE" ]; then
+  REMOVED_ARTIFACTS_AUTO="$REMOVED_ARTIFACTS_AUTO $(grep -oP 'DA-\d+' "$ADR_FILE" | while read da_id; do
+    # Verificar se o bloco da decisão contém "Revogad" no campo Status
+    if sed -n "/### $da_id /,/^### DA-/p" "$ADR_FILE" 2>/dev/null | head -5 | grep -qi 'revogad'; then
+      echo "$da_id"
+    fi
+  done)"
+fi
+BUSINESS_RULES_FILE="$REPO_ROOT/Instructions/business/business-rules.md"
+if [ -f "$BUSINESS_RULES_FILE" ]; then
+  REMOVED_ARTIFACTS_AUTO="$REMOVED_ARTIFACTS_AUTO $(grep -oP 'RN-\d+' "$BUSINESS_RULES_FILE" | while read rn_id; do
+    if sed -n "/### $rn_id /,/^### RN-/p" "$BUSINESS_RULES_FILE" 2>/dev/null | head -5 | grep -qi 'removid'; then
+      echo "$rn_id"
+    fi
+  done)"
+fi
+# Combinar manuais + automáticos, remover duplicatas
+REMOVED_ARTIFACTS=$(echo "$REMOVED_ARTIFACTS_MANUAL $REMOVED_ARTIFACTS_AUTO" | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs)
 
 STALE_REFS=""
 for artifact_id in $REMOVED_ARTIFACTS; do
@@ -254,7 +316,7 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 9. Rules não contêm workflows procedurais extensos (>5 passos)
+# 9. Rules não contêm workflows procedurais extensos (>8 passos)
 # ---------------------------------------------------------------------------
 echo ""
 echo "--- 9. Separação Rules/Skills (workflows extensos) ---"
@@ -298,7 +360,7 @@ while IFS= read -r rule_file; do
 done < <(find "$REPO_ROOT/.claude/rules" -name "*.md" -type f | sort)
 
 if [ -z "$RULES_WITH_WORKFLOWS" ]; then
-  pass "Nenhuma rule contém workflows procedurais extensos (>10 passos)"
+  pass "Nenhuma rule contém workflows procedurais extensos (>8 passos)"
 else
   fail "Rules com workflows procedurais extensos (deveriam ser skills)" "$RULES_WITH_WORKFLOWS"
 fi
@@ -349,13 +411,17 @@ echo ""
 echo "--- 12. ADRs revogadas com redirecionamento ---"
 
 if [ -f "$ADR_FILE" ]; then
-  REVOKED_WITHOUT_REDIRECT=$(grep -c 'Revogad' "$ADR_FILE" 2>/dev/null || echo "0")
-  REVOKED_WITH_REDIRECT=$(grep -cP 'Revogad.*Substituíd|Substituíd.*DA-' "$ADR_FILE" 2>/dev/null || echo "0")
+  # Contar ADRs com status contendo "Revogad" (revogadas)
+  REVOKED_COUNT=$(grep -c 'Revogad' "$ADR_FILE" 2>/dev/null || echo "0")
+  # Uma ADR revogada é válida se:
+  # (a) aponta para substituta (Substituíd.*DA-), OU
+  # (b) contém justificativa na mesma linha (Revogad.*—) indicando remoção sem substituição
+  REVOKED_WITH_JUSTIFICATION=$(grep -cP 'Revogad.*(Substituíd|DA-\d|—)' "$ADR_FILE" 2>/dev/null || echo "0")
 
-  if [ "$REVOKED_WITHOUT_REDIRECT" -le "$REVOKED_WITH_REDIRECT" ] || [ "$REVOKED_WITHOUT_REDIRECT" -eq 0 ]; then
-    pass "Todas as ADRs revogadas possuem nota de redirecionamento"
+  if [ "$REVOKED_COUNT" -le "$REVOKED_WITH_JUSTIFICATION" ] || [ "$REVOKED_COUNT" -eq 0 ]; then
+    pass "Todas as ADRs revogadas possuem justificativa ou redirecionamento"
   else
-    fail "ADRs revogadas sem nota de redirecionamento ($REVOKED_WITHOUT_REDIRECT revogadas, $REVOKED_WITH_REDIRECT com redirecionamento)"
+    fail "ADRs revogadas sem justificativa ($REVOKED_COUNT revogadas, $REVOKED_WITH_JUSTIFICATION com justificativa)"
   fi
 else
   pass "Arquivo de decisões arquiteturais não encontrado — verificação ignorada"
@@ -756,17 +822,130 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 29. Skills referenciam rules existentes
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 29. Referências cruzadas skills → rules ---"
+
+SKILLS_DIR="$REPO_ROOT/.claude/skills"
+if [ -d "$SKILLS_DIR" ]; then
+  BROKEN_SKILL_REFS=""
+  while IFS= read -r skill_file; do
+    while IFS= read -r ref; do
+      case "$ref" in *\**) continue ;; esac
+      if [ ! -f "$REPO_ROOT/$ref" ]; then
+        BROKEN_SKILL_REFS="$BROKEN_SKILL_REFS $(basename "$(dirname "$skill_file")")->$ref"
+      fi
+    done < <(grep -oP '`([^`]*/[^`]*\.md)`' "$skill_file" 2>/dev/null | sed 's/`//g' | sort -u)
+  done < <(find "$SKILLS_DIR" -name "SKILL.md" -type f | sort)
+
+  if [ -z "$BROKEN_SKILL_REFS" ]; then
+    pass "Todas as referências em skills apontam para arquivos existentes"
+  else
+    fail "Referências quebradas em skills" "$BROKEN_SKILL_REFS"
+  fi
+else
+  pass "Diretório de skills não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 30. operating-model.md lista skills que existem como diretórios
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 30. operating-model.md ↔ skills reais ---"
+
+OPERATING_MODEL="$REPO_ROOT/Instructions/operating-model.md"
+if [ -f "$OPERATING_MODEL" ] && [ -d "$SKILLS_DIR" ]; then
+  MISSING_SKILLS_IN_OM=""
+  while IFS= read -r skill_dir; do
+    skill_name=$(basename "$skill_dir")
+    if ! grep -qF "$skill_name" "$OPERATING_MODEL" 2>/dev/null; then
+      MISSING_SKILLS_IN_OM="$MISSING_SKILLS_IN_OM $skill_name"
+    fi
+  done < <(find "$SKILLS_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
+
+  if [ -z "$MISSING_SKILLS_IN_OM" ]; then
+    pass "Todas as skills reais estão referenciadas em operating-model.md"
+  else
+    warn "Skills não referenciadas em operating-model.md" "$MISSING_SKILLS_IN_OM"
+  fi
+else
+  pass "operating-model.md ou skills/ não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 31. wiki Business-Rules.md lista todas as RNs ativas
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 31. wiki Business-Rules.md ↔ RNs ativas ---"
+
+WIKI_BR="$WIKI_DIR/Business-Rules.md"
+BUSINESS_RULES_SRC="$REPO_ROOT/Instructions/business/business-rules.md"
+if [ -f "$WIKI_BR" ] && [ -f "$BUSINESS_RULES_SRC" ]; then
+  MISSING_RN_WIKI=""
+  while IFS= read -r rn_id; do
+    if ! grep -qF "$rn_id" "$WIKI_BR" 2>/dev/null; then
+      MISSING_RN_WIKI="$MISSING_RN_WIKI $rn_id"
+    fi
+  done < <(grep -oP '^### (RN-\d+)' "$BUSINESS_RULES_SRC" | sed 's/### //' | while read rn_id; do
+    # Excluir RNs removidas/depreciadas
+    if ! sed -n "/### $rn_id /,/^### RN-/p" "$BUSINESS_RULES_SRC" 2>/dev/null | grep -qi 'removid\|depreciad'; then
+      echo "$rn_id"
+    fi
+  done)
+
+  if [ -z "$MISSING_RN_WIKI" ]; then
+    pass "wiki/Business-Rules.md lista todas as RNs ativas"
+  else
+    fail "RNs ativas ausentes em wiki/Business-Rules.md" "$MISSING_RN_WIKI"
+  fi
+else
+  pass "wiki/Business-Rules.md ou business-rules.md não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
+# 32. Meta-check: quantidade de checks no script = quantidade na rule
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 32. Consistência interna audit script ↔ rule ---"
+
+AUDIT_RULE="$REPO_ROOT/.claude/rules/governance-audit.md"
+if [ -f "$AUDIT_RULE" ]; then
+  # Contar checks no script (linhas "# N." ou "echo \"--- N.")
+  SCRIPT_CHECK_COUNT=$(grep -cP '^echo "--- \d+\.' "$0" 2>/dev/null || echo "0")
+  # Contar checks documentados na rule (linhas "| N |")
+  RULE_CHECK_COUNT=$(grep -cP '^\| \d+ \|' "$AUDIT_RULE" 2>/dev/null || echo "0")
+
+  if [ "$SCRIPT_CHECK_COUNT" -eq "$RULE_CHECK_COUNT" ]; then
+    pass "Quantidade de checks no script ($SCRIPT_CHECK_COUNT) = quantidade na rule ($RULE_CHECK_COUNT)"
+  else
+    fail "Inconsistência: script tem $SCRIPT_CHECK_COUNT checks, rule documenta $RULE_CHECK_COUNT"
+  fi
+else
+  pass "governance-audit.md não encontrado — verificação ignorada"
+fi
+
+# ---------------------------------------------------------------------------
 # Resumo
 # ---------------------------------------------------------------------------
 echo ""
 echo "=== Resumo ==="
 PASSED=$((TOTAL - FAILURES - WARNINGS))
-echo "Total: $TOTAL verificações | $PASSED aprovadas | $FAILURES falhas | $WARNINGS avisos"
+if [ "$FIX_MODE" = true ] && [ "$FIXES" -gt 0 ]; then
+  echo "Total: $TOTAL verificações | $PASSED aprovadas | $FAILURES falhas | $WARNINGS avisos | $FIXES correções automáticas"
+else
+  echo "Total: $TOTAL verificações | $PASSED aprovadas | $FAILURES falhas | $WARNINGS avisos"
+fi
 
 if [ "$FAILURES" -gt 0 ]; then
   echo ""
-  echo "[ATENÇÃO] Existem $FAILURES falhas de consistência na governança."
-  echo "Corrija as falhas antes de prosseguir com o commit."
+  if [ "$FIX_MODE" = true ]; then
+    echo "[ATENÇÃO] Existem $FAILURES falhas não corrigíveis automaticamente."
+  else
+    echo "[ATENÇÃO] Existem $FAILURES falhas de consistência na governança."
+    echo "Corrija as falhas antes de prosseguir com o commit."
+    echo "Dica: use 'bash scripts/governance-audit.sh --fix' para corrigir problemas triviais automaticamente."
+  fi
   exit 1
 elif [ "$WARNINGS" -gt 0 ]; then
   echo ""

@@ -64,7 +64,7 @@ Antes de iniciar o pipeline, classificar o escopo da tarefa:
 | Escopo | Critério | Passos aplicáveis |
 |---|---|---|
 | **Código** | A tarefa altera arquivos `.cs`, `.csproj`, `Dockerfile`, `docker-compose.yml`, `appsettings.json`, workflows de CI ou qualquer artefato que afete build, execução ou comportamento da aplicação | Todos: 0 → 11 |
-| **Governança** | A tarefa altera **exclusivamente** arquivos `.md`, `.sh`, scripts de governança, hooks ou documentação — sem impacto em build, execução ou comportamento da aplicação | Apenas: 0.1 → 9 → 10 |
+| **Governança** | A tarefa altera **exclusivamente** arquivos `.md`, `.sh`, scripts de governança, hooks ou documentação — sem impacto em build, execução ou comportamento da aplicação | Apenas: 0.1 → 9 → 10. O passo 10 (PR) aplica-se sempre que houver commits a serem integrados — mesmo para mudanças exclusivamente de governança. |
 | **Análise de PR** | A tarefa é análise de solicitações de mudança em PR existente (skill pr-analysis) | Ver skill pr-analysis — o branch atribuído pelo sistema externo é ignorado; usar head.ref do PR |
 
 **Esta classificação é o primeiro ato obrigatório.** Executar passos inaplicáveis ao escopo é um erro — desperdiça tempo e gera ruído. Omitir passos aplicáveis ao escopo também é um erro.
