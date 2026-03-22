@@ -113,14 +113,48 @@ Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Da
 
 ## Imports de Governança
 
+### Core — sempre carregados (~2900 linhas)
+
+Artefatos essenciais para toda interação, independente do escopo.
+
 @Instructions/operating-model.md
 @Instructions/architecture/technical-overview.md
 @Instructions/architecture/engineering-principles.md
+@Instructions/business/business-rules.md
+@Instructions/glossary/ubiquitous-language.md
+@Instructions/snippets/canonical-snippets.md
+@scripts/operational-runbook.md
+@open-questions.md
+@assumptions-log.md
+
+@.claude/rules/governance-policies.md
+@.claude/rules/source-of-truth-priority.md
+@.claude/rules/bash-error-logging.md
+@.claude/rules/pr-metadata-governance.md
+@.claude/rules/governance-audit.md
+@.claude/rules/governance-behavior-tracking.md
+@.claude/rules/execution-time-tracking.md
+@.claude/rules/continuous-learning.md
+@.claude/rules/token-optimization.md
+
+### Sob demanda — Arquitetura detalhada (~875 linhas)
+
+Carregados quando a tarefa cria/altera estrutura de código, pastas ou nomenclatura.
+O assistente deve ler estes arquivos antes de implementar mudanças estruturais.
+
 @Instructions/architecture/patterns.md
 @Instructions/architecture/architecture-decisions.md
 @Instructions/architecture/folder-structure.md
 @Instructions/architecture/naming-conventions.md
-@Instructions/business/business-rules.md
+@.claude/rules/architecture-governance.md
+@.claude/rules/naming-governance.md
+@.claude/rules/folder-governance.md
+@.claude/rules/csharp-conventions.md
+
+### Sob demanda — Domínio, BDD e contratos (~660 linhas)
+
+Carregados quando a tarefa envolve modelagem de domínio, comportamento formal ou contratos.
+
 @Instructions/business/domain-model.md
 @Instructions/business/invariants.md
 @Instructions/business/workflows.md
@@ -128,32 +162,24 @@ Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Da
 @Instructions/bdd/README.md
 @Instructions/bdd/conventions.md
 @Instructions/contracts/README.md
+
+### Sob demanda — Decisões e templates (~195 linhas)
+
+Carregados quando a tarefa envolve registro de novas decisões arquiteturais.
+
 @Instructions/decisions/README.md
 @Instructions/decisions/adr-template.md
-@Instructions/glossary/ubiquitous-language.md
-@Instructions/snippets/README.md
-@Instructions/snippets/canonical-snippets.md
+
+### Sob demanda — Contextuais (~830 linhas)
+
+Carregados conforme o contexto específico da tarefa.
+
 @Instructions/wiki/wiki-governance.md
-@scripts/operational-runbook.md
-@open-questions.md
-@assumptions-log.md
+@Instructions/snippets/README.md
 @bash-errors-log.md
-
-### Rules operacionais ativas
-
-@.claude/rules/governance-policies.md
-@.claude/rules/source-of-truth-priority.md
-@.claude/rules/architecture-governance.md
-@.claude/rules/naming-governance.md
-@.claude/rules/folder-governance.md
-@.claude/rules/bash-error-logging.md
 @.claude/rules/environment-readiness.md
 @.claude/rules/endpoint-validation.md
-@.claude/rules/pr-metadata-governance.md
 @.claude/rules/instruction-review.md
-@.claude/rules/governance-audit.md
-@.claude/rules/execution-time-tracking.md
-@.claude/rules/governance-behavior-tracking.md
 
 ### Meta-governança
 

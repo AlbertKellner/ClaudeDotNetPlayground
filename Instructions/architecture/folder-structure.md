@@ -40,14 +40,30 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   │   ├── endpoint-validation.md
 │   │   ├── environment-readiness.md
 │   │   ├── folder-governance.md
+│   │   ├── continuous-learning.md        # Aprendizado contínuo automatizado
+│   │   ├── token-optimization.md        # Otimização de tokens e compactação estratégica
 │   │   ├── governance-policies.md       # Consolidação: normalização, contexto, propagação, ambiguidade, snippets
 │   │   ├── instruction-review.md        # Meta-regra: revisão obrigatória via REVIEW.md
 │   │   ├── naming-governance.md
 │   │   ├── pr-metadata-governance.md
+│   │   ├── csharp-conventions.md       # Convenções C#/.NET consolidadas (ECC)
 │   │   └── source-of-truth-priority.md
+│   │
+│   ├── commands/                       # Slash commands invocáveis pelo usuário
+│   │   ├── plan.md                     # /plan — plano de implementação antes de codificar
+│   │   ├── checkpoint.md               # /checkpoint — salvar e verificar estado
+│   │   ├── code-review.md              # /code-review — revisão de segurança e qualidade
+│   │   ├── tdd.md                      # /tdd — desenvolvimento guiado por testes
+│   │   ├── verify.md                   # /verify — verificação abrangente do codebase
+│   │   ├── build-fix.md                # /build-fix — corrigir erros de build incrementalmente
+│   │   ├── save-session.md             # /save-session — salvar contexto da sessão
+│   │   ├── resume-session.md           # /resume-session — retomar sessão anterior
+│   │   ├── instinct-status.md          # /instinct-status — estado dos instintos
+│   │   └── instinct-export.md          # /instinct-export — exportar instintos
 │   │
 │   ├── skills/                         # Workflows operacionais (como)
 │   │   ├── apply-user-snippet/
+│   │   ├── continuous-learning/         # Análise de observações e evolução de instintos
 │   │   ├── evolve-governance/
 │   │   ├── implement-request/
 │   │   ├── ingest-definition/
@@ -56,9 +72,21 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   │   ├── review-alignment/
 │   │   └── review-instructions/         # Executa REVIEW.md
 │   │
+│   ├── learning/                       # Sistema de aprendizado contínuo
+│   │   ├── config.json                 # Configuração do sistema (thresholds, domínios)
+│   │   ├── observations.jsonl          # Log de observações (gitignored)
+│   │   ├── instinct-template.md        # Template para criação de instintos
+│   │   ├── instincts/                  # Instintos ativos e tentativos (versionados)
+│   │   │   ├── active/                 # Instintos com confidence >= 0.5
+│   │   │   └── tentative/              # Instintos com confidence < 0.5
+│   │   └── graduated/                  # Instintos promovidos a governança (histórico)
+│   │
 │   ├── hooks/                          # Scripts de enforcement
+│   │   ├── branch-guard.sh              # Proteção de branch durante pr-analysis
 │   │   ├── instruction-change-detector.sh
+│   │   ├── observe-tool-use.sh          # Captura observações para aprendizado contínuo
 │   │   ├── pre-commit-gate.sh
+│   │   ├── session-timer.sh             # Rastreamento de tempo de execução efetivo
 │   │   └── README.md
 │
 └── Instructions/
@@ -253,3 +281,7 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-21 | Infra/Logging/ documentada: DatadogHttpSink.cs e DatadogLogEntry.cs adicionados à estrutura; lacuna de governança corrigida | Análise de causas-raiz |
 | 2026-03-21 | Shared/ExternalApi/Pokemon/ criada (integração PokéAPI); Feature PokemonGet adicionada em Features/Query/ | DA-023, RN-009 |
 | 2026-03-21 | .claude/skills/governance-behavior-tracking/ adicionada à estrutura de governança | Instrução do usuário |
+| 2026-03-22 | .claude/learning/ criada: sistema de aprendizado contínuo com config, instintos e graduações; .claude/rules/continuous-learning.md e .claude/skills/continuous-learning/ adicionados | Adaptação do ECC |
+| 2026-03-22 | .claude/hooks/observe-tool-use.sh adicionado: hook de captura de observações para aprendizado contínuo | Fase 2 do sistema de aprendizado |
+| 2026-03-22 | .claude/commands/ criada: 10 slash commands adaptados do ECC (plan, checkpoint, code-review, tdd, verify, build-fix, save-session, resume-session, instinct-status, instinct-export) | Adaptação do ECC |
+| 2026-03-22 | .claude/rules/csharp-conventions.md criada: convenções C#/.NET consolidadas (4 rules do ECC) | Adaptação do ECC |

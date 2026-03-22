@@ -4,9 +4,11 @@
 
 ```
 .claude/
-  hooks/         (3 scripts + settings.json)
-  rules/         (13 rules operacionais)
-  skills/        (12 skills com SKILL.md cada)
+  hooks/         (5 scripts + settings.json)
+  commands/      (10 slash commands invocáveis)
+  rules/         (16 rules operacionais)
+  skills/        (13 skills com SKILL.md cada)
+  learning/      (sistema de aprendizado contínuo)
 CLAUDE.md
 Instructions/
   architecture/  (6 arquivos)
@@ -30,8 +32,10 @@ open-questions.md
 | Grupo | Propósito |
 |---|---|
 | `CLAUDE.md` | Ponto de entrada: pipeline obrigatório de execução e imports de governança |
-| `.claude/rules/` | **Comportamento operacional persistente do assistente** — 13 rules que definem como interpretar, classificar, priorizar, propagar, auditar e implementar |
-| `.claude/skills/` | 12 skills que mapeiam tipos de solicitação e passos de pipeline a workflows completos de execução |
+| `.claude/commands/` | 10 slash commands invocáveis pelo usuário: `/plan`, `/checkpoint`, `/code-review`, `/tdd`, `/verify`, `/build-fix`, `/save-session`, `/resume-session`, `/instinct-status`, `/instinct-export` |
+| `.claude/rules/` | **Comportamento operacional persistente do assistente** — 16 rules que definem como interpretar, classificar, priorizar, propagar, auditar, aprender, otimizar e implementar |
+| `.claude/skills/` | 13 skills que mapeiam tipos de solicitação e passos de pipeline a workflows completos de execução |
+| `.claude/learning/` | Sistema de aprendizado contínuo: observações de uso de ferramentas → instintos → graduação para governança formal |
 | `.claude/hooks/` | Scripts de enforcement automatizado — detecção de mudanças em governança, proteção de branch e auditoria |
 | `Instructions/operating-model.md` | Documento central: explica como tudo funciona junto em runtime |
 | `Instructions/architecture/` | Memória arquitetural: princípios, padrões, decisões, nomenclatura, estrutura |
@@ -54,7 +58,7 @@ open-questions.md
 - **Hierarquia de prioridade** entre fontes de verdade com regras de conflito (`source-of-truth-priority.md`)
 - **Meta-governança** com checklist de revisão obrigatória para instruções (`REVIEW.md`, `instruction-review.md`)
 - **Auditoria automatizada** de consistência estrutural via script (`governance-audit.md`, `governance-audit.sh`)
-- **12 skills operacionais** com workflows internos completos para cada tipo de solicitação
+- **13 skills operacionais** com workflows internos completos para cada tipo de solicitação
 - **Estrutura durável** em todos os arquivos de `Instructions/` — prontos para receber conteúdo específico do domínio
 
 ---
