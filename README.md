@@ -4,7 +4,7 @@
 
 ```
 .claude/
-  hooks/         (3 scripts + settings.json)
+  hooks/         (4 scripts + settings.json)
   rules/         (14 rules operacionais)
   skills/        (13 skills com SKILL.md cada)
   learning/      (sistema de aprendizado contínuo)

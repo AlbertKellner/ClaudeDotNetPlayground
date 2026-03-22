@@ -69,6 +69,7 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   │
 │   ├── hooks/                          # Scripts de enforcement
 │   │   ├── instruction-change-detector.sh
+│   │   ├── observe-tool-use.sh          # Captura observações para aprendizado contínuo
 │   │   ├── pre-commit-gate.sh
 │   │   └── README.md
 │
@@ -265,3 +266,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-21 | Shared/ExternalApi/Pokemon/ criada (integração PokéAPI); Feature PokemonGet adicionada em Features/Query/ | DA-023, RN-009 |
 | 2026-03-21 | .claude/skills/governance-behavior-tracking/ adicionada à estrutura de governança | Instrução do usuário |
 | 2026-03-22 | .claude/learning/ criada: sistema de aprendizado contínuo com config, instintos e graduações; .claude/rules/continuous-learning.md e .claude/skills/continuous-learning/ adicionados | Adaptação do ECC |
+| 2026-03-22 | .claude/hooks/observe-tool-use.sh adicionado: hook de captura de observações para aprendizado contínuo | Fase 2 do sistema de aprendizado |
