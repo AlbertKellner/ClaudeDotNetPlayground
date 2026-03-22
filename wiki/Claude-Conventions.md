@@ -66,6 +66,158 @@ Executar passos inaplicáveis ao escopo é um erro. Omitir passos aplicáveis ao
 
 ---
 
+## Pipeline de Validação Pré-Commit — Passos 0 a 11
+
+O pipeline é a sequência obrigatória de validação antes de qualquer commit. Cada passo tem aplicabilidade definida pelo escopo da tarefa.
+
+### Passo 0 — Verificar pré-requisitos de ambiente
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Verifica se o ambiente está pronto: .NET SDK, Docker, Docker Compose, clang, variáveis de ambiente, Docker daemon em execução |
+| **Gate** | Sim — ambiente não pronto bloqueia todos os passos seguintes |
+| **Escopo Código** | Obrigatório |
+| **Escopo Governança** | Não aplicável |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+| **Skill** | `verify-environment` |
+
+### Passo 0.1 — Auditoria automatizada de governança
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Executa `bash scripts/governance-audit.sh` — 36 verificações automatizadas de consistência estrutural dos arquivos de governança |
+| **Gate** | Sim — falhas bloqueiam o commit. Se houver falhas, executar `--fix` para correções automáticas e re-executar |
+| **Escopo Código** | Obrigatório |
+| **Escopo Governança** | Obrigatório — gate principal antes do commit |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+
+### Passo 1 — Build (`dotnet build`)
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Compila o projeto em modo Debug; verifica que não há erros de compilação |
+| **Gate** | Sim — erro de compilação bloqueia o avanço |
+| **Escopo Código** | Obrigatório |
+| **Escopo Governança** | Não aplicável |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+
+### Passo 2 — Execução em modo debug (`dotnet run`)
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Inicia a aplicação localmente na porta 5000; aguarda `/health` responder (qualquer código HTTP confirma inicialização); encerra o processo |
+| **Gate** | Sim — aplicação que não inicia bloqueia o avanço |
+| **Escopo Código** | Obrigatório — primeira validação antes dos testes |
+| **Escopo Governança** | Não aplicável |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+
+### Passo 3 — Testes unitários (`dotnet test`)
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Executa todos os testes unitários em modo Debug |
+| **Gate** | **Sim — gate obrigatório**: falha em qualquer teste bloqueia os passos 4 a 8. Testes falhando bloqueiam o commit |
+| **Escopo Código** | Obrigatório |
+| **Escopo Governança** | Não aplicável |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+
+### Passo 4 — Publicar e iniciar via Docker (`docker compose up -d`)
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Publica em modo Release/Native AOT e inicia a aplicação + Datadog Agent via Docker Compose na porta 8080 |
+| **Gate** | Sim — falha de build Docker ou startup bloqueia o avanço |
+| **Escopo Código** | Obrigatório — executado **somente** após aprovação no gate de testes (passo 3) |
+| **Escopo Governança** | Não aplicável |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+| **Pré-requisito** | Docker daemon em execução; `DD_API_KEY` disponível (sem ela, prossegue sem Datadog) |
+
+### Passo 5 — Health Check pós-Docker
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Aguarda `/health` na porta 8080 responder HTTP 200 (polling até 30 tentativas) |
+| **Gate** | Sim — aplicação que não responde HTTP 200 bloqueia o avanço |
+| **Escopo Código** | Obrigatório |
+| **Escopo Governança** | Não aplicável |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+
+### Passo 6 — Validação de endpoints via HTTP real
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Para cada endpoint criado ou alterado na tarefa: obtém Bearer Token via `POST /login` (se necessário), consome o endpoint e valida o status code. Inclui validação de cache (segunda requisição consecutiva) e captura de logs de storytelling (SNP-001) |
+| **Gate** | Sim — status code inesperado bloqueia o commit |
+| **Escopo Código** | Obrigatório quando a tarefa criou ou alterou features com endpoint |
+| **Escopo Governança** | Não aplicável |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+| **Skill** | `validate-endpoints` |
+
+### Passo 7 — Exibir logs do container
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Exibe os logs de storytelling de cada requisição validada no passo 6. Se o passo 6 não foi aplicável, exibe os logs gerais do container via `docker logs` |
+| **Gate** | Não — informativo |
+| **Escopo Código** | Obrigatório |
+| **Escopo Governança** | Não aplicável |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+
+### Passo 8 — Parar containers (`docker compose down`)
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Para todos os containers Docker (aplicação + Datadog Agent) |
+| **Gate** | Não |
+| **Escopo Código** | Obrigatório |
+| **Escopo Governança** | Não aplicável |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+
+### Passo 9 — Commit
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Realiza o commit com mensagem descritiva. Somente executado após todos os gates anteriores passarem |
+| **Gate** | — |
+| **Escopo Código** | Obrigatório |
+| **Escopo Governança** | Obrigatório |
+| **Escopo Análise de PR** | Obrigatório (no branch do PR) |
+
+### Passo 10 — Criar ou atualizar Pull Request
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Verifica se já existe PR aberto para o branch; se não, cria seguindo a governança de PR. Se já existir, atualiza título e descrição para refletir o estado atual |
+| **Gate** | — |
+| **Escopo Código** | Obrigatório |
+| **Escopo Governança** | Obrigatório (quando houver commits a integrar) |
+| **Escopo Análise de PR** | **Não aplicável** — o PR já existe. Em vez disso, atualizar título e descrição do PR existente via MCP `update_pull_request` |
+| **Skill** | `manage-pr-lifecycle` |
+| **Exceção** | Em análise de PR, o branch atribuído pelo sistema externo é ignorado; usar exclusivamente o `head.ref` do PR |
+
+### Passo 11 — Checkpoint de encerramento (CI + Datadog)
+
+| Campo | Valor |
+|---|---|
+| **O que faz** | Acompanha a execução das GitHub Actions até término de todos os jobs; verifica logs no Datadog; procura falhas ou erros; se tudo passar, reporta e encerra. Se falhar, diagnostica, corrige e reinicia o ciclo |
+| **Gate** | Sim — a tarefa **não se encerra** até que todos os jobs do CI passem e os logs no Datadog sejam verificados |
+| **Escopo Código** | Obrigatório — condição de encerramento da tarefa |
+| **Escopo Governança** | Não aplicável (sem build, sem Docker, sem CI de código) |
+| **Escopo Análise de PR** | Conforme skill pr-analysis |
+| **Skill** | `manage-pr-lifecycle` |
+
+---
+
+## Notas sobre o Pipeline
+
+- **Passo 0 previne falhas em cascata** — verificar ambiente antes de executar evita erros custosos documentados em `bash-errors-log.md`
+- **Passo 3 é gate obrigatório** — o Docker publish (passo 4) só executa após todos os testes passarem
+- **Passo 11 é condição de encerramento** — a tarefa não está concluída enquanto houver jobs em execução ou logs não verificados
+- **`scripts/setup-env.sh` é modelo declarativo** — o agente não executa esse script; o ambiente deve chegar pronto
+- **`DD_API_KEY` ausente** — o pipeline prossegue sem Datadog; logs aparecerão quando o CI executar com a chave
+
+---
+
 ## Auditoria Automatizada
 
 O script `governance-audit.sh` executa **36 verificações automatizadas** da consistência estrutural dos arquivos de governança:
