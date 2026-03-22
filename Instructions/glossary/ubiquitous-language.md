@@ -95,6 +95,23 @@ Os seguintes termos são usados internamente no sistema de governança e têm de
 **Exemplos**: Datadog MCP, GitHub CLI (`gh`), tokens PAT, chaves de API
 **Notas**: Quando uma nova ferramenta operacional é disponibilizada, deve ser registrada em `technical-overview.md` e propagada para `environment-readiness.md` e `required-vars.md` conforme o protocolo em `technical-overview.md` seção "Como Novos Recursos São Registrados".
 
+### Instinto
+**Definição**: Padrão operacional detectado automaticamente a partir de observações recorrentes de uso de ferramentas ao longo de sessões de trabalho. Possui confidence scoring, domínio, gatilho e evidência. Instintos são versionados e evoluem ao longo do tempo, podendo ser graduados a governança formal.
+**Sinônimos permitidos**: padrão aprendido
+**Termos proibidos**: "regra aprendida" (ambíguo com rules de governança)
+**Contexto**: Sistema de aprendizado contínuo em `.claude/learning/instincts/`, `.claude/rules/continuous-learning.md`
+**Notas**: Instintos não são governança formal — são candidatos. Só se tornam governança após graduação aprovada pelo usuário.
+
+### Observação (Aprendizado)
+**Definição**: Registro atômico de uso de ferramenta capturado pelo hook `observe-tool-use.sh`. Contém timestamp, ferramenta, resumo de input/output, resultado e sessão. Observações são transientes — não versionadas.
+**Contexto**: Sistema de aprendizado contínuo em `.claude/learning/observations.jsonl`
+**Notas**: Diferente de "observação" no sentido coloquial. Neste contexto, é um registro estruturado persistido em JSONL.
+
+### Graduação (Aprendizado)
+**Definição**: Processo pelo qual um instinto maduro (confidence >= 0.85, observado em 3+ sessões) é promovido a artefato de governança formal (rule, skill ou check de auditoria). Requer aprovação explícita do usuário.
+**Contexto**: Sistema de aprendizado contínuo — `.claude/rules/continuous-learning.md`, `.claude/learning/graduated/`
+**Notas**: Instintos graduados são movidos para `graduated/` como histórico de rastreabilidade.
+
 ---
 
 ## Termos Pendentes de Definição
@@ -122,3 +139,4 @@ Os seguintes termos são usados internamente no sistema de governança e têm de
 |---|---|---|
 | Bootstrap | Termos do sistema de governança criados | — |
 | 2026-03-21 | Adicionado: "Ferramenta Operacional" — conceito usado em governance-policies.md §3 sem definição formal | Análise de capacidade de auto-diagnóstico |
+| 2026-03-22 | Adicionados: "Instinto", "Observação (Aprendizado)", "Graduação (Aprendizado)" — termos do sistema de aprendizado contínuo | Revisão de consistência do sistema de aprendizado |

@@ -69,9 +69,11 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   │   └── graduated/                  # Instintos promovidos a governança (histórico)
 │   │
 │   ├── hooks/                          # Scripts de enforcement
+│   │   ├── branch-guard.sh              # Proteção de branch durante pr-analysis
 │   │   ├── instruction-change-detector.sh
 │   │   ├── observe-tool-use.sh          # Captura observações para aprendizado contínuo
 │   │   ├── pre-commit-gate.sh
+│   │   ├── session-timer.sh             # Rastreamento de tempo de execução efetivo
 │   │   └── README.md
 │
 └── Instructions/

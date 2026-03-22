@@ -116,7 +116,7 @@ Ao final da análise, apresentar:
   "input_summary": "docker compose up -d --build",
   "output_summary": "success: containers started",
   "result": "success",
-  "pipeline_step": "4",
+  "tool_use_id": "toolu_abc123",
   "session_id": "abc123"
 }
 ```

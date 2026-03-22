@@ -4,19 +4,31 @@
 # Ativação: PostToolUse em * (todas as ferramentas)
 # Comportamento: Informativo (exit 0 sempre — nunca bloqueia)
 #
+# Dados de entrada: JSON via stdin (padrão Claude Code para hooks)
+# Campos disponíveis: tool_name, tool_input, tool_response, session_id, tool_use_id
+#
 # Captura: timestamp, ferramenta, resumo de input/output, resultado, sessão
 # Scrubbing: remove tokens, API keys, senhas antes de persistir
 # Storage: .claude/learning/observations.jsonl (gitignored, auto-archive em >5MB)
 #
 # Guards anti-loop:
-# - Não observa subagentes (CLAUDE_AGENT_ID != vazio e != "main")
 # - Não observa se ECC_SKIP_OBSERVE=1
-# - Não observa o próprio hook (tool = observe-tool-use.sh)
+# - Não observa o próprio hook (tool_input contém observe-tool-use.sh)
+# - Requer jq para parsing de JSON — sai silenciosamente se indisponível
 
 # === CONFIGURAÇÃO ===
 MAX_FILE_SIZE_BYTES=$((5 * 1024 * 1024))  # 5MB
 MAX_OUTPUT_CHARS=500
-SECRET_PATTERN='(api[_-]?key|token|secret|password|authorization|credentials?|auth|bearer)([\"'"'"'\s:=]+)[^\s"'"'"']{8,}'
+
+# === GUARD: Skip explícito ===
+if [ "${ECC_SKIP_OBSERVE:-0}" = "1" ]; then
+    exit 0
+fi
+
+# === GUARD: jq disponível ===
+if ! command -v jq &>/dev/null; then
+    exit 0
+fi
 
 # === RESOLUÇÃO DE CAMINHOS ===
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -33,35 +45,25 @@ if [ -f "$CONFIG_FILE" ]; then
     fi
 fi
 
-# === GUARD: Skip explícito ===
-if [ "${ECC_SKIP_OBSERVE:-0}" = "1" ]; then
+# === LER JSON DO STDIN ===
+STDIN_JSON=$(cat)
+
+if [ -z "$STDIN_JSON" ]; then
     exit 0
 fi
 
-# === GUARD: Subagentes ===
-if [ -n "${CLAUDE_AGENT_ID:-}" ] && [ "${CLAUDE_AGENT_ID}" != "main" ] && [ "${CLAUDE_AGENT_ID}" != "cli" ]; then
-    exit 0
-fi
-
-# === COLETAR DADOS DO EVENTO ===
-TOOL_NAME="${CLAUDE_TOOL_USE_NAME:-unknown}"
-TOOL_INPUT="${CLAUDE_TOOL_USE_INPUT:-}"
-TOOL_OUTPUT="${CLAUDE_TOOL_USE_OUTPUT:-}"
-TOOL_ID="${CLAUDE_TOOL_USE_ID:-}"
-SESSION_ID="${CLAUDE_SESSION_ID:-unknown}"
+# === EXTRAIR CAMPOS DO JSON ===
+TOOL_NAME=$(echo "$STDIN_JSON" | jq -r '.tool_name // "unknown"' 2>/dev/null)
+TOOL_INPUT=$(echo "$STDIN_JSON" | jq -r '.tool_input // "" | tostring' 2>/dev/null)
+TOOL_RESPONSE=$(echo "$STDIN_JSON" | jq -r '.tool_response // "" | tostring' 2>/dev/null)
+SESSION_ID=$(echo "$STDIN_JSON" | jq -r '.session_id // "unknown"' 2>/dev/null)
+TOOL_USE_ID=$(echo "$STDIN_JSON" | jq -r '.tool_use_id // ""' 2>/dev/null)
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # === GUARD: Não observar o próprio hook ===
 if echo "$TOOL_INPUT" | grep -q "observe-tool-use.sh" 2>/dev/null; then
     exit 0
 fi
-
-# === SCRUBBING DE SECRETS ===
-scrub_secrets() {
-    local text="$1"
-    # Substituir padrões de secrets por [REDACTED]
-    echo "$text" | sed -E "s/$SECRET_PATTERN/\1\2[REDACTED]/gi" 2>/dev/null || echo "$text"
-}
 
 # === TRUNCAMENTO ===
 truncate_text() {
@@ -75,31 +77,14 @@ truncate_text() {
 }
 
 # === PREPARAR DADOS ===
-INPUT_SUMMARY=$(scrub_secrets "$(truncate_text "$TOOL_INPUT" "$MAX_OUTPUT_CHARS")")
-OUTPUT_SUMMARY=$(scrub_secrets "$(truncate_text "$TOOL_OUTPUT" "$MAX_OUTPUT_CHARS")")
+INPUT_SUMMARY=$(truncate_text "$TOOL_INPUT" "$MAX_OUTPUT_CHARS")
+OUTPUT_SUMMARY=$(truncate_text "$TOOL_RESPONSE" "$MAX_OUTPUT_CHARS")
 
 # Detectar resultado (heurística simples)
 RESULT="success"
-if echo "$TOOL_OUTPUT" | grep -qiE "(error|fail|exception|denied|refused|BLOQUEADO)" 2>/dev/null; then
+if echo "$TOOL_RESPONSE" | grep -qiE "(error|fail|exception|denied|refused|BLOQUEADO)" 2>/dev/null; then
     RESULT="failure"
 fi
-
-# === ESCAPAR PARA JSON ===
-json_escape() {
-    local text="$1"
-    # Escapar caracteres especiais para JSON
-    text="${text//\\/\\\\}"
-    text="${text//\"/\\\"}"
-    text="${text//$'\n'/\\n}"
-    text="${text//$'\r'/\\r}"
-    text="${text//$'\t'/\\t}"
-    echo "$text"
-}
-
-ESCAPED_INPUT=$(json_escape "$INPUT_SUMMARY")
-ESCAPED_OUTPUT=$(json_escape "$OUTPUT_SUMMARY")
-ESCAPED_TOOL=$(json_escape "$TOOL_NAME")
-ESCAPED_SESSION=$(json_escape "$SESSION_ID")
 
 # === GARANTIR DIRETÓRIO ===
 mkdir -p "$LEARNING_DIR" 2>/dev/null || exit 0
@@ -114,9 +99,16 @@ if [ -f "$OBS_FILE" ]; then
     fi
 fi
 
-# === ESCREVER OBSERVAÇÃO ===
-OBSERVATION="{\"timestamp\":\"$TIMESTAMP\",\"tool\":\"$ESCAPED_TOOL\",\"input_summary\":\"$ESCAPED_INPUT\",\"output_summary\":\"$ESCAPED_OUTPUT\",\"result\":\"$RESULT\",\"tool_use_id\":\"$TOOL_ID\",\"session_id\":\"$ESCAPED_SESSION\"}"
-
-echo "$OBSERVATION" >> "$OBS_FILE" 2>/dev/null || true
+# === CONSTRUIR E ESCREVER OBSERVAÇÃO VIA JQ (escapa JSON corretamente) ===
+jq -n -c \
+    --arg ts "$TIMESTAMP" \
+    --arg tool "$TOOL_NAME" \
+    --arg input "$INPUT_SUMMARY" \
+    --arg output "$OUTPUT_SUMMARY" \
+    --arg result "$RESULT" \
+    --arg tuid "$TOOL_USE_ID" \
+    --arg sid "$SESSION_ID" \
+    '{timestamp: $ts, tool: $tool, input_summary: $input, output_summary: $output, result: $result, tool_use_id: $tuid, session_id: $sid}' \
+    >> "$OBS_FILE" 2>/dev/null || true
 
 exit 0

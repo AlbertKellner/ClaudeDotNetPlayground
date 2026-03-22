@@ -59,6 +59,7 @@ Esta regra consolida as políticas (o quê, não como) de normalização de ling
 | Snippet canônico | Implementações que usam o snippet |
 | Ferramentas operacionais (MCP, tokens, integrações) | technical-overview, environment-readiness, required-vars, container-setup, pipeline pré-commit |
 | Artefatos documentáveis (BDD, regras de negócio, contratos, testes, componentes, configuração, CI/CD) | Wiki (`wiki/`) — páginas de Feature, Business-Rules, Architecture, Project-Setup, CI-CD conforme `wiki-governance.md` |
+| Sistema de aprendizado (instintos, observações, graduações) | continuous-learning rule, config.json, instinct-template, glossário, governance-audit checks |
 
 ### Limites:
 - Propagação automática quando o impacto é claro e seguro
@@ -122,3 +123,4 @@ Na ausência de sinal claro → assumir **ilustrativo**.
 | 2026-03-18 | Criado: consolidação de natural-language-normalization, repository-context-evolution, change-propagation, ambiguity-handling e snippet-handling | Reestruturação de governança |
 | 2026-03-19 | Adicionado: ferramentas operacionais ao mapa de propagação e à lista de conhecimento durável | Lacuna de governança identificada |
 | 2026-03-19 | Adicionado: artefatos documentáveis (BDD, regras, contratos, testes) como gatilho de propagação para wiki | Instrução do usuário |
+| 2026-03-22 | Adicionado: sistema de aprendizado ao mapa de propagação | Revisão de consistência do sistema de aprendizado |
