@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "description": "Configuração do sistema de aprendizado contínuo automatizado",
+  "observation": {
+    "enabled": true,
+    "max_file_size_mb": 5,
+    "archive_after_days": 30,
+    "output_truncate_chars": 500,
+    "tail_sample_lines": 500,
+    "min_observations_for_analysis": 50
+  },
+  "instinct": {
+    "confidence_thresholds": {
+      "tentative_min": 0.2,
+      "active_min": 0.5,
+      "graduation_min": 0.85
+    },
+    "confidence_adjustments": {
+      "confirming_observation": 0.05,
+      "contradicting_observation": -0.10,
+      "weekly_decay": -0.02
+    },
+    "graduation_requirements": {
+      "min_sessions": 3,
+      "no_contradictions_last_sessions": 2
+    },
+    "auto_remove_below": 0.2
+  },
+  "domains": [
+    "environment",
+    "pipeline",
+    "governance",
+    "code-pattern",
+    "endpoint",
+    "tooling"
+  ],
+  "scrubbing": {
+    "patterns": [
+      "(api[_-]?key|token|secret|password|authorization|credentials?|auth)[\"'\\s:=]+[^\\s\"']{8,}"
+    ]
+  }
+}

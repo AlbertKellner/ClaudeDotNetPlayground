@@ -40,6 +40,7 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   │   ├── endpoint-validation.md
 │   │   ├── environment-readiness.md
 │   │   ├── folder-governance.md
+│   │   ├── continuous-learning.md        # Aprendizado contínuo automatizado
 │   │   ├── governance-policies.md       # Consolidação: normalização, contexto, propagação, ambiguidade, snippets
 │   │   ├── instruction-review.md        # Meta-regra: revisão obrigatória via REVIEW.md
 │   │   ├── naming-governance.md
@@ -48,6 +49,7 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   │
 │   ├── skills/                         # Workflows operacionais (como)
 │   │   ├── apply-user-snippet/
+│   │   ├── continuous-learning/         # Análise de observações e evolução de instintos
 │   │   ├── evolve-governance/
 │   │   ├── implement-request/
 │   │   ├── ingest-definition/
@@ -55,6 +57,15 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   │   ├── resolve-ambiguity/
 │   │   ├── review-alignment/
 │   │   └── review-instructions/         # Executa REVIEW.md
+│   │
+│   ├── learning/                       # Sistema de aprendizado contínuo
+│   │   ├── config.json                 # Configuração do sistema (thresholds, domínios)
+│   │   ├── observations.jsonl          # Log de observações (gitignored)
+│   │   ├── instinct-template.md        # Template para criação de instintos
+│   │   ├── instincts/                  # Instintos ativos e tentativos (versionados)
+│   │   │   ├── active/                 # Instintos com confidence >= 0.5
+│   │   │   └── tentative/              # Instintos com confidence < 0.5
+│   │   └── graduated/                  # Instintos promovidos a governança (histórico)
 │   │
 │   ├── hooks/                          # Scripts de enforcement
 │   │   ├── instruction-change-detector.sh
@@ -253,3 +264,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-21 | Infra/Logging/ documentada: DatadogHttpSink.cs e DatadogLogEntry.cs adicionados à estrutura; lacuna de governança corrigida | Análise de causas-raiz |
 | 2026-03-21 | Shared/ExternalApi/Pokemon/ criada (integração PokéAPI); Feature PokemonGet adicionada em Features/Query/ | DA-023, RN-009 |
 | 2026-03-21 | .claude/skills/governance-behavior-tracking/ adicionada à estrutura de governança | Instrução do usuário |
+| 2026-03-22 | .claude/learning/ criada: sistema de aprendizado contínuo com config, instintos e graduações; .claude/rules/continuous-learning.md e .claude/skills/continuous-learning/ adicionados | Adaptação do ECC |
