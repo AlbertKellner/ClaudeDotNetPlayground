@@ -5,7 +5,7 @@
 ```
 .claude/
   hooks/         (4 scripts + settings.json)
-  rules/         (14 rules operacionais)
+  rules/         (15 rules operacionais)
   skills/        (13 skills com SKILL.md cada)
   learning/      (sistema de aprendizado contínuo)
 CLAUDE.md
@@ -31,7 +31,7 @@ open-questions.md
 | Grupo | Propósito |
 |---|---|
 | `CLAUDE.md` | Ponto de entrada: pipeline obrigatório de execução e imports de governança |
-| `.claude/rules/` | **Comportamento operacional persistente do assistente** — 14 rules que definem como interpretar, classificar, priorizar, propagar, auditar, aprender e implementar |
+| `.claude/rules/` | **Comportamento operacional persistente do assistente** — 15 rules que definem como interpretar, classificar, priorizar, propagar, auditar, aprender, otimizar e implementar |
 | `.claude/skills/` | 13 skills que mapeiam tipos de solicitação e passos de pipeline a workflows completos de execução |
 | `.claude/learning/` | Sistema de aprendizado contínuo: observações de uso de ferramentas → instintos → graduação para governança formal |
 | `.claude/hooks/` | Scripts de enforcement automatizado — detecção de mudanças em governança, proteção de branch e auditoria |

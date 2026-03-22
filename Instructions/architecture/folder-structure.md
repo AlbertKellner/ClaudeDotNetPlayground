@@ -41,6 +41,7 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   │   ├── environment-readiness.md
 │   │   ├── folder-governance.md
 │   │   ├── continuous-learning.md        # Aprendizado contínuo automatizado
+│   │   ├── token-optimization.md        # Otimização de tokens e compactação estratégica
 │   │   ├── governance-policies.md       # Consolidação: normalização, contexto, propagação, ambiguidade, snippets
 │   │   ├── instruction-review.md        # Meta-regra: revisão obrigatória via REVIEW.md
 │   │   ├── naming-governance.md
