@@ -93,13 +93,23 @@ Ativado pela meta-regra `instruction-review.md`.
 
 ## Uso de Subagents
 
-O assistente pode lançar subagents especializados quando a tarefa beneficiar de paralelismo:
+O assistente pode lançar subagents especializados quando a tarefa beneficiar de paralelismo ou para proteger o contexto principal de output volumoso.
 
-| Cenário | Tipo de Subagent | Quando Usar |
-|---|---|---|
-| Exploração de codebase | `subagent_type: Explore` | Antes de implementar, para entender a estrutura atual |
-| Revisão de alinhamento | `subagent_type: general-purpose` | Após mudanças significativas, verificar consistência |
-| Validação de testes | `subagent_type: general-purpose` | Executar testes em paralelo com outras tarefas |
+**Modelo padrão para subagentes**: Haiku (configurado via `CLAUDE_CODE_SUBAGENT_MODEL=haiku` em `.claude/settings.json`).
+
+| Cenário | Tipo de Subagent | Modelo | Quando Usar |
+|---|---|---|---|
+| Exploração de codebase | `subagent_type: Explore` | haiku | Antes de implementar, para entender a estrutura atual |
+| Revisão de alinhamento | `subagent_type: general-purpose` | haiku | Após mudanças significativas, verificar consistência |
+| Validação de testes | `subagent_type: general-purpose` | haiku | Executar testes em paralelo com outras tarefas |
+| Auditoria de governança | `subagent_type: general-purpose` | haiku | Executar `governance-audit.sh` sem poluir contexto |
+| Monitoramento de CI | `subagent_type: general-purpose` | haiku | Acompanhar GitHub Actions (passo 11) |
+| Análise de logs Docker | `subagent_type: general-purpose` | haiku | Capturar storytelling dos containers (passo 7) |
+| Pesquisa de padrões | `subagent_type: general-purpose` | haiku | Analisar observações de aprendizado contínuo |
+
+**Princípio**: subagente lê muitos arquivos e linhas → retorna resumo de 1-2 parágrafos. O contexto principal permanece limpo.
+
+Ver `.claude/rules/token-optimization.md` para a política completa.
 
 ---
 
