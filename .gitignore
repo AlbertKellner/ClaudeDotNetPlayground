@@ -7,3 +7,5 @@ obj/
 .claude/.session-timer
 .claude/learning/observations.jsonl
 .claude/learning/observations.archive/
+.claude/sessions/
+.claude/checkpoints.log

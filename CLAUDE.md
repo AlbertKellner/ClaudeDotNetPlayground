@@ -149,6 +149,7 @@ O assistente deve ler estes arquivos antes de implementar mudanças estruturais.
 @.claude/rules/architecture-governance.md
 @.claude/rules/naming-governance.md
 @.claude/rules/folder-governance.md
+@.claude/rules/csharp-conventions.md
 
 ### Sob demanda — Domínio, BDD e contratos (~660 linhas)
 
