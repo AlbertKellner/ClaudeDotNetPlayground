@@ -1301,6 +1301,69 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 37. Sistema de aprendizado contínuo: estrutura mínima
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 37. Estrutura do sistema de aprendizado contínuo ---"
+
+LEARNING_DIR="$REPO_ROOT/.claude/learning"
+LEARNING_OK=true
+LEARNING_MISSING=""
+
+for required in "config.json" "instinct-template.md" "instincts/README.md"; do
+  if [ ! -f "$LEARNING_DIR/$required" ]; then
+    LEARNING_OK=false
+    LEARNING_MISSING="$LEARNING_MISSING $required"
+  fi
+done
+
+# Verificar hook de observação configurado em settings.json
+if [ -f "$REPO_ROOT/.claude/settings.json" ]; then
+  if ! grep -q "observe-tool-use.sh" "$REPO_ROOT/.claude/settings.json" 2>/dev/null; then
+    LEARNING_OK=false
+    LEARNING_MISSING="$LEARNING_MISSING hook-not-configured-in-settings"
+  fi
+fi
+
+if [ "$LEARNING_OK" = true ]; then
+  pass "Sistema de aprendizado contínuo com estrutura mínima válida"
+else
+  fail "Estrutura do sistema de aprendizado incompleta" \
+    "Faltando:$LEARNING_MISSING" \
+    "O sistema de aprendizado contínuo requer config.json, instinct-template.md, instincts/README.md e hook configurado" \
+    "Verificar .claude/learning/ e .claude/settings.json"
+fi
+
+# ---------------------------------------------------------------------------
+# 38. Instintos expirados (confidence < auto_remove_below)
+# ---------------------------------------------------------------------------
+echo ""
+echo "--- 38. Instintos expirados ---"
+
+EXPIRED_INSTINCTS=""
+for dir in "$LEARNING_DIR/instincts/active" "$LEARNING_DIR/instincts/tentative"; do
+  if [ -d "$dir" ]; then
+    for f in "$dir"/*.md; do
+      [ -f "$f" ] || continue
+      [ "$(basename "$f")" = "README.md" ] && continue
+      conf=$(grep "^confidence:" "$f" 2>/dev/null | head -1 | sed 's/^confidence:[[:space:]]*//')
+      if [ -n "$conf" ] && awk "BEGIN { exit !($conf < 0.2) }" 2>/dev/null; then
+        EXPIRED_INSTINCTS="$EXPIRED_INSTINCTS $(basename "$f" .md)(conf=$conf)"
+      fi
+    done
+  fi
+done
+
+if [ -z "$EXPIRED_INSTINCTS" ]; then
+  pass "Nenhum instinto expirado (todos >= 0.2)"
+else
+  warn "Instintos com confidence abaixo do threshold de remoção" \
+    "$EXPIRED_INSTINCTS" \
+    "Instintos expirados devem ser removidos via instinct-manager.sh prune" \
+    "Executar: bash scripts/instinct-manager.sh prune"
+fi
+
+# ---------------------------------------------------------------------------
 # Resumo
 # ---------------------------------------------------------------------------
 echo ""
