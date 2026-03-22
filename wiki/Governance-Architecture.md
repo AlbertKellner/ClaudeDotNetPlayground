@@ -1,0 +1,172 @@
+# Arquitetura
+
+## Descrição
+
+Esta página documenta o estilo arquitetural adotado (Vertical Slice Architecture com segregação Command/Query), a estrutura de pastas, os componentes por Slice, o fluxo de requisições e as responsabilidades de cada camada. Deve ser consultada ao entender a estrutura do projeto ou ao adicionar novas features.
+
+## Contexto
+
+O projeto adota **Vertical Slice Architecture** com segregação explícita de operações de leitura (**Query**) e escrita (**Command**). Cada funcionalidade é implementada como uma Slice vertical isolada, contendo todos os artefatos necessários dentro da sua própria pasta, sob `Features/Query` ou `Features/Command`. Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` global). Lógica genuinamente compartilhada entre Slices reside em `Shared/`.
+
+---
+
+## Estilo Arquitetural
+
+A Vertical Slice Architecture organiza o código por funcionalidade, não por camada técnica. Cada Slice contém todos os artefatos necessários para seu funcionamento: endpoint, use case, interfaces, models, repository e scripts SQL. Slices não se comunicam diretamente entre si.
+
+A segregação Command/Query classifica toda funcionalidade como:
+- **Query**: operação de leitura — não altera estado. Reside em `Features/Query/`.
+- **Command**: operação de escrita — altera estado. Reside em `Features/Command/`.
+
+A classificação é baseada na **intenção da operação**, não no verbo HTTP.
+
+---
+
+## Estrutura de Pastas
+
+```
+src/Albert.Playground.ECS.AOT.Api/
+├── Features/
+│   ├── Query/
+│   │   ├── TestGet/
+│   │   │   ├── TestGetEndpoint/
+│   │   │   ├── TestGetUseCase/
+│   │   │   ├── TestGetInterfaces/
+│   │   │   └── TestGetModels/
+│   │   ├── WeatherConditionsGet/
+│   │   │   ├── WeatherConditionsGetEndpoint/
+│   │   │   ├── WeatherConditionsGetUseCase/
+│   │   │   ├── WeatherConditionsGetInterfaces/
+│   │   │   └── WeatherConditionsGetModels/
+│   │   ├── GitHubRepoSearch/
+│   │   │   ├── GitHubRepoSearchEndpoint/
+│   │   │   ├── GitHubRepoSearchUseCase/
+│   │   │   ├── GitHubRepoSearchInterfaces/
+│   │   │   └── GitHubRepoSearchModels/
+│   │   └── PokemonGet/
+│   │       ├── PokemonGetEndpoint/
+│   │       ├── PokemonGetUseCase/
+│   │       ├── PokemonGetInterfaces/
+│   │       └── PokemonGetModels/
+│   └── Command/
+│       └── UserLogin/
+│           ├── UserLoginEndpoint/
+│           ├── UserLoginUseCase/
+│           ├── UserLoginInterfaces/
+│           └── UserLoginModels/
+│
+├── Infra/
+│   ├── Correlation/          # GuidV7 — geração e validação de GUID v7
+│   ├── ExceptionHandling/    # GlobalExceptionHandler — Problem Details (RFC 7807)
+│   ├── HealthChecks/         # DatadogAgentHealthCheck — verificação do Datadog Agent
+│   ├── Json/                 # AppJsonContext — serialização AOT-compatível
+│   ├── Logging/              # DatadogHttpSink, DatadogLogEntry — logs diretos ao Datadog
+│   ├── Middlewares/          # CorrelationIdMiddleware — GUID v7 por request
+│   ├── ModelBinding/         # Providers AOT-compatíveis (NullModelBinderProvider, FallbackSimpleTypeModelBinderProvider, EnhancedModelMetadataActivator)
+│   ├── ModelValidation/      # NoOpObjectModelValidator — validação AOT-compatível
+│   └── Security/             # JWT, AuthenticateFilter, TokenService, AuthenticateAttribute
+│
+└── Shared/
+    └── ExternalApi/
+        ├── OpenMeteo/        # Integração com API Open-Meteo (clima)
+        │   ├── IOpenMeteoApi.cs
+        │   ├── IOpenMeteoApiClient.cs
+        │   ├── OpenMeteoApiClient.cs
+        │   ├── CachedOpenMeteoApiClient.cs
+        │   └── Models/
+        ├── GitHub/           # Integração com API GitHub (repositórios)
+        │   ├── IGitHubApi.cs
+        │   ├── IGitHubApiClient.cs
+        │   ├── GitHubApiClient.cs
+        │   ├── CachedGitHubApiClient.cs
+        │   ├── GitHubAuthenticationHandler.cs
+        │   └── Models/
+        └── Pokemon/          # Integração com PokéAPI (pokémon)
+            ├── IPokemonApi.cs
+            ├── IPokemonApiClient.cs
+            ├── PokemonApiClient.cs
+            ├── CachedPokemonApiClient.cs
+            └── Models/
+```
+
+---
+
+## Componentes por Slice
+
+Cada Slice segue uma estrutura padronizada de componentes:
+
+| Componente | Pasta | Responsabilidade |
+|---|---|---|
+| **Endpoint** (Controller) | `<Feature>Endpoint/` | Controller com Actions — orquestra request/response, define status codes, escreve logs de storytelling. Sem lógica de negócio. |
+| **UseCase** | `<Feature>UseCase/` | Orquestração da lógica de negócio da Slice. Depende apenas de interfaces. |
+| **Interfaces** | `<Feature>Interfaces/` | Contratos para repositórios e integrações externas ao UseCase. |
+| **Models** | `<Feature>Models/` | Input (validação de payload), Output (contrato de saída), Entity (quando aplicável). Residem exclusivamente na Slice. |
+| **Repository** | `<Feature>Repository/` | Acesso a dados e materialização de objetos de domínio. Contém Scripts SQL quando aplicável. |
+
+Nem todos os componentes são obrigatórios — apenas os necessários para a Slice existem (regra de existência condicional).
+
+---
+
+## Fluxo de Requisição
+
+```
+Request HTTP
+  └── CorrelationIdMiddleware (garante GUID v7; abre LogContext com CorrelationId)
+        └── GlobalExceptionHandler (captura exceções não tratadas; retorna Problem Details RFC 7807)
+              └── Controller / Action (pasta Endpoint)
+                    ├── [sem Authenticate] POST /login → UserLoginEndpoint → UserLoginUseCase → ITokenService
+                    └── [com Authenticate] demais endpoints → AuthenticateFilter (valida JWT; enriquece LogContext)
+                          └── UseCase
+                                └── Repository / ApiClient (via Interface)
+                                      └── Banco de dados / serviço externo
+```
+
+O enrichment do Serilog é transversal:
+- Todo log dentro do scope do `CorrelationIdMiddleware` recebe `{ CorrelationId: <guid-v7> }`
+- Todo log dentro do scope do `AuthenticateFilter` (endpoints protegidos) recebe `{ UserId: <int>, UserName: <string> }`
+
+---
+
+## Responsabilidades por Camada
+
+| Camada | Contém | Não contém |
+|---|---|---|
+| **Endpoint** | Orquestração request/response, status codes, logs de storytelling, delegação ao UseCase | Lógica de negócio, acesso a dados, validação de payload |
+| **UseCase** | Lógica de negócio, orquestração de chamadas via interfaces | Acesso direto a infraestrutura, detalhes de framework HTTP |
+| **Repository** | Acesso a dados, materialização de entidades, scripts SQL | Lógica de negócio, validação de payload |
+| **Models** | Input (validação), Output (contrato de saída), Entity (domínio) | Lógica de orquestração |
+| **Infra** | Middlewares, exception handling, segurança (JWT), correlação, JSON AOT, model binding AOT | Lógica de negócio, lógica especializada de Features |
+| **Shared** | Clientes HTTP externos (Refit + Polly), abstrações genéricas, utilitários | Lógica especializada para uma única Slice, Models de Features |
+
+---
+
+## Features Implementadas
+
+| Feature | Tipo | Endpoint | Autenticação | Regra de Negócio |
+|---|---|---|---|---|
+| Health | Infra (com RN) | `GET /health` | Não | RN-005 |
+| UserLogin | Command | `POST /login` | Não | RN-002 |
+| TestGet | Query | `GET /test` | Sim | RN-001 |
+| WeatherConditionsGet | Query | `GET /weather-conditions` | Sim | RN-004 |
+| GitHubRepoSearch | Query | `GET /github-repo-search` | Sim | RN-008 |
+| PokemonGet | Query | `GET /pokemon/{id}` | Sim | RN-009 |
+
+---
+
+## Restrições Arquiteturais
+
+- Slices não se comunicam diretamente entre si
+- `Shared/` não depende de `Features/`
+- Lógica de negócio não pode estar em Endpoints nem em Repositories
+- Validação de payload deve estar no objeto `Input` de cada Slice
+- Models de Input e Output de cada Feature residem exclusivamente em `<Feature>Models/`
+- Features não devem usar models de `Shared/` (incluindo `Shared/ExternalApi/*/Models/`) como tipo de retorno de seus Use Cases ou Endpoints
+
+---
+
+## Referências
+
+- [Padrões de Desenvolvimento](Governance-Development-Patterns) — padrões que determinam a organização
+- [Segurança](Governance-Security) — mecanismos de autenticação e autorização
+- [Observabilidade](Governance-Observability) — logging, tracing e métricas
+- [Testes](Governance-Testing) — estratégia e padrões de teste

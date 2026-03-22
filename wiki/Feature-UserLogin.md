@@ -1,12 +1,16 @@
 # Login de Usuário
 
+## Descrição
+
+Documenta o endpoint de autenticação (`POST /login`), responsável por validar credenciais e gerar JWT Bearer Tokens. Esta página cobre contratos de entrada e saída, o comportamento de validação e a regra de negócio RN-002. Consulte quando precisar entender o fluxo de autenticação ou obter tokens de acesso. Relaciona-se com [Segurança](Governance-Security) (mecanismo JWT) e [Test Get](Feature-TestGet) (endpoint protegido).
+
 ## Resumo
 
 Endpoint de autenticação. Recebe credenciais de usuário, valida-as e retorna um Bearer Token JWT quando as credenciais são válidas. O token obtido deve ser utilizado nas requisições aos endpoints protegidos da aplicação.
 
 ## Autenticação
 
-**Não requer autenticação.** Este endpoint é público e é o ponto de entrada para obtenção do token de acesso. Consulte [Autenticação JWT](Infra-Authentication) para entender como o token gerado é utilizado.
+**Não requer autenticação.** Este endpoint é público e é o ponto de entrada para obtenção do token de acesso. Consulte [Segurança](Governance-Security) para entender como o token gerado é utilizado.
 
 ## Contrato de Entrada
 
@@ -67,7 +71,7 @@ Retornado quando campos obrigatórios estão ausentes no body da requisição.
 - Se as credenciais forem **inválidas**: retorna `HTTP 401` com corpo em formato Problem Details.
 - O token gerado tem validade de **1 hora** a partir da geração.
 
-Regra de negócio relacionada: [RN-002](Business-Rules#rn-002---autenticação-de-usuário-via-login)
+Regra de negócio relacionada: [RN-002](Domain-Business-Rules#rn-002--autenticação-de-usuário-via-login)
 
 ## Testes Automatizados
 
@@ -79,3 +83,9 @@ Regra de negócio relacionada: [RN-002](Business-Rules#rn-002---autenticação-d
 ## BDD
 
 Nenhum cenário BDD definido para esta funcionalidade.
+
+## Referências
+
+- [Regras de Negócio](Domain-Business-Rules) — RN-002
+- [Segurança](Governance-Security) — mecanismo JWT e proteção de endpoints
+- [Visão Geral do Domínio](Domain-Overview) — funcionalidades implementadas

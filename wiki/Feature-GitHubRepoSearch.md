@@ -1,6 +1,11 @@
 # Pesquisa de Repositórios GitHub
 
+## Descrição
+
+Documenta o endpoint de pesquisa de repositórios GitHub (`GET /github-repo-search`), que lista todos os repositórios da conta AlbertKellner com nome e endereço Git. Esta página cobre o contrato HTTP, o comportamento de paginação automática, cache por usuário e a regra de negócio RN-008. Consulte quando precisar entender a integração com a API do GitHub ou o uso de Personal Access Token. Relaciona-se com [Integrações](Governance-Integrations) (Refit + Polly + PAT) e [Segurança](Governance-Security) (autenticação obrigatória).
+
 ## Resumo
+
 Endpoint autenticado que pesquisa e exibe todos os repositórios da conta GitHub AlbertKellner, retornando o nome de cada repositório e o respectivo endereço Git. A resposta é cacheada por usuário autenticado com duração configurável.
 
 ## Autenticação
@@ -30,13 +35,13 @@ Requer autenticação: Sim. Bearer Token JWT deve ser enviado no header `Authori
 ```
 
 ### HTTP 401 — Não autorizado
-Retornado quando o Bearer Token está ausente, expirado ou inválido. Corpo em formato [Problem Details](Infra-Authentication).
+Retornado quando o Bearer Token está ausente, expirado ou inválido. Corpo em formato [Problem Details](Governance-Security).
 
 ### HTTP 500 — Erro interno
-Retornado quando a API do GitHub está indisponível ou retorna erro. Corpo em formato [Problem Details](Infra-Exception-Handling).
+Retornado quando a API do GitHub está indisponível ou retorna erro. Corpo em formato [Problem Details](Governance-Quality).
 
 ## Comportamento
-- O sistema verifica o Memory Cache usando o ID do usuário autenticado como chave ([RN-008](Business-Rules))
+- O sistema verifica o Memory Cache usando o ID do usuário autenticado como chave ([RN-008](Domain-Business-Rules))
 - Se houver cache válido, retorna a resposta cacheada sem consultar a API externa
 - Se não houver cache, consulta a API do GitHub (`GET /users/AlbertKellner/repos`) com paginação automática (100 repositórios por página)
 - O resultado é armazenado no cache com duração configurável via `appsettings.json` (seção `ExternalApi:GitHub:EndpointCache:GitHubRepoSearch:DurationSeconds`, padrão: 60 segundos)
@@ -50,4 +55,11 @@ Retornado quando a API do GitHub está indisponível ou retorna erro. Corpo em f
 - `CachedGitHubApiClientTests` — testes de cache hit/miss, isolamento por usuário e logging
 
 ## BDD
+
 Nenhum cenário BDD definido para esta funcionalidade.
+
+## Referências
+
+- [Regras de Negócio](Domain-Business-Rules) — RN-008
+- [Integrações](Governance-Integrations) — padrão Refit + Polly e Memory Cache
+- [Segurança](Governance-Security) — autenticação obrigatória
