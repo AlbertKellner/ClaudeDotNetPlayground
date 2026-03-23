@@ -14,6 +14,7 @@ Esta documentação detalha o sistema de logging estruturado adotado neste repos
 | [04-integracao-datadog.md](04-integracao-datadog.md) | DatadogHttpSink, configuração por environment, docker-compose e appsettings.json |
 | [05-testes-de-logging.md](05-testes-de-logging.md) | FakeLogger, padrão de asserção, exemplos de testes de log |
 | [06-prompt-implementacao-logs.md](06-prompt-implementacao-logs.md) | Prompt único e genérico para implementar boas práticas de logging em qualquer repositório |
+| [07-exemplo-program-cs.md](07-exemplo-program-cs.md) | Program.cs real completo e anotado com o padrão de logging storytelling |
 
 ---
 

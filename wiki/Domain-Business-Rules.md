@@ -10,17 +10,6 @@ As regras de negócio definem o que o sistema deve ou não deve fazer. São a fo
 
 ---
 
-## RN-001 — Verificação de disponibilidade da aplicação
-
-| Campo | Valor |
-|---|---|
-| **Endpoint** | `GET /health` |
-| **Autenticação** | Não exigida |
-| **Comportamento** | Retorna HTTP 200 quando a aplicação está em operação normal |
-| **Feature** | [Health Check](Feature-Health) |
-
----
-
 ## RN-002 — Autenticação de usuário via login com credenciais
 
 | Campo | Valor |
