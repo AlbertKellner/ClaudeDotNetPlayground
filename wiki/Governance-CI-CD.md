@@ -86,6 +86,9 @@ Os dois últimos jobs são executados em paralelo após a aprovação no gate de
   - `ci` — durante os jobs de execução e health check
   - `local` — durante execução local via Docker Compose
 - O Datadog Agent é iniciado como container adjacente nos jobs que validam a aplicação em execução
+- A configuração do Datadog Agent no CI difere do Docker Compose local:
+  - No CI, o Agent usa `DD_ENV=ci` e coleta logs via file tailing (`app-logs/run.log`) em vez de Docker log collection
+  - No Docker Compose, o Agent coleta logs de todos os containers via Docker socket (`DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true`)
 
 ---
 

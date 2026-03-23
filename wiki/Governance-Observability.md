@@ -80,7 +80,13 @@ Todo log segue o formato obrigatório `[NomeDaClasse][NomeDoMétodo] Descrição
 | `DatadogHttpSink` | `Infra/Logging/` | Serilog `ILogEventSink` customizado: envia logs diretamente ao Datadog via HTTP (`/api/v2/logs`); batching assíncrono via `Channel` |
 | `DatadogLogEntry` | `Infra/Logging/` | Modelo de entrada de log para o Datadog + `DatadogLogJsonContext` para serialização AOT-compatível |
 
-O sink é ativado condicionalmente pela configuração `Datadog:DirectLogs` em `appsettings.json`.
+**Funcionamento do batching**:
+- Utiliza `System.Threading.Channels.Channel` como fila assíncrona produtor-consumidor
+- Eventos de log são enfileirados no channel pelo método `Emit` (non-blocking)
+- Uma task em background consome o channel, agrupa eventos em batches e envia ao Datadog via HTTP POST para `/api/v2/logs`
+- Serialização AOT-compatível via `DatadogLogJsonContext`
+
+**Ativação**: o sink é ativado condicionalmente pela configuração `Datadog:DirectLogs` em `appsettings.json` (padrão: `false`). Quando desativado, os logs fluem apenas pelo Serilog Console Sink e são coletados pelo Datadog Agent via Docker log collection.
 
 ---
 

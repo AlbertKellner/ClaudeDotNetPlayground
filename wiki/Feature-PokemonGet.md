@@ -51,6 +51,8 @@ Retorna Problem Details (RFC 7807) quando o token é ausente, inválido ou expir
 ## Testes Automatizados
 - `PokemonGetUseCaseTests` — 8 testes: log de início, ID recebido passado à API, dados básicos mapeados, tipos mapeados, habilidades mapeadas, stats mapeados, sprites mapeados, log de retorno
 - `PokemonGetEndpointTests` — 3 testes: retorna OK com output, log de início, log de retorno
+- `PokemonApiClientTests` — testes de logging e delegação HTTP do cliente PokéAPI
+- `CachedPokemonApiClientTests` — testes de cache hit/miss, isolamento por usuário e logging
 
 ## BDD
 

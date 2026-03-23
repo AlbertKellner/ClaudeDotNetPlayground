@@ -84,9 +84,9 @@ src/Albert.Playground.ECS.AOT.UnitTest/
 │   └── ExceptionHandling/
 ├── Shared/
 │   └── ExternalApi/
-│       ├── OpenMeteo/
-│       ├── GitHub/
-│       └── Pokemon/
+│       ├── OpenMeteo/   # OpenMeteoApiClientTests, CachedOpenMeteoApiClientTests
+│       ├── GitHub/      # GitHubApiClientTests, CachedGitHubApiClientTests
+│       └── Pokemon/     # PokemonApiClientTests, CachedPokemonApiClientTests
 └── TestHelpers/
 ```
 

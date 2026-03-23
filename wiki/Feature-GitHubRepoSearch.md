@@ -46,7 +46,8 @@ Retornado quando a API do GitHub está indisponível ou retorna erro. Corpo em f
 - Se não houver cache, consulta a API do GitHub (`GET /users/AlbertKellner/repos`) com paginação automática (100 repositórios por página)
 - O resultado é armazenado no cache com duração configurável via `appsettings.json` (seção `ExternalApi:GitHub:EndpointCache:GitHubRepoSearch:DurationSeconds`, padrão: 60 segundos)
 - A autenticação na API do GitHub utiliza Personal Access Token (PAT) configurável via variável de ambiente `GITHUB_PAT` ou `appsettings.json`
-- Resiliência HTTP via Polly v8: retry exponencial + timeout por tentativa
+- Resiliência HTTP via Polly v8: retry exponencial (delay base: 5s, até 3 tentativas)
+- **Rate limiting da API GitHub**: sem PAT: 60 requests/hora; com PAT: 5.000 requests/hora
 
 ## Testes Automatizados
 - `GitHubRepoSearchEndpointTests` — testes de logging e retorno do endpoint

@@ -30,15 +30,37 @@ A aplicação pode ser executada de duas formas: em modo debug via `dotnet run` 
 |---|---|---|
 | `Jwt:Secret` | Chave secreta para geração de JWT HS256 | **Alterar em produção** — valor padrão é apenas para desenvolvimento |
 
-### Configurações opcionais
+### Configurações de Datadog
 
 | Chave | Descrição | Valor padrão |
 |---|---|---|
-| `Serilog:MinimumLevel` | Nível mínimo de log | `Information` |
+| `Datadog:AgentUrl` | URL do Datadog Agent para traces | `http://datadog-agent:8126` |
+| `Datadog:DirectLogs` | Ativa envio de logs diretamente ao Datadog via HTTP Sink | `false` |
+
+### Configurações de Serilog
+
+| Chave | Descrição | Valor padrão |
+|---|---|---|
+| `Serilog:MinimumLevel:Default` | Nível mínimo de log padrão | `Information` |
+| `Serilog:MinimumLevel:Override:Microsoft` | Nível mínimo para namespaces Microsoft | `Warning` |
+| `Serilog:MinimumLevel:Override:Microsoft.AspNetCore` | Nível mínimo para ASP.NET Core | `Warning` |
+| `Serilog:MinimumLevel:Override:System` | Nível mínimo para namespaces System | `Warning` |
+
+### Configurações de APIs externas
+
+| Chave | Descrição | Valor padrão |
+|---|---|---|
 | `ExternalApi:OpenMeteo:HttpRequest:BaseUrl` | URL base da API Open-Meteo | `https://api.open-meteo.com` |
+| `ExternalApi:OpenMeteo:CircuitBreaker:MaxRetryAttempts` | Tentativas de retry | `3` |
+| `ExternalApi:OpenMeteo:CircuitBreaker:DelaySeconds` | Delay base do retry exponencial | `3` |
+| `ExternalApi:OpenMeteo:EndpointCache:WeatherConditionsGet:DurationSeconds` | Duração do cache (segundos) | `10` |
 | `ExternalApi:GitHub:HttpRequest:BaseUrl` | URL base da API GitHub | `https://api.github.com` |
 | `ExternalApi:GitHub:HttpRequest:PersonalAccessToken` | PAT do GitHub (opcional) | vazio |
+| `ExternalApi:GitHub:CircuitBreaker:DelaySeconds` | Delay base do retry exponencial | `5` |
+| `ExternalApi:GitHub:EndpointCache:GitHubRepoSearch:DurationSeconds` | Duração do cache (segundos) | `60` |
 | `ExternalApi:Pokemon:HttpRequest:BaseUrl` | URL base da PokéAPI | `https://pokeapi.co` |
+| `ExternalApi:Pokemon:CircuitBreaker:DelaySeconds` | Delay base do retry exponencial | `3` |
+| `ExternalApi:Pokemon:EndpointCache:PokemonGet:DurationSeconds` | Duração do cache (segundos) | `60` |
 
 ---
 

@@ -40,6 +40,12 @@ Estas 4 skills são invocadas como passos do pipeline pré-commit definido em `C
 
 ---
 
+## Total de Skills
+
+O repositório possui **12 skills** no total: 8 ativadas por tipo de mensagem + 4 de pipeline. Todas residem em `.claude/skills/`.
+
+---
+
 ## Localização
 
 Todas as skills residem em `.claude/skills/{nome-da-skill}/SKILL.md`.

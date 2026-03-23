@@ -56,7 +56,7 @@ Hooks são scripts shell que executam automaticamente em resposta a eventos de u
 | **Tipo** | Script de governança (não é um hook de gatilho automático) |
 | **Propósito** | Executa o ciclo verificação → correção → re-verificação da auditoria de governança antes de commits |
 | **Comportamento** | Executa `governance-audit.sh`, aplica `--fix` em caso de falhas, e re-executa para confirmar que todas as falhas foram resolvidas |
-| **Posição no pipeline** | Passo 0.1 do pipeline pré-commit |
+| **Invocação** | Manual — invocado pelo assistente como passo 0.1 do pipeline pré-commit, ou chamado por `instruction-change-detector.sh` após mudanças de governança |
 
 ---
 

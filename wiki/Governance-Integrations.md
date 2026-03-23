@@ -90,7 +90,19 @@ Requisição autenticada
 
 ## Estrutura de Configuração
 
-Cada integração em `appsettings.json` segue a estrutura:
+Cada integração em `appsettings.json` segue a estrutura `HttpRequest` + `CircuitBreaker` + `EndpointCache`, com valores que variam por serviço:
+
+### Valores reais por serviço
+
+| Serviço | `DelaySeconds` | `MaxRetryAttempts` | `BackoffType` | Cache Duration | Cache Type |
+|---|---|---|---|---|---|
+| **OpenMeteo** | 3 | 3 | Exponential | 10s | Absolute |
+| **GitHub** | 5 | 3 | Exponential | 60s | Absolute |
+| **PokéAPI** | 3 | 3 | Exponential | 60s | Absolute |
+
+> **Nota**: O GitHub utiliza delay de retry maior (5s vs 3s) devido ao rate limiting mais restritivo da API.
+
+### Estrutura do `appsettings.json`
 
 ```json
 {
@@ -101,13 +113,14 @@ Cada integração em `appsettings.json` segue a estrutura:
       },
       "CircuitBreaker": {
         "MaxRetryAttempts": 3,
-        "Delay": "00:00:02",
-        "BackoffType": "Exponential",
-        "AttemptTimeout": "00:00:10"
+        "DelaySeconds": 3,
+        "BackoffType": "Exponential"
       },
       "EndpointCache": {
-        "Duration": 300,
-        "ExpirationType": "Sliding"
+        "<NomeDaFeature>": {
+          "DurationSeconds": 60,
+          "ExpirationType": "Absolute"
+        }
       }
     }
   }

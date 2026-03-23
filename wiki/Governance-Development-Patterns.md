@@ -125,6 +125,27 @@ Todo código que precisa ser compartilhado entre Slices reside em `Shared/`:
 
 ---
 
+## PAD-008 — Tratamento Centralizado de Exceções via IExceptionHandler
+
+O tratamento de exceções não tratadas é centralizado em `GlobalExceptionHandler` (`Infra/ExceptionHandling/`), que implementa `IExceptionHandler` do ASP.NET Core:
+
+- Captura toda exceção não tratada que escape da pipeline
+- Loga o erro com contexto completo via `ILogger` (inclui CorrelationId automaticamente)
+- Retorna HTTP 500 com corpo no formato **Problem Details** (RFC 7807 / RFC 9110)
+- Não expõe stack trace ao cliente
+- Transparente para Features — nenhum `try-catch` é necessário nos Controllers ou Use Cases
+
+```csharp
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+// ...
+app.UseExceptionHandler();
+```
+
+**Exceções permitidas**: `try-catch` específicos em Repositories para exceções de infraestrutura (violação de constraint, timeout) continuam permitidos conforme PAD-005.
+
+---
+
 ## Decorator Pattern para Memory Cache (DA-018)
 
 Endpoints GET que consomem APIs externas implementam Memory Cache usando `IMemoryCache` com o padrão Decorator:
