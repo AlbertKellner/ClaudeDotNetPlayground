@@ -68,7 +68,7 @@ echo $TOKEN
 
 ### 6. Chamar endpoint autenticado
 ```bash
-curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/weather-conditions
+curl -H "Authorization: Bearer $TOKEN" "http://localhost:8080/weather-conditions?latitude=-23.5475&longitude=-46.6361"
 ```
 
 ### 7. Logs do container da aplicação
@@ -89,8 +89,7 @@ docker compose down
 |---|---|---|---|---|
 | `GET` | `/health` | Não | Verificação de disponibilidade (app + Datadog Agent) | RN-005 |
 | `POST` | `/login` | Não | Login com credenciais; retorna JWT Bearer Token | RN-002 |
-| `GET` | `/test` | Sim | Endpoint de teste; retorna `"funcionando"` | RN-001 |
-| `GET` | `/weather-conditions` | Sim | Condições climáticas atuais de São Paulo via Open-Meteo | RN-004 |
+| `GET` | `/weather-conditions?latitude={lat}&longitude={lng}` | Sim | Condições climáticas por coordenadas via Open-Meteo | RN-004 |
 | `GET` | `/github-repo-search` | Sim | Pesquisa de repositórios GitHub da conta AlbertKellner | RN-008 |
 | `GET` | `/pokemon/{id}` | Sim | Consulta de Pokémon por ID via PokéAPI | RN-009 |
 

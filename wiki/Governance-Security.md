@@ -146,6 +146,5 @@ Todos os componentes residem em `Infra/Security/`:
 ## Referências
 
 - [Feature UserLogin](Feature-UserLogin) — endpoint que gera o token
-- [Feature TestGet](Feature-TestGet) — exemplo de endpoint protegido
 - [Arquitetura](Governance-Architecture) — fluxo de requisição com AuthenticateFilter
 - [Testes](Governance-Testing) — testes de segurança e validação de token

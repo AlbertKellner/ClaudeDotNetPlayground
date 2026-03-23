@@ -1,12 +1,12 @@
-# Condições Climáticas de São Paulo
+# Condições Climáticas por Coordenadas
 
 ## Descrição
 
-Documenta o endpoint de consulta de condições climáticas (`GET /weather-conditions`), que retorna dados em tempo real do município de São Paulo via API Open-Meteo. Esta página cobre o contrato HTTP, o comportamento de cache por usuário, a estratégia de resiliência com Polly, e a regra de negócio RN-004. Consulte quando precisar entender a integração com a Open-Meteo ou o padrão de cache. Relaciona-se com [Integrações](Governance-Integrations) (padrão Refit + Polly) e [Segurança](Governance-Security) (autenticação obrigatória).
+Documenta o endpoint de consulta de condições climáticas (`GET /weather-conditions?latitude={lat}&longitude={lng}`), que retorna dados em tempo real de qualquer localização geográfica via API Open-Meteo. Esta página cobre o contrato HTTP, o comportamento de cache por usuário e coordenadas, a estratégia de resiliência com Polly, e a regra de negócio RN-004. Consulte quando precisar entender a integração com a Open-Meteo ou o padrão de cache. Relaciona-se com [Integrações](Governance-Integrations) (padrão Refit + Polly) e [Segurança](Governance-Security) (autenticação obrigatória).
 
 ## Resumo
 
-Consulta as condições climáticas atuais do município de São Paulo a partir da API Open-Meteo e retorna o payload completo da resposta, preservando a estrutura original sem filtragem ou mapeamento parcial.
+Consulta as condições climáticas atuais de uma localização geográfica especificada por latitude e longitude a partir da API Open-Meteo e retorna o payload completo da resposta, preservando a estrutura original sem filtragem ou mapeamento parcial.
 
 ## Autenticação
 
@@ -20,7 +20,14 @@ Sim. Requer Bearer Token JWT válido no header `Authorization`. Ver [Segurança]
 | **Rota** | `/weather-conditions` |
 | **Headers** | `Authorization: Bearer <token>` (obrigatório) |
 | **Body** | Não aplicável |
-| **Query params** | Nenhum (coordenadas e campos são fixos na implementação) |
+| **Query params** | `latitude` (double, obrigatório), `longitude` (double, obrigatório) |
+
+### Exemplo de chamada
+
+```
+GET /weather-conditions?latitude=-23.5475&longitude=-46.6361
+Authorization: Bearer <token>
+```
 
 ## Contrato de Saída
 
@@ -85,7 +92,7 @@ Payload completo retornado pela API Open-Meteo, preservando a estrutura original
 
 Conforme [RN-004](Domain-Business-Rules):
 
-- As coordenadas do município de São Paulo são fixas na implementação: latitude `-23.5475`, longitude `-46.6361` (centro conforme a Prefeitura de São Paulo)
+- As coordenadas são recebidas como parâmetros de query (`latitude` e `longitude`)
 - Os campos de condição atual consultados são: `temperature_2m`, `relative_humidity_2m`, `apparent_temperature`, `is_day`, `precipitation`, `rain`, `showers`, `weather_code`, `cloud_cover`, `wind_speed_10m`, `wind_direction_10m`
 - O payload retornado pela Open-Meteo é entregue integralmente ao cliente, sem filtragem ou redução de campos
 
@@ -133,9 +140,9 @@ Esta feature consome a API Open-Meteo via Refit com resiliência Polly e Memory 
 |-------------|----------------|-------|
 | Duração do cache | `ExternalApi:OpenMeteo:EndpointCache:WeatherConditionsGet:DurationSeconds` | `10` |
 | Tipo de expiração | `ExternalApi:OpenMeteo:EndpointCache:WeatherConditionsGet:ExpirationType` | `Absolute` |
-| Chave de cache | *(definida no código)* | `OpenMeteo:WeatherConditionsGet:{userId}` |
+| Chave de cache | *(definida no código)* | `OpenMeteo:WeatherConditionsGet:{userId}:{latitude}:{longitude}` |
 
-O cache é por usuário autenticado. Cada usuário tem seu próprio cache de condições climáticas. Ao expirar o tempo configurado, a próxima requisição faz nova chamada HTTP à Open-Meteo e recicla o cache.
+O cache é por usuário autenticado e por coordenadas. Cada combinação de usuário + latitude + longitude tem seu próprio cache. Ao expirar o tempo configurado, a próxima requisição faz nova chamada HTTP à Open-Meteo e recicla o cache.
 
 ---
 
@@ -144,7 +151,7 @@ O cache é por usuário autenticado. Cada usuário tem seu próprio cache de con
 | Arquivo | Cobertura |
 |---------|-----------|
 | `WeatherConditionsGetEndpointTests.cs` | Logs do endpoint, retorno HTTP 200 com payload correto |
-| `WeatherConditionsGetUseCaseTests.cs` | Logs do use case, retorno de `OpenMeteoOutput` sem mapeamento parcial |
+| `WeatherConditionsGetUseCaseTests.cs` | Logs do use case, coordenadas passadas à API, retorno sem mapeamento parcial |
 | `OpenMeteoApiClientTests.cs` | Logs do cliente HTTP, delegação correta para a interface Refit |
 | `CachedOpenMeteoApiClientTests.cs` | Cache hit/miss, isolamento por usuário, logs de cache, armazenamento |
 

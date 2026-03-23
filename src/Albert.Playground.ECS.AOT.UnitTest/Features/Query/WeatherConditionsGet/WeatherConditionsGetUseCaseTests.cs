@@ -28,6 +28,12 @@ public sealed class WeatherConditionsGetUseCaseTests
         }
     }
 
+    private static WeatherConditionsGetInput CreateDefaultInput() => new()
+    {
+        Latitude = -23.5475,
+        Longitude = -46.6361
+    };
+
     [Fact]
     public async Task ExecuteAsync_DeveRegistrarLogInformationNoInicio()
     {
@@ -35,7 +41,7 @@ public sealed class WeatherConditionsGetUseCaseTests
         var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
         var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
 
-        await useCase.ExecuteAsync();
+        await useCase.ExecuteAsync(CreateDefaultInput());
 
         var logs = fakeLogger.GetSnapshot();
         Assert.Contains(logs, l =>
@@ -50,7 +56,7 @@ public sealed class WeatherConditionsGetUseCaseTests
         var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
         var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
 
-        await useCase.ExecuteAsync();
+        await useCase.ExecuteAsync(CreateDefaultInput());
 
         var logs = fakeLogger.GetSnapshot();
         Assert.Contains(logs, l =>
@@ -65,7 +71,7 @@ public sealed class WeatherConditionsGetUseCaseTests
         var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
         var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
 
-        await useCase.ExecuteAsync();
+        await useCase.ExecuteAsync(CreateDefaultInput());
 
         var logs = fakeLogger.GetSnapshot();
         Assert.Contains(logs, l =>
@@ -80,7 +86,7 @@ public sealed class WeatherConditionsGetUseCaseTests
         var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
         var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
 
-        await useCase.ExecuteAsync();
+        await useCase.ExecuteAsync(CreateDefaultInput());
 
         var logs = fakeLogger.GetSnapshot();
         Assert.Contains(logs, l =>
@@ -95,7 +101,7 @@ public sealed class WeatherConditionsGetUseCaseTests
         var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
         var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
 
-        await useCase.ExecuteAsync();
+        await useCase.ExecuteAsync(CreateDefaultInput());
 
         var logs = fakeLogger.GetSnapshot();
         Assert.All(logs, l => Assert.Contains("WeatherConditionsGetUseCase", l.Message));
@@ -107,27 +113,33 @@ public sealed class WeatherConditionsGetUseCaseTests
         var fakeClient = new FakeOpenMeteoApiClient();
         var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
         var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
+        var input = CreateDefaultInput();
 
-        var result = await useCase.ExecuteAsync();
+        var result = await useCase.ExecuteAsync(input);
 
         Assert.IsType<WeatherConditionsGetOutput>(result);
         Assert.Equal("America/Sao_Paulo", result.Timezone);
-        Assert.Equal(-23.5475, result.Latitude);
-        Assert.Equal(-46.6361, result.Longitude);
+        Assert.Equal(input.Latitude, result.Latitude);
+        Assert.Equal(input.Longitude, result.Longitude);
     }
 
     [Fact]
-    public async Task ExecuteAsync_DevePassarCoordenadaDeSaoPauloParaApi()
+    public async Task ExecuteAsync_DevePassarCoordenadasDoInputParaApi()
     {
         var fakeClient = new FakeOpenMeteoApiClient();
         var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
         var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
+        var input = new WeatherConditionsGetInput
+        {
+            Latitude = 40.7128,
+            Longitude = -74.0060
+        };
 
-        await useCase.ExecuteAsync();
+        await useCase.ExecuteAsync(input);
 
         Assert.NotNull(fakeClient.LastInput);
-        Assert.Equal(-23.5475, fakeClient.LastInput.Latitude);
-        Assert.Equal(-46.6361, fakeClient.LastInput.Longitude);
+        Assert.Equal(40.7128, fakeClient.LastInput.Latitude);
+        Assert.Equal(-74.0060, fakeClient.LastInput.Longitude);
     }
 
     [Fact]
@@ -137,7 +149,7 @@ public sealed class WeatherConditionsGetUseCaseTests
         var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
         var useCase = new WeatherConditionsGetUseCase(fakeClient, fakeLogger);
 
-        await useCase.ExecuteAsync();
+        await useCase.ExecuteAsync(CreateDefaultInput());
 
         Assert.NotNull(fakeClient.LastInput);
         Assert.Contains("temperature_2m", fakeClient.LastInput.Current);

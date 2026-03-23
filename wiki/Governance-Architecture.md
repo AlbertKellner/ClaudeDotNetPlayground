@@ -28,11 +28,6 @@ A classificação é baseada na **intenção da operação**, não no verbo HTTP
 src/Albert.Playground.ECS.AOT.Api/
 ├── Features/
 │   ├── Query/
-│   │   ├── TestGet/
-│   │   │   ├── TestGetEndpoint/
-│   │   │   ├── TestGetUseCase/
-│   │   │   ├── TestGetInterfaces/
-│   │   │   └── TestGetModels/
 │   │   ├── WeatherConditionsGet/
 │   │   │   ├── WeatherConditionsGetEndpoint/
 │   │   │   ├── WeatherConditionsGetUseCase/
@@ -146,8 +141,7 @@ O enrichment do Serilog é transversal:
 |---|---|---|---|---|
 | Health | Infra (com RN) | `GET /health` | Não | RN-005 |
 | UserLogin | Command | `POST /login` | Não | RN-002 |
-| TestGet | Query | `GET /test` | Sim | RN-001 |
-| WeatherConditionsGet | Query | `GET /weather-conditions` | Sim | RN-004 |
+| WeatherConditionsGet | Query | `GET /weather-conditions?latitude={lat}&longitude={lng}` | Sim | RN-004 |
 | GitHubRepoSearch | Query | `GET /github-repo-search` | Sim | RN-008 |
 | PokemonGet | Query | `GET /pokemon/{id}` | Sim | RN-009 |
 

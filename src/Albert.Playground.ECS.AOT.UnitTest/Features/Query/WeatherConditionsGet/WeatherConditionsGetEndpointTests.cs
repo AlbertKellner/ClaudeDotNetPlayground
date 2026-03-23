@@ -16,14 +16,17 @@ public sealed class WeatherConditionsGetEndpointTests
         {
             var output = new OpenMeteoOutput
             {
-                Latitude = -23.5475,
-                Longitude = -46.6361,
+                Latitude = input.Latitude,
+                Longitude = input.Longitude,
                 Timezone = "America/Sao_Paulo"
             };
 
             return Task.FromResult(output);
         }
     }
+
+    private const double TestLatitude = -23.5475;
+    private const double TestLongitude = -46.6361;
 
     [Fact]
     public async Task Get_DeveRegistrarLogInformationNoInicio()
@@ -34,7 +37,7 @@ public sealed class WeatherConditionsGetEndpointTests
         var fakeLoggerEndpoint = new FakeLogger<WeatherConditionsGetEndpoint>();
         var endpoint = new WeatherConditionsGetEndpoint(useCase, fakeLoggerEndpoint);
 
-        await endpoint.Get(CancellationToken.None);
+        await endpoint.Get(TestLatitude, TestLongitude, CancellationToken.None);
 
         var logs = fakeLoggerEndpoint.GetSnapshot();
         Assert.Contains(logs, l =>
@@ -51,7 +54,7 @@ public sealed class WeatherConditionsGetEndpointTests
         var fakeLoggerEndpoint = new FakeLogger<WeatherConditionsGetEndpoint>();
         var endpoint = new WeatherConditionsGetEndpoint(useCase, fakeLoggerEndpoint);
 
-        await endpoint.Get(CancellationToken.None);
+        await endpoint.Get(TestLatitude, TestLongitude, CancellationToken.None);
 
         var logs = fakeLoggerEndpoint.GetSnapshot();
         Assert.Contains(logs, l =>
@@ -68,7 +71,7 @@ public sealed class WeatherConditionsGetEndpointTests
         var fakeLoggerEndpoint = new FakeLogger<WeatherConditionsGetEndpoint>();
         var endpoint = new WeatherConditionsGetEndpoint(useCase, fakeLoggerEndpoint);
 
-        var actionResult = await endpoint.Get(CancellationToken.None);
+        var actionResult = await endpoint.Get(TestLatitude, TestLongitude, CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(actionResult);
         var output = Assert.IsType<WeatherConditionsGetOutput>(okResult.Value);
@@ -84,7 +87,7 @@ public sealed class WeatherConditionsGetEndpointTests
         var fakeLoggerEndpoint = new FakeLogger<WeatherConditionsGetEndpoint>();
         var endpoint = new WeatherConditionsGetEndpoint(useCase, fakeLoggerEndpoint);
 
-        await endpoint.Get(CancellationToken.None);
+        await endpoint.Get(TestLatitude, TestLongitude, CancellationToken.None);
 
         var logs = fakeLoggerEndpoint.GetSnapshot();
         Assert.All(logs, l => Assert.Contains("WeatherConditionsGetEndpoint", l.Message));

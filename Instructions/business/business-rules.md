@@ -27,19 +27,6 @@ Cada regra segue a estrutura:
 
 ## Regras Ativas
 
-### RN-001 — Endpoint de verificação de disponibilidade da aplicação
-**Enunciado**: A aplicação deve expor um endpoint de verificação de disponibilidade que retorna a string "funcionando".
-**Condição**: Quando uma requisição GET é recebida no endpoint de teste.
-**Ação**: O sistema retorna HTTP 200 com o corpo contendo a string `"funcionando"`.
-**Exceções**: Nenhuma.
-**Dependências**: Nenhuma.
-**BDD relacionado**: Nenhum no momento.
-**Contrato relacionado**: Nenhum no momento.
-**Workflows relacionados**: Nenhum.
-**Status**: Ativo
-
----
-
 ### RN-002 — Autenticação de usuário via login com credenciais
 **Enunciado**: A aplicação deve expor um endpoint de login que valida as credenciais do usuário e retorna um Bearer Token JWT quando as credenciais são válidas.
 **Condição**: Quando uma requisição POST é recebida no endpoint de login com `userName` e `password`.
@@ -66,10 +53,10 @@ Cada regra segue a estrutura:
 
 ---
 
-### RN-004 — Consulta de condições climáticas atuais de São Paulo
-**Enunciado**: A aplicação deve expor um endpoint autenticado para consultar as condições climáticas atuais do município de São Paulo, retornando o payload completo retornado pela API Open-Meteo, sem filtragem, redução de campos ou mapeamento parcial. A resposta deve ser cacheada por usuário autenticado com duração configurável.
-**Condição**: Quando uma requisição GET autenticada é recebida no endpoint de condições climáticas.
-**Ação**: O sistema verifica o Memory Cache usando o ID do usuário autenticado como chave. Se houver cache válido, retorna a resposta cacheada sem consultar a API externa. Se não houver cache, consulta a API Open-Meteo (`GET /v1/forecast`) com as coordenadas centrais do município de São Paulo conforme indicadas pela Prefeitura de São Paulo (latitude: -23.5475, longitude: -46.6361) e os campos de condição atual definidos, armazena o resultado no cache e retorna HTTP 200 com o payload JSON completo da resposta da Open-Meteo, preservando sua estrutura original.
+### RN-004 — Consulta de condições climáticas por coordenadas geográficas
+**Enunciado**: A aplicação deve expor um endpoint autenticado para consultar as condições climáticas atuais de qualquer localização geográfica, recebendo latitude e longitude como parâmetros de query, retornando o payload completo retornado pela API Open-Meteo, sem filtragem, redução de campos ou mapeamento parcial. A resposta deve ser cacheada por usuário autenticado e por coordenadas com duração configurável.
+**Condição**: Quando uma requisição GET autenticada é recebida no endpoint de condições climáticas com parâmetros `latitude` e `longitude` na query string (`GET /weather-conditions?latitude={lat}&longitude={lng}`).
+**Ação**: O sistema verifica o Memory Cache usando o ID do usuário autenticado e as coordenadas como chave. Se houver cache válido, retorna a resposta cacheada sem consultar a API externa. Se não houver cache, consulta a API Open-Meteo (`GET /v1/forecast`) com as coordenadas recebidas e os campos de condição atual definidos, armazena o resultado no cache e retorna HTTP 200 com o payload JSON completo da resposta da Open-Meteo, preservando sua estrutura original.
 **Exceções**: Nenhuma.
 **Dependências**: RN-003 (autenticação obrigatória).
 **BDD relacionado**: Nenhum no momento.
@@ -136,6 +123,9 @@ Cada regra segue a estrutura:
 ---
 
 ## Regras Substituídas ou Depreciadas
+
+### RN-001 — Endpoint de verificação de disponibilidade da aplicação
+**Status**: Removida (2026-03-23) — funcionalidade removida do sistema.
 
 ### RN-006 — Busca de repositórios do team IntegrationRepos no GitHub
 **Status**: Removida (2026-03-20) — funcionalidade removida do sistema.
