@@ -2,7 +2,7 @@
 
 ## Descrição
 
-Documenta o endpoint de autenticação (`POST /login`), responsável por validar credenciais e gerar JWT Bearer Tokens. Esta página cobre contratos de entrada e saída, o comportamento de validação e a regra de negócio RN-002. Consulte quando precisar entender o fluxo de autenticação ou obter tokens de acesso. Relaciona-se com [Segurança](Governance-Security) (mecanismo JWT) e [Test Get](Feature-TestGet) (endpoint protegido).
+Documenta o endpoint de autenticação (`POST /login`), responsável por validar credenciais e gerar JWT Bearer Tokens. Esta página cobre contratos de entrada e saída, o comportamento de validação e a regra de negócio RN-002. Consulte quando precisar entender o fluxo de autenticação ou obter tokens de acesso. Relaciona-se com [Segurança](Governance-Security) (mecanismo JWT).
 
 ## Resumo
 

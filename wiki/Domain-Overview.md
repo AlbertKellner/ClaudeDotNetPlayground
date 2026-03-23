@@ -22,10 +22,9 @@ Este projeto é um playground de exploração de padrões e integrações, const
 
 | Funcionalidade | Endpoint | Descrição | Regra de Negócio | Página |
 |---|---|---|---|---|
-| Health Check | `GET /health` | Verificação de disponibilidade da aplicação e do Datadog Agent | RN-001, RN-005 | [Feature-Health](Feature-Health) |
+| Health Check | `GET /health` | Verificação de disponibilidade da aplicação e do Datadog Agent | RN-005 | [Feature-Health](Feature-Health) |
 | Login de Usuário | `POST /login` | Autenticação com credenciais; retorna JWT Bearer Token | RN-002 | [Feature-UserLogin](Feature-UserLogin) |
-| Test Get | `GET /test` | Endpoint de teste autenticado; retorna `"funcionando"` | RN-001, RN-003 | [Feature-TestGet](Feature-TestGet) |
-| Condições Climáticas | `GET /weather-conditions` | Consulta de condições climáticas atuais de São Paulo via Open-Meteo | RN-004 | [Feature-WeatherConditionsGet](Feature-WeatherConditionsGet) |
+| Condições Climáticas | `GET /weather-conditions?latitude={lat}&longitude={lng}` | Consulta de condições climáticas por coordenadas via Open-Meteo | RN-004 | [Feature-WeatherConditionsGet](Feature-WeatherConditionsGet) |
 | Pesquisa GitHub | `GET /github-repo-search` | Pesquisa de repositórios da conta AlbertKellner no GitHub | RN-008 | [Feature-GitHubRepoSearch](Feature-GitHubRepoSearch) |
 | Consulta Pokémon | `GET /pokemon/{id}` | Consulta de dados de Pokémon por ID via PokéAPI | RN-009 | [Feature-PokemonGet](Feature-PokemonGet) |
 
@@ -64,7 +63,6 @@ Os principais conceitos em uso são:
 - [Integrações](Governance-Integrations)
 - [Feature: Health Check](Feature-Health)
 - [Feature: Login de Usuário](Feature-UserLogin)
-- [Feature: Test Get](Feature-TestGet)
 - [Feature: Condições Climáticas](Feature-WeatherConditionsGet)
 - [Feature: Pesquisa GitHub](Feature-GitHubRepoSearch)
 - [Feature: Consulta Pokémon](Feature-PokemonGet)

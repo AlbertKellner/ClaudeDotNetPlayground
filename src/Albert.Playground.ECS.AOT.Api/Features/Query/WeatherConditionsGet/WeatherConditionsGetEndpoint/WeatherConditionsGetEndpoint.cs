@@ -11,13 +11,28 @@ public sealed class WeatherConditionsGetEndpoint(
     ILogger<WeatherConditionsGetEndpoint> logger) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> Get(CancellationToken cancellationToken)
+    public async Task<IActionResult> Get(
+        [FromQuery] double latitude,
+        [FromQuery] double longitude,
+        CancellationToken cancellationToken)
     {
-        logger.LogInformation("[WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions");
+        logger.LogInformation(
+            "[WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions. Latitude={Latitude}, Longitude={Longitude}",
+            latitude,
+            longitude);
 
-        var result = await useCase.ExecuteAsync(cancellationToken);
+        var input = new WeatherConditionsGetInput
+        {
+            Latitude = latitude,
+            Longitude = longitude
+        };
 
-        logger.LogInformation("[WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas de São Paulo");
+        var result = await useCase.ExecuteAsync(input, cancellationToken);
+
+        logger.LogInformation(
+            "[WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas. Latitude={Latitude}, Longitude={Longitude}",
+            latitude,
+            longitude);
 
         return Ok(result);
     }

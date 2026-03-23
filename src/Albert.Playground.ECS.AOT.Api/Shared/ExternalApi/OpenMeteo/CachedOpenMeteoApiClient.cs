@@ -19,7 +19,7 @@ public sealed class CachedOpenMeteoApiClient(
         logger.LogInformation("[CachedOpenMeteoApiClient][GetForecastAsync] Verificar cache para condições climáticas");
 
         var userId = GetAuthenticatedUserId();
-        var cacheKey = $"{CacheKeyPrefix}:{userId}";
+        var cacheKey = $"{CacheKeyPrefix}:{userId}:{input.Latitude}:{input.Longitude}";
 
         if (memoryCache.TryGetValue(cacheKey, out OpenMeteoOutput? cached) && cached is not null)
         {

@@ -116,6 +116,38 @@ A mesma requisição, feita dentro da janela de cache (60 segundos), gera logs s
 
 ---
 
+## Exemplo: Requisição ao Endpoint de Condições Climáticas com Coordenadas
+
+- **Endpoint**: `GET /weather-conditions?latitude=-23.5475&longitude=-46.6361`
+- **Autenticação**: Bearer Token válido (usuário Albert, id 123)
+- **Cache**: miss na primeira requisição
+
+```
+[23/03/2026 14:33:00.0000000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [] [CorrelationIdMiddleware][InvokeAsync] Processar requisição e garantir CorrelationId
+[23/03/2026 14:33:00.0010000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [] [CorrelationIdMiddleware][InvokeAsync] Prosseguir com CorrelationId enriquecido no contexto. CorrelationId=019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f
+[23/03/2026 14:33:00.0020000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [] [AuthenticateFilter][OnActionExecutionAsync] Validar Bearer Token da requisição
+[23/03/2026 14:33:00.0030000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [AuthenticateFilter][OnActionExecutionAsync] Prosseguir com requisição autenticada. UserId=123, UserName=Albert
+[23/03/2026 14:33:00.0040000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions. Latitude=-23.5475, Longitude=-46.6361
+[23/03/2026 14:33:00.0050000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [WeatherConditionsGetUseCase][ExecuteAsync] Executar caso de uso de condições climáticas. Latitude=-23.5475, Longitude=-46.6361
+[23/03/2026 14:33:00.0060000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [WeatherConditionsGetUseCase][ExecuteAsync] Consultar API Open-Meteo. Latitude=-23.5475, Longitude=-46.6361
+[23/03/2026 14:33:00.0070000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [CachedOpenMeteoApiClient][GetForecastAsync] Verificar cache para condições climáticas
+[23/03/2026 14:33:00.0080000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [CachedOpenMeteoApiClient][GetForecastAsync] Cache miss. Consultar API externa. CacheKey=OpenMeteo:WeatherConditionsGet:123:-23.5475:-46.6361
+[23/03/2026 14:33:00.0090000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [OpenMeteoApiClient][GetForecastAsync] Executar requisição HTTP ao Open-Meteo. Latitude=-23.5475, Longitude=-46.6361
+[23/03/2026 14:33:00.4500000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [OpenMeteoApiClient][GetForecastAsync] Retornar resposta da Open-Meteo. Timezone=America/Sao_Paulo
+[23/03/2026 14:33:00.4510000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [CachedOpenMeteoApiClient][GetForecastAsync] Armazenar resposta no cache. CacheKey=OpenMeteo:WeatherConditionsGet:123:-23.5475:-46.6361, DurationSeconds=10
+[23/03/2026 14:33:00.4520000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [WeatherConditionsGetUseCase][ExecuteAsync] Mapear resposta da Open-Meteo para model da Feature
+[23/03/2026 14:33:00.4530000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [WeatherConditionsGetUseCase][ExecuteAsync] Retornar condições climáticas obtidas da Open-Meteo. Timezone=America/Sao_Paulo
+[23/03/2026 14:33:00.4540000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas. Latitude=-23.5475, Longitude=-46.6361
+[23/03/2026 14:33:00.4550000] [019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f] [Albert] [CorrelationIdMiddleware][InvokeAsync] Retornar resposta com CorrelationId enriquecido. CorrelationId=019580c4-a1b2-7c3d-4e5f-6a7b8c9d0e1f
+```
+
+Note que:
+- As coordenadas recebidas via query parameter aparecem nos logs do Endpoint e do UseCase
+- A chave de cache inclui `userId:latitude:longitude`, permitindo cache independente por localização e por usuário
+- O fluxo completo (middleware → auth → endpoint → use case → cache → API externa → mapeamento → retorno) é idêntico ao do Pokemon, com a diferença de que não há iteração de listas
+
+---
+
 ## Exemplo: Requisição com Token Inválido (401)
 
 Quando o token é inválido, o fluxo é interrompido no `AuthenticateFilter`:

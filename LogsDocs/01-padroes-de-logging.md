@@ -122,7 +122,7 @@ Cada camada da arquitetura tem um papel específico nos logs:
 
 O Endpoint é responsável por logar o início e o fim da requisição HTTP, incluindo parâmetros recebidos e dados-chave do resultado retornado. Não contém lógica de negócio — apenas orquestra request/response e delega ao UseCase.
 
-### Endpoint simples (sem parâmetros de rota)
+### Endpoint com parâmetros de query
 
 ```csharp
 [ApiController]
@@ -133,13 +133,21 @@ public sealed class WeatherConditionsGetEndpoint(
     ILogger<WeatherConditionsGetEndpoint> logger) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> Get(CancellationToken cancellationToken)
+    public async Task<IActionResult> Get(
+        [FromQuery] double latitude,
+        [FromQuery] double longitude,
+        CancellationToken cancellationToken)
     {
-        logger.LogInformation("[WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions");
+        logger.LogInformation(
+            "[WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions. Latitude={Latitude}, Longitude={Longitude}",
+            latitude, longitude);
 
-        var result = await useCase.ExecuteAsync(cancellationToken);
+        var input = new WeatherConditionsGetInput { Latitude = latitude, Longitude = longitude };
+        var result = await useCase.ExecuteAsync(input, cancellationToken);
 
-        logger.LogInformation("[WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas de São Paulo");
+        logger.LogInformation(
+            "[WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas. Latitude={Latitude}, Longitude={Longitude}",
+            latitude, longitude);
 
         return Ok(result);
     }
@@ -147,9 +155,9 @@ public sealed class WeatherConditionsGetEndpoint(
 ```
 
 **Observações**:
-- Log de entrada: descreve a rota e o método HTTP
-- Log de saída: descreve o que está sendo retornado, sem expor dados sensíveis
-- Sem lógica de negócio — apenas dois logs e uma delegação ao UseCase
+- Log de entrada: descreve a rota, método HTTP e parâmetros recebidos via query
+- Log de saída: descreve o que está sendo retornado com os parâmetros da consulta
+- Sem lógica de negócio — apenas dois logs, construção do Input e delegação ao UseCase
 
 ### Endpoint com parâmetro de rota
 
@@ -181,24 +189,32 @@ public sealed class PokemonGetEndpoint(
 - O parâmetro de rota `id` é logado na entrada como `{PokemonId}` (nome semântico, não técnico)
 - Na saída, dados-chave do resultado (`PokemonId`, `PokemonName`) são incluídos para rastreabilidade
 
-### Endpoint de verificação simples
+### Endpoint com parâmetros de query
 
 ```csharp
 [ApiController]
-[Route("test")]
+[Route("weather-conditions")]
 [Authenticate]
-public sealed class TestGetEndpoint(
-    TestGetUseCase useCase,
-    ILogger<TestGetEndpoint> logger) : ControllerBase
+public sealed class WeatherConditionsGetEndpoint(
+    WeatherConditionsGetUseCase useCase,
+    ILogger<WeatherConditionsGetEndpoint> logger) : ControllerBase
 {
     [HttpGet]
-    public IActionResult Get()
+    public async Task<IActionResult> Get(
+        [FromQuery] double latitude,
+        [FromQuery] double longitude,
+        CancellationToken cancellationToken)
     {
-        logger.LogInformation("[TestGetEndpoint][Get] Processar requisição GET /test");
+        logger.LogInformation(
+            "[WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions. Latitude={Latitude}, Longitude={Longitude}",
+            latitude, longitude);
 
-        var result = useCase.Execute();
+        var input = new WeatherConditionsGetInput { Latitude = latitude, Longitude = longitude };
+        var result = await useCase.ExecuteAsync(input, cancellationToken);
 
-        logger.LogInformation("[TestGetEndpoint][Get] Retornar resposta do endpoint. Result={Result}", result);
+        logger.LogInformation(
+            "[WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas. Latitude={Latitude}, Longitude={Longitude}",
+            latitude, longitude);
 
         return Ok(result);
     }
@@ -218,27 +234,27 @@ public sealed class WeatherConditionsGetUseCase(
     IOpenMeteoApiClient openMeteoApiClient,
     ILogger<WeatherConditionsGetUseCase> logger)
 {
-    private const double SaoPauloLatitude = -23.5475;
-    private const double SaoPauloLongitude = -46.6361;
     private const string CurrentFields = "temperature_2m,relative_humidity_2m,apparent_temperature,...";
 
-    public async Task<WeatherConditionsGetOutput> ExecuteAsync(CancellationToken cancellationToken = default)
+    public async Task<WeatherConditionsGetOutput> ExecuteAsync(
+        WeatherConditionsGetInput input, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
-            "[WeatherConditionsGetUseCase][ExecuteAsync] Executar caso de uso de condições climáticas de São Paulo");
+            "[WeatherConditionsGetUseCase][ExecuteAsync] Executar caso de uso de condições climáticas. Latitude={Latitude}, Longitude={Longitude}",
+            input.Latitude, input.Longitude);
 
-        var input = new OpenMeteoInput
+        var openMeteoInput = new OpenMeteoInput
         {
-            Latitude = SaoPauloLatitude,
-            Longitude = SaoPauloLongitude,
+            Latitude = input.Latitude,
+            Longitude = input.Longitude,
             Current = CurrentFields
         };
 
         logger.LogInformation(
             "[WeatherConditionsGetUseCase][ExecuteAsync] Consultar API Open-Meteo. Latitude={Latitude}, Longitude={Longitude}",
-            input.Latitude, input.Longitude);
+            openMeteoInput.Latitude, openMeteoInput.Longitude);
 
-        var result = await openMeteoApiClient.GetForecastAsync(input, cancellationToken);
+        var result = await openMeteoApiClient.GetForecastAsync(openMeteoInput, cancellationToken);
 
         logger.LogInformation(
             "[WeatherConditionsGetUseCase][ExecuteAsync] Mapear resposta da Open-Meteo para model da Feature");

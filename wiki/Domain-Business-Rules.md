@@ -41,19 +41,19 @@ Detalhes de segurança: [Autenticação](Governance-Security)
 | **Escopo** | Todos os endpoints, exceto `POST /login` e `GET /health` |
 | **Autenticação** | Obrigatória — Bearer Token JWT no header `Authorization` |
 | **Comportamento** | Token válido: requisição processada normalmente, `UserId` e `UserName` enriquecidos nos logs. Token inválido ou ausente: HTTP 401 com Problem Details |
-| **Feature** | [Test Get](Feature-TestGet) |
+| **Feature** | Todos os endpoints protegidos |
 
 Detalhes de segurança: [Autenticação](Governance-Security)
 
 ---
 
-## RN-004 — Consulta de condições climáticas atuais de São Paulo
+## RN-004 — Consulta de condições climáticas por coordenadas geográficas
 
 | Campo | Valor |
 |---|---|
-| **Endpoint** | `GET /weather-conditions` |
+| **Endpoint** | `GET /weather-conditions?latitude={lat}&longitude={lng}` |
 | **Autenticação** | Exigida |
-| **Comportamento** | Consulta a API Open-Meteo com coordenadas centrais de São Paulo (lat: -23.5475, lon: -46.6361). Retorna o payload completo da Open-Meteo sem filtragem. Resposta cacheada por usuário autenticado com duração configurável |
+| **Comportamento** | Recebe latitude e longitude via query parameters. Consulta a API Open-Meteo com as coordenadas recebidas. Retorna o payload completo da Open-Meteo sem filtragem. Resposta cacheada por usuário autenticado e por coordenadas com duração configurável |
 | **Feature** | [Condições Climáticas](Feature-WeatherConditionsGet) |
 
 ---
@@ -105,7 +105,6 @@ Detalhes de segurança: [Autenticação](Governance-Security)
 - [Visão Geral do Domínio](Domain-Overview)
 - [Feature: Health Check](Feature-Health)
 - [Feature: Login de Usuário](Feature-UserLogin)
-- [Feature: Test Get](Feature-TestGet)
 - [Feature: Condições Climáticas](Feature-WeatherConditionsGet)
 - [Feature: Pesquisa GitHub](Feature-GitHubRepoSearch)
 - [Feature: Consulta Pokémon](Feature-PokemonGet)

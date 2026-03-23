@@ -217,7 +217,6 @@ builder.Services.AddScoped<IPokemonApiClient, CachedPokemonApiClient>();
 
 Log.Information("[Program] Registrar dependências das features");
 
-builder.Services.AddScoped<Albert.Playground.ECS.AOT.Api.Features.Query.TestGet.TestGetUseCase>();
 builder.Services.AddScoped<UserLoginUseCase>();
 builder.Services.AddScoped<WeatherConditionsGetUseCase>();
 builder.Services.AddScoped<GitHubRepoSearchUseCase>();
@@ -255,7 +254,6 @@ app.Run();
 // tenham efeito — um método privado nunca chamado é trimado pelo AOT junto com seus atributos.
 internal static class AotControllerPreservation
 {
-    [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Query.TestGet.TestGetEndpoint))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Command.UserLogin.UserLoginEndpoint))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Query.WeatherConditionsGet.WeatherConditionsGetEndpoint))]
     [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(Albert.Playground.ECS.AOT.Api.Features.Query.GitHubRepoSearch.GitHubRepoSearchEndpoint))]
