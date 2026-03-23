@@ -118,6 +118,254 @@ Cada camada da arquitetura tem um papel específico nos logs:
 
 ---
 
+## Exemplo Completo: Endpoint (Controller)
+
+O Endpoint é responsável por logar o início e o fim da requisição HTTP, incluindo parâmetros recebidos e dados-chave do resultado retornado. Não contém lógica de negócio — apenas orquestra request/response e delega ao UseCase.
+
+### Endpoint simples (sem parâmetros de rota)
+
+```csharp
+[ApiController]
+[Route("weather-conditions")]
+[Authenticate]
+public sealed class WeatherConditionsGetEndpoint(
+    WeatherConditionsGetUseCase useCase,
+    ILogger<WeatherConditionsGetEndpoint> logger) : ControllerBase
+{
+    [HttpGet]
+    public async Task<IActionResult> Get(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("[WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions");
+
+        var result = await useCase.ExecuteAsync(cancellationToken);
+
+        logger.LogInformation("[WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas de São Paulo");
+
+        return Ok(result);
+    }
+}
+```
+
+**Observações**:
+- Log de entrada: descreve a rota e o método HTTP
+- Log de saída: descreve o que está sendo retornado, sem expor dados sensíveis
+- Sem lógica de negócio — apenas dois logs e uma delegação ao UseCase
+
+### Endpoint com parâmetro de rota
+
+```csharp
+[ApiController]
+[Route("pokemon")]
+[Authenticate]
+public sealed class PokemonGetEndpoint(
+    PokemonGetUseCase useCase,
+    ILogger<PokemonGetEndpoint> logger) : ControllerBase
+{
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get([FromRoute] int id, CancellationToken cancellationToken)
+    {
+        logger.LogInformation("[PokemonGetEndpoint][Get] Processar requisicao GET /pokemon/{PokemonId}", id);
+
+        var result = await useCase.ExecuteAsync(id, cancellationToken);
+
+        logger.LogInformation(
+            "[PokemonGetEndpoint][Get] Retornar resposta do endpoint com dados do Pokemon. PokemonId={PokemonId}, PokemonName={PokemonName}",
+            id, result.Name);
+
+        return Ok(result);
+    }
+}
+```
+
+**Observações**:
+- O parâmetro de rota `id` é logado na entrada como `{PokemonId}` (nome semântico, não técnico)
+- Na saída, dados-chave do resultado (`PokemonId`, `PokemonName`) são incluídos para rastreabilidade
+
+### Endpoint de verificação simples
+
+```csharp
+[ApiController]
+[Route("test")]
+[Authenticate]
+public sealed class TestGetEndpoint(
+    TestGetUseCase useCase,
+    ILogger<TestGetEndpoint> logger) : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Get()
+    {
+        logger.LogInformation("[TestGetEndpoint][Get] Processar requisição GET /test");
+
+        var result = useCase.Execute();
+
+        logger.LogInformation("[TestGetEndpoint][Get] Retornar resposta do endpoint. Result={Result}", result);
+
+        return Ok(result);
+    }
+}
+```
+
+---
+
+## Exemplo Completo: UseCase
+
+O UseCase é responsável por logar a orquestração da lógica de negócio: início do caso de uso, chamadas a serviços externos, mapeamentos, iterações e resultado final. Toda decisão de fluxo relevante deve ter um log.
+
+### UseCase simples (chamada a API externa + mapeamento)
+
+```csharp
+public sealed class WeatherConditionsGetUseCase(
+    IOpenMeteoApiClient openMeteoApiClient,
+    ILogger<WeatherConditionsGetUseCase> logger)
+{
+    private const double SaoPauloLatitude = -23.5475;
+    private const double SaoPauloLongitude = -46.6361;
+    private const string CurrentFields = "temperature_2m,relative_humidity_2m,apparent_temperature,...";
+
+    public async Task<WeatherConditionsGetOutput> ExecuteAsync(CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation(
+            "[WeatherConditionsGetUseCase][ExecuteAsync] Executar caso de uso de condições climáticas de São Paulo");
+
+        var input = new OpenMeteoInput
+        {
+            Latitude = SaoPauloLatitude,
+            Longitude = SaoPauloLongitude,
+            Current = CurrentFields
+        };
+
+        logger.LogInformation(
+            "[WeatherConditionsGetUseCase][ExecuteAsync] Consultar API Open-Meteo. Latitude={Latitude}, Longitude={Longitude}",
+            input.Latitude, input.Longitude);
+
+        var result = await openMeteoApiClient.GetForecastAsync(input, cancellationToken);
+
+        logger.LogInformation(
+            "[WeatherConditionsGetUseCase][ExecuteAsync] Mapear resposta da Open-Meteo para model da Feature");
+
+        var output = new WeatherConditionsGetOutput
+        {
+            Latitude = result.Latitude,
+            Longitude = result.Longitude,
+            Timezone = result.Timezone,
+            // ... demais campos mapeados
+        };
+
+        logger.LogInformation(
+            "[WeatherConditionsGetUseCase][ExecuteAsync] Retornar condições climáticas obtidas da Open-Meteo. Timezone={Timezone}",
+            output.Timezone);
+
+        return output;
+    }
+}
+```
+
+**Observações**:
+- Log de entrada: descreve o caso de uso
+- Log antes da chamada externa: registra parâmetros enviados à API
+- Log após receber a resposta: descreve a ação de mapeamento
+- Log de saída: informa dados-chave do resultado
+
+### UseCase com iterações (mapeamento de listas)
+
+```csharp
+public sealed class PokemonGetUseCase(
+    IPokemonApiClient pokemonApiClient,
+    ILogger<PokemonGetUseCase> logger)
+{
+    public async Task<PokemonGetOutput> ExecuteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation(
+            "[PokemonGetUseCase][ExecuteAsync] Executar caso de uso de consulta de Pokemon. PokemonId={PokemonId}", id);
+
+        logger.LogInformation(
+            "[PokemonGetUseCase][ExecuteAsync] Consultar PokeAPI. PokemonId={PokemonId}", id);
+
+        var result = await pokemonApiClient.GetByIdAsync(id, cancellationToken);
+
+        logger.LogInformation(
+            "[PokemonGetUseCase][ExecuteAsync] Mapear resposta da PokeAPI para model da Feature");
+
+        var types = new List<PokemonGetTypeItem>();
+
+        logger.LogInformation(
+            "[PokemonGetUseCase][ExecuteAsync] Iterar tipos do Pokemon. Count={Count}", result.Types.Count);
+
+        foreach (var typeSlot in result.Types)
+        {
+            types.Add(new PokemonGetTypeItem
+            {
+                Slot = typeSlot.Slot,
+                Name = typeSlot.Type.Name
+            });
+        }
+
+        logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Iteracao de tipos concluida");
+
+        var abilities = new List<PokemonGetAbilityItem>();
+
+        logger.LogInformation(
+            "[PokemonGetUseCase][ExecuteAsync] Iterar habilidades do Pokemon. Count={Count}", result.Abilities.Count);
+
+        foreach (var abilitySlot in result.Abilities)
+        {
+            abilities.Add(new PokemonGetAbilityItem
+            {
+                Name = abilitySlot.Ability.Name,
+                IsHidden = abilitySlot.IsHidden
+            });
+        }
+
+        logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Iteracao de habilidades concluida");
+
+        var stats = new List<PokemonGetStatItem>();
+
+        logger.LogInformation(
+            "[PokemonGetUseCase][ExecuteAsync] Iterar stats do Pokemon. Count={Count}", result.Stats.Count);
+
+        foreach (var statSlot in result.Stats)
+        {
+            stats.Add(new PokemonGetStatItem
+            {
+                Name = statSlot.Stat.Name,
+                BaseStat = statSlot.BaseStat,
+                Effort = statSlot.Effort
+            });
+        }
+
+        logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Iteracao de stats concluida");
+
+        var output = new PokemonGetOutput
+        {
+            Id = result.Id,
+            Name = result.Name,
+            Height = result.Height,
+            Weight = result.Weight,
+            BaseExperience = result.BaseExperience,
+            FrontDefaultSprite = result.Sprites.FrontDefault,
+            FrontShinySprite = result.Sprites.FrontShiny,
+            Types = types,
+            Abilities = abilities,
+            Stats = stats
+        };
+
+        logger.LogInformation(
+            "[PokemonGetUseCase][ExecuteAsync] Retornar dados do Pokemon. PokemonId={PokemonId}, PokemonName={PokemonName}",
+            output.Id, output.Name);
+
+        return output;
+    }
+}
+```
+
+**Observações**:
+- Cada iteração (`foreach`) tem log **antes** (com `Count`) e **depois** (confirmação de conclusão)
+- O padrão se repete para cada lista mapeada (tipos, habilidades, stats)
+- A linha em branco acima e abaixo de cada `logger.Log*()` é respeitada (isolamento visual)
+- O log de saída inclui `PokemonId` e `PokemonName` para correlação com o log de entrada
+
+---
+
 ## Ganhos do Padrão Storytelling
 
 ### 1. Rastreabilidade Completa
