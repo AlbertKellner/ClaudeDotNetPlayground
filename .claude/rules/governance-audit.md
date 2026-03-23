@@ -53,9 +53,9 @@ O script `scripts/governance-audit.sh` verifica automaticamente.
 | 17 | Hooks configurados em `settings.json` existem como arquivos e têm sintaxe bash válida | Integridade de hooks |
 | 18 | Contagens de skills são consistentes em todas as ocorrências do `README.md` | Consistência documental |
 | 19 | Todos os diretórios de skills contêm `SKILL.md` com estrutura mínima (Propósito/Nome, Quando Usar, Workflow) | Integridade estrutural |
-| 20 | `wiki/Architecture.md` lista todas as features implementadas | Completude wiki |
-| 21 | `wiki/Architecture.md` lista todas as subpastas de `Infra/` | Completude wiki |
-| 22 | `wiki/Architecture.md` lista todas as integrações de `Shared/ExternalApi/` | Completude wiki |
+| 20 | `wiki/Governance-Architecture.md` lista todas as features implementadas | Completude wiki |
+| 21 | `wiki/Governance-Architecture.md` lista todas as subpastas de `Infra/` | Completude wiki |
+| 22 | `wiki/Governance-Architecture.md` lista todas as integrações de `Shared/ExternalApi/` | Completude wiki |
 | 23 | Todas as rules possuem estrutura mínima (Propósito + Histórico ou Relação com Outras Rules) | Estrutura mínima |
 | 24 | Tabela "Features Implementadas" na wiki lista todas as features | Completude wiki |
 
@@ -69,7 +69,7 @@ O script `scripts/governance-audit.sh` verifica automaticamente.
 | 28 | Contratos OpenAPI refletem endpoints implementados (não são placeholders) | Completude semântica |
 | 29 | Referências em skills apontam para arquivos existentes | Integridade referencial |
 | 30 | Skills reais estão referenciadas em `operating-model.md` | Alinhamento operacional |
-| 31 | `wiki/Business-Rules.md` lista todas as RNs ativas | Completude wiki |
+| 31 | `wiki/Domain-Business-Rules.md` lista todas as RNs ativas | Completude wiki |
 | 32 | Quantidade e IDs de checks no script correspondem 1:1 à documentação na rule | Meta-consistência |
 | 33 | Grafo de rules conectado — nenhuma rule isolada (sem referências a outras rules); detecta pares bidirecionais sem hierarquia explícita | Integridade referencial |
 | 34 | Todas as skills referenciam pelo menos uma rule | Integridade referencial |

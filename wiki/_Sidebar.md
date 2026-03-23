@@ -4,33 +4,35 @@
 
 ---
 
-**Configuração**
-- [Configuração do Projeto](Project-Setup)
+**Governança**
+- [Arquitetura](Governance-Architecture)
+- [Padrões de Desenvolvimento](Governance-Development-Patterns)
+- [Convenções de Código](Governance-Code-Conventions)
+- [Testes](Governance-Testing)
+- [Segurança](Governance-Security)
+- [Observabilidade](Governance-Observability)
+- [CI/CD e Deploy](Governance-CI-CD)
+- [Integrações](Governance-Integrations)
+- [Operação](Governance-Operation)
+- [Qualidade e Manutenção](Governance-Quality)
+- [Restrições e Decisões](Governance-Decisions)
 
 ---
 
-**Arquitetura**
-- [Arquitetura](Architecture)
-
----
-
-**Funcionalidades**
+**Domínio e Negócio**
+- [Visão Geral](Domain-Overview)
+- [Regras de Negócio](Domain-Business-Rules)
 - [Health Check](Feature-Health)
 - [Login de Usuário](Feature-UserLogin)
 - [Test Get](Feature-TestGet)
 - [Condições Climáticas](Feature-WeatherConditionsGet)
-- [Pesquisa de Repositórios GitHub](Feature-GitHubRepoSearch)
+- [Pesquisa GitHub](Feature-GitHubRepoSearch)
 - [Consulta de Pokémon](Feature-PokemonGet)
 
 ---
 
-**Infraestrutura**
-- [Correlation ID](Infra-Correlation-ID)
-- [Autenticação JWT](Infra-Authentication)
-- [Tratamento de Exceções](Infra-Exception-Handling)
-
----
-
-**Referência**
-- [Regras de Negócio](Business-Rules)
-- [CI/CD](CI-CD)
+**Claude**
+- [Visão Geral](Claude-Overview)
+- [Skills](Claude-Skills)
+- [Hooks](Claude-Hooks)
+- [Convenções e Restrições](Claude-Conventions)

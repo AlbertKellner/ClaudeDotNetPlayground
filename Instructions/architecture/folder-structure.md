@@ -18,20 +18,31 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 ├── assumptions-log.md                  # Premissas ativas
 │
 ├── wiki/                               # Arquivos-fonte da GitHub Wiki (fonte canônica)
-│   ├── Home.md
-│   ├── Project-Setup.md
-│   ├── Architecture.md
-│   ├── Feature-Health.md
-│   ├── Feature-UserLogin.md
-│   ├── Feature-TestGet.md
-│   ├── Feature-WeatherConditionsGet.md
-│   ├── Feature-GitHubRepoSearch.md
-│   ├── Infra-Correlation-ID.md
-│   ├── Infra-Authentication.md
-│   ├── Infra-Exception-Handling.md
-│   ├── Business-Rules.md
-│   ├── CI-CD.md
-│   └── _Sidebar.md
+│   ├── Home.md                         # Ponto de entrada e sumário navegável
+│   ├── _Sidebar.md                     # Sidebar de navegação por agrupamento
+│   ├── Governance-Architecture.md      # Governança: estilo arquitetural, pastas, componentes
+│   ├── Governance-Development-Patterns.md  # Governança: padrões de desenvolvimento
+│   ├── Governance-Code-Conventions.md  # Governança: convenções de código
+│   ├── Governance-Testing.md           # Governança: estratégia de testes
+│   ├── Governance-Security.md          # Governança: autenticação JWT
+│   ├── Governance-Observability.md     # Governança: Correlation ID, Serilog, Datadog
+│   ├── Governance-CI-CD.md             # Governança: pipelines de CI/CD
+│   ├── Governance-Integrations.md      # Governança: Refit + Polly, Memory Cache
+│   ├── Governance-Operation.md         # Governança: setup, build, Docker
+│   ├── Governance-Quality.md           # Governança: exceções, Problem Details
+│   ├── Governance-Decisions.md         # Governança: decisões e restrições
+│   ├── Domain-Overview.md              # Domínio: visão geral da aplicação
+│   ├── Domain-Business-Rules.md        # Domínio: índice de regras de negócio
+│   ├── Feature-Health.md               # Feature: Health Check
+│   ├── Feature-UserLogin.md            # Feature: Login de Usuário
+│   ├── Feature-TestGet.md              # Feature: Test Get
+│   ├── Feature-WeatherConditionsGet.md # Feature: Condições Climáticas
+│   ├── Feature-GitHubRepoSearch.md     # Feature: Pesquisa de Repositórios GitHub
+│   ├── Feature-PokemonGet.md           # Feature: Consulta de Pokémon
+│   ├── Claude-Overview.md              # Claude: visão geral operacional
+│   ├── Claude-Skills.md                # Claude: catálogo de skills
+│   ├── Claude-Hooks.md                 # Claude: hooks configurados
+│   └── Claude-Conventions.md           # Claude: convenções e restrições
 │
 ├── .claude/
 │   ├── rules/                          # Políticas operacionais (o quê)
@@ -253,3 +264,4 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-21 | Infra/Logging/ documentada: DatadogHttpSink.cs e DatadogLogEntry.cs adicionados à estrutura; lacuna de governança corrigida | Análise de causas-raiz |
 | 2026-03-21 | Shared/ExternalApi/Pokemon/ criada (integração PokéAPI); Feature PokemonGet adicionada em Features/Query/ | DA-023, RN-009 |
 | 2026-03-21 | .claude/skills/governance-behavior-tracking/ adicionada à estrutura de governança | Instrução do usuário |
+| 2026-03-22 | wiki/ reorganizada: estrutura por agrupamentos (Governance-*, Domain-*, Feature-*, Claude-*); páginas Infra-* e estruturais antigas substituídas por páginas com prefixo de grupo | Instrução do usuário |

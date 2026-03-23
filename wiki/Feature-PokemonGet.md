@@ -1,6 +1,11 @@
 # Consulta de Pokémon por ID
 
+## Descrição
+
+Documenta o endpoint de consulta de Pokémon (`GET /pokemon/{id}`), que retorna dados de um Pokémon por ID via PokéAPI. Esta página cobre o contrato HTTP com parâmetro de rota, o mapeamento para model próprio da Feature (DA-020), o cache por usuário, e a regra de negócio RN-009. Consulte quando precisar entender a integração com a PokéAPI ou o padrão de isolamento de models. Relaciona-se com [Integrações](Governance-Integrations) (Refit + Polly) e [Padrões de Desenvolvimento](Governance-Development-Patterns) (isolamento de models).
+
 ## Resumo
+
 Endpoint autenticado que consulta dados de um Pokémon por ID via PokéAPI. O ID do Pokémon é recebido como parâmetro de rota da requisição HTTP. A resposta é cacheada por usuário autenticado.
 
 ## Autenticação
@@ -46,6 +51,16 @@ Retorna Problem Details (RFC 7807) quando o token é ausente, inválido ou expir
 ## Testes Automatizados
 - `PokemonGetUseCaseTests` — 8 testes: log de início, ID recebido passado à API, dados básicos mapeados, tipos mapeados, habilidades mapeadas, stats mapeados, sprites mapeados, log de retorno
 - `PokemonGetEndpointTests` — 3 testes: retorna OK com output, log de início, log de retorno
+- `PokemonApiClientTests` — testes de logging e delegação HTTP do cliente PokéAPI
+- `CachedPokemonApiClientTests` — testes de cache hit/miss, isolamento por usuário e logging
 
 ## BDD
+
 Nenhum cenário BDD definido para esta funcionalidade.
+
+## Referências
+
+- [Regras de Negócio](Domain-Business-Rules) — RN-009
+- [Integrações](Governance-Integrations) — padrão Refit + Polly e Memory Cache
+- [Padrões de Desenvolvimento](Governance-Development-Patterns) — isolamento de models (DA-020)
+- [Segurança](Governance-Security) — autenticação obrigatória

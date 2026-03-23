@@ -100,7 +100,7 @@ COMPOSE="$REPO_ROOT/docker-compose.yml"
 REQUIRED_VARS="$REPO_ROOT/scripts/required-vars.md"
 SETTINGS="$REPO_ROOT/.claude/settings.json"
 WIKI_DIR="$REPO_ROOT/wiki"
-WIKI_ARCH="$REPO_ROOT/wiki/Architecture.md"
+WIKI_ARCH="$REPO_ROOT/wiki/Governance-Architecture.md"
 FEATURES_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Features"
 INFRA_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Infra"
 EXTERNAL_API_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Shared/ExternalApi"
@@ -416,7 +416,7 @@ echo ""
 echo "--- 8. Páginas estruturais obrigatórias na Wiki ---"
 
 if [ -d "$WIKI_DIR" ]; then
-  REQUIRED_PAGES="Home.md _Sidebar.md Architecture.md Project-Setup.md Business-Rules.md CI-CD.md"
+  REQUIRED_PAGES="Home.md _Sidebar.md Governance-Architecture.md Governance-Operation.md Domain-Business-Rules.md Governance-CI-CD.md"
   MISSING_PAGES=""
   for page in $REQUIRED_PAGES; do
     if [ ! -f "$WIKI_DIR/$page" ]; then
@@ -781,10 +781,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 20. wiki/Architecture.md lista todas as features implementadas
+# 20. wiki/Governance-Architecture.md lista todas as features implementadas
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 20. Architecture.md lista todas as features ---"
+echo "--- 20. Governance-Architecture.md lista todas as features ---"
 
 if [ -f "$WIKI_ARCH" ] && [ -d "$FEATURES_DIR" ]; then
   MISSING_IN_ARCH=""
@@ -796,19 +796,19 @@ if [ -f "$WIKI_ARCH" ] && [ -d "$FEATURES_DIR" ]; then
   done < <(find "$FEATURES_DIR" -mindepth 2 -maxdepth 2 -type d | sort)
 
   if [ -z "$MISSING_IN_ARCH" ]; then
-    pass "wiki/Architecture.md lista todas as features implementadas"
+    pass "wiki/Governance-Architecture.md lista todas as features implementadas"
   else
-    fail "Features ausentes em wiki/Architecture.md" "$MISSING_IN_ARCH"
+    fail "Features ausentes em wiki/Governance-Architecture.md" "$MISSING_IN_ARCH"
   fi
 else
-  pass "wiki/Architecture.md ou Features/ não encontrado — verificação ignorada"
+  pass "wiki/Governance-Architecture.md ou Features/ não encontrado — verificação ignorada"
 fi
 
 # ---------------------------------------------------------------------------
-# 21. wiki/Architecture.md lista todas as subpastas de Infra/
+# 21. wiki/Governance-Architecture.md lista todas as subpastas de Infra/
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 21. Architecture.md lista todas as subpastas de Infra/ ---"
+echo "--- 21. Governance-Architecture.md lista todas as subpastas de Infra/ ---"
 
 if [ -f "$WIKI_ARCH" ] && [ -d "$INFRA_DIR" ]; then
   MISSING_INFRA_WIKI=""
@@ -820,19 +820,19 @@ if [ -f "$WIKI_ARCH" ] && [ -d "$INFRA_DIR" ]; then
   done < <(find "$INFRA_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
 
   if [ -z "$MISSING_INFRA_WIKI" ]; then
-    pass "wiki/Architecture.md lista todas as subpastas de Infra/"
+    pass "wiki/Governance-Architecture.md lista todas as subpastas de Infra/"
   else
-    fail "Subpastas de Infra/ ausentes em wiki/Architecture.md" "$MISSING_INFRA_WIKI"
+    fail "Subpastas de Infra/ ausentes em wiki/Governance-Architecture.md" "$MISSING_INFRA_WIKI"
   fi
 else
-  pass "wiki/Architecture.md ou Infra/ não encontrado — verificação ignorada"
+  pass "wiki/Governance-Architecture.md ou Infra/ não encontrado — verificação ignorada"
 fi
 
 # ---------------------------------------------------------------------------
-# 22. wiki/Architecture.md lista todas as integrações Shared/ExternalApi/
+# 22. wiki/Governance-Architecture.md lista todas as integrações Shared/ExternalApi/
 # ---------------------------------------------------------------------------
 echo ""
-echo "--- 22. Architecture.md lista Shared/ExternalApi/ ---"
+echo "--- 22. Governance-Architecture.md lista Shared/ExternalApi/ ---"
 
 if [ -f "$WIKI_ARCH" ] && [ -d "$EXTERNAL_API_DIR" ]; then
   MISSING_API_WIKI=""
@@ -844,12 +844,12 @@ if [ -f "$WIKI_ARCH" ] && [ -d "$EXTERNAL_API_DIR" ]; then
   done < <(find "$EXTERNAL_API_DIR" -mindepth 1 -maxdepth 1 -type d | sort)
 
   if [ -z "$MISSING_API_WIKI" ]; then
-    pass "wiki/Architecture.md lista todas as integrações de Shared/ExternalApi/"
+    pass "wiki/Governance-Architecture.md lista todas as integrações de Shared/ExternalApi/"
   else
-    fail "Integrações ausentes em wiki/Architecture.md" "$MISSING_API_WIKI"
+    fail "Integrações ausentes em wiki/Governance-Architecture.md" "$MISSING_API_WIKI"
   fi
 else
-  pass "wiki/Architecture.md ou Shared/ExternalApi/ não encontrado — verificação ignorada"
+  pass "wiki/Governance-Architecture.md ou Shared/ExternalApi/ não encontrado — verificação ignorada"
 fi
 
 # ---------------------------------------------------------------------------
@@ -906,7 +906,7 @@ if [ -f "$WIKI_ARCH" ] && [ -d "$FEATURES_DIR" ]; then
     fail "Features ausentes na tabela 'Features Implementadas' da wiki" "$MISSING_IN_TABLE"
   fi
 else
-  pass "wiki/Architecture.md ou Features/ não encontrado — verificação ignorada"
+  pass "wiki/Governance-Architecture.md ou Features/ não encontrado — verificação ignorada"
 fi
 
 # ---------------------------------------------------------------------------
@@ -1086,7 +1086,7 @@ fi
 echo ""
 echo "--- 31. wiki Business-Rules.md ↔ RNs ativas ---"
 
-WIKI_BR="$WIKI_DIR/Business-Rules.md"
+WIKI_BR="$WIKI_DIR/Domain-Business-Rules.md"
 BUSINESS_RULES_SRC="$REPO_ROOT/Instructions/business/business-rules.md"
 if [ -f "$WIKI_BR" ] && [ -f "$BUSINESS_RULES_SRC" ]; then
   MISSING_RN_WIKI=""
@@ -1102,12 +1102,12 @@ if [ -f "$WIKI_BR" ] && [ -f "$BUSINESS_RULES_SRC" ]; then
   done)
 
   if [ -z "$MISSING_RN_WIKI" ]; then
-    pass "wiki/Business-Rules.md lista todas as RNs ativas"
+    pass "wiki/Domain-Business-Rules.md lista todas as RNs ativas"
   else
-    fail "RNs ativas ausentes em wiki/Business-Rules.md" "$MISSING_RN_WIKI"
+    fail "RNs ativas ausentes em wiki/Domain-Business-Rules.md" "$MISSING_RN_WIKI"
   fi
 else
-  pass "wiki/Business-Rules.md ou business-rules.md não encontrado — verificação ignorada"
+  pass "wiki/Domain-Business-Rules.md ou business-rules.md não encontrado — verificação ignorada"
 fi
 
 # ---------------------------------------------------------------------------

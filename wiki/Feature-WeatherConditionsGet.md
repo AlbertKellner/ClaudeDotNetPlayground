@@ -1,12 +1,16 @@
 # Condições Climáticas de São Paulo
 
+## Descrição
+
+Documenta o endpoint de consulta de condições climáticas (`GET /weather-conditions`), que retorna dados em tempo real do município de São Paulo via API Open-Meteo. Esta página cobre o contrato HTTP, o comportamento de cache por usuário, a estratégia de resiliência com Polly, e a regra de negócio RN-004. Consulte quando precisar entender a integração com a Open-Meteo ou o padrão de cache. Relaciona-se com [Integrações](Governance-Integrations) (padrão Refit + Polly) e [Segurança](Governance-Security) (autenticação obrigatória).
+
 ## Resumo
 
 Consulta as condições climáticas atuais do município de São Paulo a partir da API Open-Meteo e retorna o payload completo da resposta, preservando a estrutura original sem filtragem ou mapeamento parcial.
 
 ## Autenticação
 
-Sim. Requer Bearer Token JWT válido no header `Authorization`. Ver [Autenticação JWT](Infra-Authentication).
+Sim. Requer Bearer Token JWT válido no header `Authorization`. Ver [Segurança](Governance-Security).
 
 ## Contrato de Entrada
 
@@ -79,7 +83,7 @@ Payload completo retornado pela API Open-Meteo, preservando a estrutura original
 
 ## Comportamento
 
-Conforme [RN-004](Business-Rules):
+Conforme [RN-004](Domain-Business-Rules):
 
 - As coordenadas do município de São Paulo são fixas na implementação: latitude `-23.5475`, longitude `-46.6361` (centro conforme a Prefeitura de São Paulo)
 - Os campos de condição atual consultados são: `temperature_2m`, `relative_humidity_2m`, `apparent_temperature`, `is_day`, `precipitation`, `rain`, `showers`, `weather_code`, `cloud_cover`, `wind_speed_10m`, `wind_direction_10m`
@@ -147,3 +151,10 @@ O cache é por usuário autenticado. Cada usuário tem seu próprio cache de con
 ## BDD
 
 Nenhum cenário BDD definido para esta funcionalidade no momento.
+
+## Referências
+
+- [Regras de Negócio](Domain-Business-Rules) — RN-004
+- [Integrações](Governance-Integrations) — padrão Refit + Polly e Memory Cache
+- [Segurança](Governance-Security) — autenticação obrigatória
+- [Arquitetura](Governance-Architecture) — posição no fluxo de request

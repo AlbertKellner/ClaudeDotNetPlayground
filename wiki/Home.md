@@ -1,55 +1,60 @@
 # Albert.Playground.ECS.AOT
 
-API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native AOT**. Implementa autenticação por **JWT Bearer Token**, logging estruturado com **Serilog** e arquitetura **Vertical Slice**.
+## Descrição
 
-## O que está implementado
-
-- Endpoint de disponibilidade (`GET /health`)
-- Autenticação de usuário com geração de JWT (`POST /login`)
-- Endpoint protegido por Bearer Token (`GET /test`)
-- Consulta de condições climáticas de São Paulo via Open-Meteo (`GET /weather-conditions`)
-- Pesquisa de repositórios GitHub da conta AlbertKellner (`GET /github-repo-search`)
-- Consulta de Pokémon por ID via PokéAPI (`GET /pokemon`)
-- Infraestrutura transversal: rastreabilidade por Correlation ID, tratamento centralizado de exceções, autenticação JWT
+Ponto de entrada da documentação do projeto. API web construída com **ASP.NET Core** em **.NET 10**, compilada com **Native AOT**. Implementa autenticação por **JWT Bearer Token**, logging estruturado com **Serilog** e arquitetura **Vertical Slice**. Esta página organiza toda a documentação em quatro agrupamentos temáticos: Governança, Domínio e Negócio, Claude, e conteúdos em consolidação.
 
 ---
 
-## Sumário
+## Governança
 
-### Configuração e Execução
-
-| Página | Descrição |
-|--------|-----------|
-| [Configuração do Projeto](Project-Setup) | Pré-requisitos, configuração, build e como executar a aplicação |
-
-### Arquitetura
+Diretrizes, padrões, restrições, decisões técnicas e operacionais deste repositório.
 
 | Página | Descrição |
 |--------|-----------|
-| [Arquitetura](Architecture) | Estilo arquitetural Vertical Slice, estrutura de pastas e fluxo de request |
+| [Arquitetura](Governance-Architecture) | Estilo Vertical Slice, estrutura de pastas, componentes e fluxo de request |
+| [Padrões de Desenvolvimento](Governance-Development-Patterns) | Vertical Slice, CQRS, UseCase, Decorator, validação em Input |
+| [Convenções de Código](Governance-Code-Conventions) | Nomenclatura, namespaces, variáveis, padrão de logging SNP-001 |
+| [Testes](Governance-Testing) | Estratégia de testes, padrões e cobertura |
+| [Segurança](Governance-Security) | Autenticação JWT, proteção de endpoints |
+| [Observabilidade](Governance-Observability) | Correlation ID, Serilog, Datadog Agent |
+| [CI/CD e Deploy](Governance-CI-CD) | Pipelines de build, execução e validação |
+| [Integrações](Governance-Integrations) | Padrão Refit + Polly, Memory Cache, APIs externas |
+| [Operação](Governance-Operation) | Pré-requisitos, configuração, build, Docker |
+| [Qualidade e Manutenção](Governance-Quality) | Tratamento de exceções, Problem Details |
+| [Restrições e Decisões](Governance-Decisions) | Decisões arquiteturais, restrições AOT, evolução |
+
+---
+
+## Domínio e Negócio
+
+Regras de negócio, funcionalidades implementadas e conceitos de domínio.
+
+| Página | Descrição |
+|--------|-----------|
+| [Visão Geral do Domínio](Domain-Overview) | Propósito da aplicação, funcionalidades e APIs externas |
+| [Regras de Negócio](Domain-Business-Rules) | Índice das regras de negócio com links para as Features |
 
 ### Funcionalidades (Features)
 
-| Página | Descrição |
-|--------|-----------|
-| [Health Check](Feature-Health) | Endpoint de verificação de disponibilidade da aplicação (`GET /health`) |
-| [Login de Usuário](Feature-UserLogin) | Autenticação com credenciais e geração de JWT Bearer Token (`POST /login`) |
-| [Test Get](Feature-TestGet) | Endpoint protegido que retorna confirmação de funcionamento (`GET /test`) |
-| [Condições Climáticas de São Paulo](Feature-WeatherConditionsGet) | Consulta das condições climáticas atuais de São Paulo via Open-Meteo API (`GET /weather-conditions`) |
-| [Pesquisa de Repositórios GitHub](Feature-GitHubRepoSearch) | Pesquisa e exibição dos repositórios da conta AlbertKellner (`GET /github-repo-search`) |
-| [Consulta de Pokémon](Feature-PokemonGet) | Consulta de dados de Pokémon por ID via PokéAPI (`GET /pokemon`) |
+| Página | Endpoint | Descrição |
+|--------|----------|-----------|
+| [Health Check](Feature-Health) | `GET /health` | Verificação de disponibilidade da aplicação |
+| [Login de Usuário](Feature-UserLogin) | `POST /login` | Autenticação com credenciais e geração de JWT |
+| [Test Get](Feature-TestGet) | `GET /test` | Endpoint protegido de confirmação de funcionamento |
+| [Condições Climáticas](Feature-WeatherConditionsGet) | `GET /weather-conditions` | Consulta de condições climáticas de São Paulo via Open-Meteo |
+| [Pesquisa de Repositórios GitHub](Feature-GitHubRepoSearch) | `GET /github-repo-search` | Pesquisa de repositórios da conta AlbertKellner |
+| [Consulta de Pokémon](Feature-PokemonGet) | `GET /pokemon/{id}` | Consulta de dados de Pokémon por ID via PokéAPI |
 
-### Infraestrutura
+---
 
-| Página | Descrição |
-|--------|-----------|
-| [Correlation ID](Infra-Correlation-ID) | Rastreabilidade de requests via GUID v7 e header `X-Correlation-Id` |
-| [Autenticação JWT](Infra-Authentication) | Geração e validação de Bearer Token JWT, proteção de endpoints |
-| [Tratamento de Exceções](Infra-Exception-Handling) | Captura centralizada de exceções e resposta padronizada em Problem Details |
+## Claude
 
-### Regras de Negócio e CI/CD
+Documentação das capacidades, convenções e mecanismos do Claude neste repositório.
 
 | Página | Descrição |
 |--------|-----------|
-| [Regras de Negócio](Business-Rules) | Índice das regras de negócio implementadas com links para as features correspondentes |
-| [CI/CD](CI-CD) | Pipelines de build, execução e validação de pull requests |
+| [Visão Geral](Claude-Overview) | Sistema de governança operacional e pipeline de validação |
+| [Skills](Claude-Skills) | Catálogo de skills disponíveis por tipo de ativação |
+| [Hooks](Claude-Hooks) | Hooks configurados e seus comportamentos |
+| [Convenções e Restrições](Claude-Conventions) | Comportamentos obrigatórios, linguagem, restrições |
