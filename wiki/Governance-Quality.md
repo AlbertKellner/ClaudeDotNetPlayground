@@ -132,8 +132,26 @@ Para features que criam ou alteram endpoints: validação via chamada HTTP real 
 
 ---
 
+## Componentes de Compatibilidade AOT
+
+O projeto utiliza Native AOT (DA-009), que impõe a substituição de componentes baseados em reflection por alternativas AOT-compatíveis:
+
+| Componente | Localização | Propósito |
+|---|---|---|
+| `AppJsonContext` | `Infra/Json/` | `JsonSerializerContext` source-generated para serialização AOT-compatível |
+| `NullModelBinderProvider` | `Infra/ModelBinding/` | Substitui providers incompatíveis com AOT (TryParse, FloatingPoint) |
+| `FallbackSimpleTypeModelBinderProvider` | `Infra/ModelBinding/` | Substitui `SimpleTypeModelBinderProvider` para compatibilidade AOT |
+| `EnhancedModelMetadataActivator` | `Infra/ModelBinding/` | Workaround AOT: ativa `IsEnhancedModelMetadataSupported` antes do primeiro request |
+| `NoOpObjectModelValidator` | `Infra/ModelValidation/` | Substitui `IObjectModelValidator` padrão (reflection-based) por implementação vazia AOT-compatível |
+| `AotControllerPreservation` | `Program.cs` | Preserva Controllers do trim AOT via `[DynamicDependency]`; chamado explicitamente no startup |
+
+Para mais detalhes sobre restrições e trade-offs do Native AOT, ver [Restrições e Decisões](Governance-Decisions).
+
+---
+
 ## Referências
 
 - [Arquitetura](Governance-Architecture) — visão geral da arquitetura e localização do GlobalExceptionHandler
+- [Restrições e Decisões](Governance-Decisions) — restrições do Native AOT e componentes de compatibilidade
 - [Segurança](Governance-Security) — autenticação e tratamento de 401
 - [Testes](Governance-Testing) — estratégia de testes unitários

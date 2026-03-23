@@ -173,6 +173,72 @@ Componentes da mesma Slice compartilham o namespace da Feature e se enxergam dir
 
 ---
 
+## Princípios de Engenharia
+
+Princípios obrigatórios que guiam todas as decisões de implementação. Decisões que os violem devem ser justificadas com ADR.
+
+### Princípios Fundamentais
+
+| ID | Princípio | Descrição |
+|---|---|---|
+| P001 | Separação de Responsabilidades | Cada módulo, componente ou função deve ter responsabilidade única e bem definida. Responsabilidades de negócio não devem vazar para infraestrutura e vice-versa |
+| P002 | Governança Antes de Implementação | Toda definição durável deve ser persistida na governança antes de qualquer mudança de código |
+| P003 | Consistência Terminológica | Os mesmos termos de domínio devem ser usados consistentemente em todo o repositório — código, contratos, BDD, documentação |
+| P004 | Decisões Explicadas | Decisões arquiteturais devem ser documentadas com contexto, alternativas e trade-offs. "Funciona" não é justificativa suficiente |
+| P005 | Comportamento de Negócio Prevalece | Preferências arquiteturais não podem invalidar comportamento de negócio exigido |
+
+### Princípios de Código
+
+| ID | Princípio | Descrição |
+|---|---|---|
+| P006 | Linguagem e Comunicação | Código sempre em inglês; respostas do agente sempre em português; PRs em português brasileiro |
+| P007 | File-Scoped Namespace | Toda declaração de namespace deve seguir o padrão de file-scoped namespace (ver seção acima) |
+| P008 | Declaração Implícita (var) | Usar `var` sempre que possível; nome da variável deve ser autoexplicativo (ver seção acima) |
+| P009 | Responsabilidade Única (SRP) | Regra estrutural obrigatória: Endpoint (request/response + logs), UseCase (orquestração de negócio), Repository (acesso a dados), Models (validação + contratos), Shared (infraestrutura genérica) |
+| P010 | Tratamento de Erros | Proibido: `try-catch` genérico espalhado. Obrigatório: handler centralizado. Permitido: `try-catch` para exceções específicas em infraestrutura/repositórios |
+| P011 | Preservação de Formatação | Manter indentação dos arquivos conforme convenções existentes; não alterar código não modificado |
+| P012 | Validação Pré-Commit | Build limpo + execução com health check obrigatórios antes de qualquer commit |
+| P013 | HealthCheck Obrigatório | Toda aplicação deve expor `/health` respondendo `Healthy` com HTTP 200 |
+| P014 | Compilação AOT | Todo projeto configurado com `PublishAot=true` + `InvariantGlobalization=true`; código AOT-compatível obrigatório |
+
+---
+
+## Governança de Snippets
+
+Trechos técnicos fornecidos pelo usuário são classificados obrigatoriamente antes de qualquer ação:
+
+| Classificação | Sinal do Usuário | Tratamento |
+|---|---|---|
+| **Normativo** | "inclua exatamente", "copie", "preserve", "literalmente" | Copiar na íntegra; não reescrever |
+| **Ilustrativo** | "algo assim", "tipo isso", "como exemplo" | Adaptar ao contexto do projeto |
+| **Preferencial** | "prefiro esse padrão", "use esse estilo" | Seguir a abordagem |
+| **Contextual** | "para contextualizar", "para entender" | Apenas apoio de entendimento |
+
+**Padrão conservador**: na ausência de sinal claro, assumir **ilustrativo**.
+
+### Snippets Normativos Canônicos
+
+Snippets registrados em `Instructions/snippets/canonical-snippets.md` são obrigatórios e não podem ser reescritos livremente. Alteração exige nova instrução explícita do usuário ou conflito técnico reportado.
+
+| ID | Título | Escopo |
+|---|---|---|
+| SNP-001 | Padrão de Logging Estruturado | Todas as classes da aplicação — formato `[Classe][Método]`, storytelling, isolamento visual |
+
+---
+
+## Glossário e Linguagem Ubíqua
+
+A terminologia de domínio é definida em `Instructions/glossary/ubiquitous-language.md` e prevalece sobre nomenclatura técnica na camada de domínio.
+
+**Regras obrigatórias:**
+- O mesmo conceito deve usar o mesmo nome em todo o repositório
+- Sinônimos são permitidos apenas quando registrados explicitamente no glossário
+- Abreviações são permitidas apenas quando registradas (ex: `ECS`, `AOT`)
+- Nomes ambíguos que causaram confusão devem ser registrados como **proibidos** no glossário
+- Nenhum nome de conceito pode divergir da definição do glossário sem alteração explícita do glossário primeiro
+
+---
+
 ## Termos Proibidos
 
 | Termo | Motivo | Alternativa |

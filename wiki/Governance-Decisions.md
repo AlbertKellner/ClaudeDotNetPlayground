@@ -18,8 +18,11 @@ O projeto acumula decisões arquiteturais registradas como ADRs (Architecture De
 | DA-005 | Vertical Slice Architecture com Command/Query | 2026-03-15 | Ativo |
 | DA-008 | Controllers com Actions (não Minimal API) | 2026-03-15 | Ativo |
 | DA-009 | Native AOT (`PublishAot=true`) | 2026-03-15 | Ativo |
+| DA-010 | Tratamento de Exceções: `IExceptionHandler` com Problem Details | 2026-03-15 | Ativo |
 | DA-011 | Estrutura `Infra/` + Correlation ID Middleware | 2026-03-15 | Ativo |
+| DA-012 | Runtime: Migração de .NET 8 para .NET 10 | 2026-03-15 | Ativo |
 | DA-013 | Autenticação JWT Bearer Token | 2026-03-15 | Ativo |
+| DA-014 | Idioma de Pull Requests: Português Brasileiro Obrigatório | 2026-03-15 | Ativo |
 | DA-015 | Logging estruturado (padrão storytelling) | 2026-03-15 | Ativo |
 | DA-016 | Containerização Docker + Datadog Agent | 2026-03-16 | Ativo |
 | DA-017 | Padrão de integração com API externa (Refit + Polly) | 2026-03-16 | Ativo |
@@ -83,6 +86,47 @@ O projeto é configurado para publicação com Native AOT, o que impõe restriç
 | `FallbackSimpleTypeModelBinderProvider` | `Infra/ModelBinding/` | Substitui `SimpleTypeModelBinderProvider` para compatibilidade AOT |
 | `EnhancedModelMetadataActivator` | `Infra/ModelBinding/` | Workaround AOT: ativa `IsEnhancedModelMetadataSupported` antes do primeiro request |
 | `NoOpObjectModelValidator` | `Infra/ModelValidation/` | Substitui `IObjectModelValidator` padrão (reflection-based) por implementação vazia |
+
+---
+
+## Decisões Revogadas
+
+| ID | Título | Data | Motivo |
+|---|---|---|---|
+| DA-019 | Integração GitHub API com persistência em arquivo JSON | 2026-03-19 | Revogada — funcionalidades de busca e sincronização removidas do sistema |
+
+---
+
+## Processo de Decisão Arquitetural (ADR)
+
+Decisões arquiteturais relevantes são registradas como ADRs (Architecture Decision Records) em `Instructions/decisions/`. Cada ADR preserva o raciocínio por trás de uma decisão — não apenas "o que foi decidido", mas "por que foi decidido assim" e "quais alternativas foram consideradas".
+
+### Quando registrar uma decisão
+
+- Decisão tecnológica relevante (linguagem, framework, banco, broker)
+- Decisão arquitetural estruturante (estilo, padrão de integração, fronteiras)
+- Restrição técnica importante estabelecida
+- Alternativa descartada cuja razão deve ser preservada
+- Mudança significativa de direção técnica
+
+### Estrutura de cada ADR
+
+| Seção | Conteúdo |
+|---|---|
+| **Contexto** | Situação que levou à necessidade da decisão |
+| **Decisão** | O que foi decidido — linguagem afirmativa e clara |
+| **Alternativas** | Opções avaliadas e por que cada uma foi descartada |
+| **Trade-offs** | O que a decisão sacrifica ou compromete |
+| **Consequências** | Impacto em outros artefatos, restrições futuras |
+
+### Status de ADRs
+
+- **Ativo**: decisão em vigor
+- **Substituído**: superado por ADR mais recente (referencia o substituto)
+- **Revogado**: não mais aplicável, com justificativa
+- **Depreciado**: não mais aplicável mas não substituído por outro
+
+ADRs substituídos ou revogados **não são deletados** — documentam por que houve mudança de direção.
 
 ---
 

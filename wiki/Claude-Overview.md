@@ -89,6 +89,44 @@ Comportamento de negócio sempre prevalece sobre preferência arquitetural quand
 
 ---
 
+## Regras de Propagação de Mudanças
+
+Nenhuma mudança existe isolada. Consistência entre artefatos é responsabilidade do assistente. Quando um artefato muda, os relacionados devem ser avaliados:
+
+| Se muda... | Avaliar impacto em... |
+|---|---|
+| Negócio (regras, invariantes, fluxos) | BDD, contratos, glossário, implementação |
+| Contratos (OpenAPI, schemas, payloads) | Negócio, BDD, glossário, implementação |
+| BDD (cenários) | Negócio, contratos, implementação |
+| Arquitetura (princípios, padrões) | Technical-overview, folder-structure, naming-conventions, implementação |
+| Nomenclatura | Glossário, BDD, contratos, código, documentação |
+| Snippet canônico | Implementações que usam o snippet |
+| Ferramentas operacionais (MCP, tokens) | Technical-overview, environment-readiness, required-vars |
+| Artefatos documentáveis (BDD, regras, contratos, testes) | Wiki — páginas de Feature, Business-Rules, Architecture, CI-CD |
+
+A propagação é automática quando o impacto é claro e seguro. O assistente pausa e reporta quando há conflito, dependentes externos não mapeados ou dúvida sobre intenção.
+
+---
+
+## Governança da Wiki
+
+A pasta `wiki/` no repositório principal é a **fonte canônica** das páginas da Wiki. A publicação na GitHub Wiki é **automática** via o workflow `wiki-publish.yml` (disparado a cada push para `main`/`master` que altere arquivos em `wiki/`).
+
+A Wiki é organizada em quatro agrupamentos:
+
+| Agrupamento | Prefixo | Propósito |
+|---|---|---|
+| Governança | `Governance-` | Diretrizes, padrões, restrições, decisões técnicas |
+| Domínio e Negócio | `Domain-` / `Feature-` | Regras de negócio, features implementadas, conceitos de domínio |
+| Claude | `Claude-` | Skills, hooks, convenções e comportamentos do assistente |
+| Não categorizado | Sem prefixo | Conteúdos em consolidação |
+
+Toda página segue um padrão mínimo: Descrição, Contexto, Conteúdo Principal, Referências. Páginas de Feature seguem um template obrigatório com seções de Autenticação, Contrato de Entrada/Saída, Comportamento, Testes e BDD.
+
+A governança completa da Wiki está definida em `Instructions/wiki/wiki-governance.md`.
+
+---
+
 ## Referências
 
 - [Claude — Skills](Claude-Skills)

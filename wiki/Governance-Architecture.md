@@ -153,6 +153,31 @@ O enrichment do Serilog é transversal:
 
 ---
 
+## Componentes de Infraestrutura (`Infra/`)
+
+Componentes transversais que suportam a aplicação sem conter lógica de negócio:
+
+| Componente | Localização | Propósito |
+|---|---|---|
+| `CorrelationIdMiddleware` | `Infra/Middlewares/` | Garante GUID v7 por request; enriquece Serilog LogContext; opaco para Features |
+| `GuidV7` | `Infra/Correlation/` | Geração (`Guid.CreateVersion7()`) e validação de GUID v7 (uso interno de Infra) |
+| `GlobalExceptionHandler` | `Infra/ExceptionHandling/` | Handler centralizado de exceções; retorna Problem Details (RFC 7807) |
+| `DatadogAgentHealthCheck` | `Infra/HealthChecks/` | Verifica disponibilidade do Datadog Agent via HTTP; determina Healthy/Degraded/Unhealthy (RN-005) |
+| `AppJsonContext` | `Infra/Json/` | `JsonSerializerContext` source-generated para serialização AOT-compatível |
+| `DatadogHttpSink` | `Infra/Logging/` | Serilog `ILogEventSink`: envia logs diretamente ao Datadog via HTTP; batching assíncrono via Channel |
+| `DatadogLogEntry` | `Infra/Logging/` | Modelo de entrada de log + `DatadogLogJsonContext` para serialização AOT |
+| `NullModelBinderProvider` | `Infra/ModelBinding/` | Substitui providers incompatíveis com AOT (TryParse, FloatingPoint) |
+| `FallbackSimpleTypeModelBinderProvider` | `Infra/ModelBinding/` | Substitui `SimpleTypeModelBinderProvider` para compatibilidade AOT |
+| `EnhancedModelMetadataActivator` | `Infra/ModelBinding/` | Workaround AOT: ativa `IsEnhancedModelMetadataSupported` antes do primeiro request |
+| `NoOpObjectModelValidator` | `Infra/ModelValidation/` | Substitui `IObjectModelValidator` padrão (reflection-based) por implementação AOT-compatível |
+| `ITokenService` | `Infra/Security/` | Contrato de geração e validação de JWT Bearer Token |
+| `AuthenticatedUser` | `Infra/Security/` | Modelo de usuário autenticado extraído do token (Id, UserName) |
+| `TokenService` | `Infra/Security/` | Implementação JWT HS256: geração e validação de Bearer Token |
+| `AuthenticateFilter` | `Infra/Security/` | `IAsyncActionFilter`: valida Bearer Token, retorna 401 se inválido, enriquece LogContext com UserId e UserName |
+| `AuthenticateAttribute` | `Infra/Security/` | `TypeFilterAttribute`: decorador `[Authenticate]` para Controllers |
+
+---
+
 ## Restrições Arquiteturais
 
 - Slices não se comunicam diretamente entre si
