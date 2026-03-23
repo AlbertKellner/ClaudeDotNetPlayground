@@ -44,7 +44,7 @@ Cada cenário deve poder ser rastreado até uma regra de negócio em `Instructio
 Use comentários no arquivo `.feature` para referenciar a regra:
 
 ```gherkin
-# Regra relacionada: RN-001
+# Regra relacionada: RN-002
 Scenario: [título do cenário]
 ```
 
