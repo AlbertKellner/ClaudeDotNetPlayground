@@ -28,9 +28,6 @@ O projeto acumula decisões arquiteturais registradas como ADRs (Architecture De
 | DA-017 | Padrão de integração com API externa (Refit + Polly) | 2026-03-16 | Ativo |
 | DA-018 | Memory Cache com Decorator Pattern | 2026-03-19 | Ativo |
 | DA-020 | Isolamento de models de Feature (`Input`/`Output` em `<Feature>Models/`) | 2026-03-19 | Ativo |
-| DA-021 | Integração GitHub API | 2026-03-20 | Ativo |
-| DA-022 | Contratos OpenAPI e cenários BDD diferidos | 2026-03-21 | Ativo |
-| DA-023 | Integração PokéAPI | 2026-03-21 | Ativo |
 
 ---
 

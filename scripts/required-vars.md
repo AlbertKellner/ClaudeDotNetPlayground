@@ -80,17 +80,6 @@ Ou execute `scripts/setup-env.sh` — ele valida todas as entradas e emite erros
 | **Quem pode fornecer** | O administrador da conta `ClaudeCode-Bot` (proprietário do repositório). |
 | **Onde armazenar** | Secrets do Claude Code, variável `GH_CLAUDE_CODE_MCP`. |
 
-### GITHUB_PAT (GitHub Personal Access Token para a aplicação)
-
-| Campo | Valor |
-|---|---|
-| **Validade** | Depende da configuração: tokens Classic podem não expirar; tokens Fine-grained têm validade configurável. |
-| **Como obter** | GitHub → Settings → Developer Settings → Personal Access Tokens → criar token. Permissões mínimas: `public_repo` (para leitura de repositórios públicos). |
-| **Sintoma quando ausente** | `GET /github-repo-search` retorna HTTP 500. Aplicação loga erro de autenticação ao consultar `api.github.com`. |
-| **Sintoma quando inválido/expirado** | API GitHub retorna HTTP 401. Aplicação retorna HTTP 500. |
-| **Como renovar** | Criar novo token no GitHub. Atualizar `GITHUB_PAT` na ferramenta externa de configuração de container. |
-| **Quem pode fornecer** | O próprio desenvolvedor (tokens são pessoais). |
-
 ---
 
 ## Mapa de Erros por Variável
@@ -102,7 +91,6 @@ Esta tabela mapeia cada variável ao erro exato que aparece quando está ausente
 | `DD_API_KEY` | Pipeline Docker prossegue sem Datadog; `/health` retorna `Unhealthy` | `Unexpected response code from the API Key validation endpoint` | `docker compose up`, `GET /health` |
 | `DD_APP_KEY` | MCP Datadog inacessível; ferramentas MCP não respondem | HTTP 403 do servidor MCP | Ferramentas MCP do Claude Code |
 | `GH_CLAUDE_CODE_MCP` | Servidor MCP do GitHub inacessível; ferramentas MCP não respondem | HTTP 401 do servidor MCP do GitHub | Ferramentas MCP do Claude Code (PRs, Actions) |
-| `GITHUB_PAT` | `/github-repo-search` retorna HTTP 500 | HTTP 401 da API GitHub | `GET /github-repo-search` via Docker |
 | `EXTRA_CA_CERT` | `UntrustedRoot` em `dotnet restore` dentro do Docker build | CA inválida; mesmo erro `UntrustedRoot` | `docker compose build` |
 | `HTTP_PROXY` | `Temporary failure resolving 'archive.ubuntu.com'` em `apt-get` | Proxy inacessível; timeout de conexão | `docker compose build`, `apt-get`, `dotnet restore` |
 
