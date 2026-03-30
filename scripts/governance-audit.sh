@@ -178,18 +178,23 @@ echo ""
 echo "--- 3. Contagem de rules no README.md ---"
 
 ACTUAL_RULES_COUNT=$(find "$REPO_ROOT/.claude/rules" -name "*.md" -type f | wc -l)
-README_RULES_COUNT=$(grep -oP '\d+(?=\s*rules)' "$README" 2>/dev/null | head -1 || echo "0")
+# Extrai o número da linha que contém .claude/rules/ (aceita "N rules" ou "N políticas" etc.)
+README_RULES_COUNT=$(grep '\.claude/rules/' "$README" 2>/dev/null | grep -oP '^\|[^|]*\|\s*\K\d+' | head -1 || echo "0")
 
 if [ "$ACTUAL_RULES_COUNT" = "$README_RULES_COUNT" ]; then
   pass "Contagem de rules no README.md ($README_RULES_COUNT) corresponde ao real ($ACTUAL_RULES_COUNT)"
 else
   if [ "$FIX_MODE" = true ]; then
     safe_fix "$README"
-    sed -i "s/${README_RULES_COUNT} rules/${ACTUAL_RULES_COUNT} rules/g" "$README"
+    # Substitui o número na linha que contém .claude/rules/
+    sed -i "/\.claude\/rules\//s/| $README_RULES_COUNT /| $ACTUAL_RULES_COUNT /" "$README"
     FIXES=$((FIXES + 1))
     pass "Contagem de rules atualizada automaticamente (--fix): $README_RULES_COUNT → $ACTUAL_RULES_COUNT"
   else
-    fail "Contagem de rules no README.md ($README_RULES_COUNT) não corresponde ao real ($ACTUAL_RULES_COUNT)"
+    fail "Contagem de rules no README.md ($README_RULES_COUNT) não corresponde ao real ($ACTUAL_RULES_COUNT)" \
+      "" \
+      "O número na linha .claude/rules/ do README.md diverge do número real de arquivos .md em .claude/rules/" \
+      "Atualizar o número no README.md ou usar --fix para correção automática"
   fi
 fi
 
@@ -200,18 +205,23 @@ echo ""
 echo "--- 4. Contagem de skills no README.md ---"
 
 ACTUAL_SKILLS_COUNT=$(find "$REPO_ROOT/.claude/skills" -mindepth 1 -maxdepth 1 -type d | wc -l)
-README_SKILLS_COUNT=$(grep -oP '\d+(?=\s*skills)' "$README" 2>/dev/null | head -1 || echo "0")
+# Extrai o número da linha que contém .claude/skills/ (aceita "N skills" ou "N workflows" etc.)
+README_SKILLS_COUNT=$(grep '\.claude/skills/' "$README" 2>/dev/null | grep -oP '^\|[^|]*\|\s*\K\d+' | head -1 || echo "0")
 
 if [ "$ACTUAL_SKILLS_COUNT" = "$README_SKILLS_COUNT" ]; then
   pass "Contagem de skills no README.md ($README_SKILLS_COUNT) corresponde ao real ($ACTUAL_SKILLS_COUNT)"
 else
   if [ "$FIX_MODE" = true ]; then
     safe_fix "$README"
-    sed -i "s/${README_SKILLS_COUNT} skills/${ACTUAL_SKILLS_COUNT} skills/g" "$README"
+    # Substitui o número na linha que contém .claude/skills/
+    sed -i "/\.claude\/skills\//s/| $README_SKILLS_COUNT /| $ACTUAL_SKILLS_COUNT /" "$README"
     FIXES=$((FIXES + 1))
     pass "Contagem de skills atualizada automaticamente (--fix): $README_SKILLS_COUNT → $ACTUAL_SKILLS_COUNT"
   else
-    fail "Contagem de skills no README.md ($README_SKILLS_COUNT) não corresponde ao real ($ACTUAL_SKILLS_COUNT)"
+    fail "Contagem de skills no README.md ($README_SKILLS_COUNT) não corresponde ao real ($ACTUAL_SKILLS_COUNT)" \
+      "" \
+      "O número na linha .claude/skills/ do README.md diverge do número real de diretórios em .claude/skills/" \
+      "Atualizar o número no README.md ou usar --fix para correção automática"
   fi
 fi
 

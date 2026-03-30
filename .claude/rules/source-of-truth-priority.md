@@ -1,5 +1,9 @@
 # Regra: Prioridade entre Fontes de Verdade
 
+## Classificação
+
+Meta-governança (ponte entre domínio técnico e de negócio). Define a hierarquia de prioridade entre fontes de verdade que abrangem ambos os domínios e arbitra conflitos entre eles.
+
 ## Propósito
 
 Esta rule define a ordem de prioridade entre fontes de verdade do repositório e como conflitos entre elas devem ser detectados, documentados e resolvidos.

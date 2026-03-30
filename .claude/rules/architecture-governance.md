@@ -1,5 +1,9 @@
 # Regra: Governança Arquitetural
 
+## Classificação
+
+Meta-governança (ponte entre domínio técnico e de negócio). Governa decisões técnicas, mas contém a regra crítica de que arquitetura não pode invalidar comportamento de negócio.
+
 ## Propósito
 
 Esta rule define como o assistente deve identificar, registrar, preservar e aplicar decisões e princípios arquiteturais neste repositório.
@@ -52,11 +56,31 @@ Quando uma decisão arquitetural relevante for tomada (seja pelo usuário ou com
 
 ## Separação de Governança Técnica e de Negócio
 
+### Regras de conteúdo
+
 - `Instructions/architecture/` contém **apenas** governança técnica: princípios de engenharia, padrões, restrições estruturais, decisões tecnológicas.
 - `Instructions/business/` contém **apenas** governança de negócio: regras de negócio, invariantes, workflows, modelo de domínio.
 - **Regras de negócio não pertencem a arquivos de arquitetura**.
 - **Decisões arquiteturais não pertencem a arquivos de negócio**.
 - Quando uma decisão arquitetural for motivada por requisito de negócio, registrar a motivação no ADR mas manter os artefatos separados.
+
+### Regras de imports no CLAUDE.md
+
+Os imports de governança no `CLAUDE.md` devem ser organizados em seções rotuladas que tornem explícito o domínio de cada grupo:
+
+| Seção | Conteúdo |
+|---|---|
+| **Modelo operacional** | `Instructions/operating-model.md` |
+| **Governança técnica** | `Instructions/architecture/*`, `Instructions/snippets/*` |
+| **Governança de negócio** | `Instructions/business/*` |
+| **Camadas-ponte (técnico + negócio)** | `Instructions/bdd/*`, `Instructions/contracts/*`, `Instructions/glossary/*`, `Instructions/decisions/*`, `Instructions/wiki/*` |
+| **Artefatos operacionais** | `scripts/*`, `open-questions.md`, `assumptions-log.md`, `bash-errors-log.md` |
+| **Rules meta-governança (ponte)** | Rules que arbitram entre domínio técnico e de negócio |
+| **Rules técnicas** | Rules puramente técnicas (pipeline, auditoria, validação, ambiente) |
+
+### Regras de classificação de rules
+
+Rules em `.claude/rules/` que atuem como ponte entre domínio técnico e de negócio devem conter uma seção `## Classificação` no topo (após o título, antes do Propósito) identificando-as como meta-governança e descrevendo por que misturam concerns. Rules puramente técnicas não precisam dessa seção.
 
 ---
 
@@ -96,3 +120,12 @@ Se uma decisão arquitetural impede ou compromete o comportamento esperado do si
 - `governance-policies.md` — políticas de propagação (§3) e normalização (§1) usadas por esta rule
 - `source-of-truth-priority.md` define que arquitetura está subordinada a BDD e regras de negócio quando há conflito
 - `naming-governance.md` e `folder-governance.md` são subordinadas a esta rule para decisões estruturais
+
+---
+
+## Histórico de Mudanças
+
+| Data | Mudança | Referência |
+|---|---|---|
+| 2026-03-18 | Criado: governança arquitetural com separação tech/negócio e regra de subordinação ao negócio | Reestruturação de governança |
+| 2026-03-30 | Adicionado: seção Classificação (meta-governança); regras de organização de imports no CLAUDE.md por domínio; regras de classificação obrigatória de rules-ponte | Separação tech/negócio |

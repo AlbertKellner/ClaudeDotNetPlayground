@@ -1,5 +1,9 @@
 # Regra: Políticas de Governança Consolidadas
 
+## Classificação
+
+Meta-governança (ponte entre domínio técnico e de negócio). Coordena normalização, contexto, propagação e ambiguidades transversalmente a ambos os domínios.
+
 ## Propósito
 
 Esta regra consolida as políticas (o quê, não como) de normalização de linguagem, contexto do repositório, propagação de mudanças, tratamento de ambiguidades e classificação de snippets. Os workflows procedurais correspondentes residem nas skills.
@@ -59,6 +63,8 @@ Esta regra consolida as políticas (o quê, não como) de normalização de ling
 | Snippet canônico | Implementações que usam o snippet |
 | Ferramentas operacionais (MCP, tokens, integrações) | technical-overview, environment-readiness, required-vars, container-setup, pipeline pré-commit |
 | Artefatos documentáveis (BDD, regras de negócio, contratos, testes, componentes, configuração, CI/CD) | Wiki (`wiki/`) — páginas de Feature, Business-Rules, Architecture, Project-Setup, CI-CD conforme `wiki-governance.md` |
+| Novo padrão organizacional de governança (organização de imports, classificação de rules, estrutura de seções) | `architecture-governance.md` (seção Separação de Governança Técnica e de Negócio), rules afetadas, CLAUDE.md |
+| Script de auditoria falha por bug do script (não por problema real nos artefatos) | `scripts/governance-audit.sh` — corrigir o script é parte da tarefa, não um problema pré-existente a ignorar |
 
 ### Limites:
 - Propagação automática quando o impacto é claro e seguro
@@ -122,3 +128,5 @@ Na ausência de sinal claro → assumir **ilustrativo**.
 | 2026-03-18 | Criado: consolidação de natural-language-normalization, repository-context-evolution, change-propagation, ambiguity-handling e snippet-handling | Reestruturação de governança |
 | 2026-03-19 | Adicionado: ferramentas operacionais ao mapa de propagação e à lista de conhecimento durável | Lacuna de governança identificada |
 | 2026-03-19 | Adicionado: artefatos documentáveis (BDD, regras, contratos, testes) como gatilho de propagação para wiki | Instrução do usuário |
+| 2026-03-30 | Adicionado: seção Classificação — meta-governança (ponte entre domínio técnico e de negócio) | Separação tech/negócio |
+| 2026-03-30 | Adicionado: 2 entradas no mapa de propagação — novo padrão organizacional de governança e correção de bug no script de auditoria | Análise de causa-raiz de omissão |
