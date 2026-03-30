@@ -35,8 +35,8 @@ O projeto acumula decisões arquiteturais registradas como ADRs (Architecture De
 
 | ID | Título | Data | Motivo |
 |---|---|---|---|
-| DA-019 | Integração GitHub API com persistência em arquivo JSON | 2026-03-19 | Revogada — funcionalidades de busca e sincronização removidas do sistema |
-| DA-023 | Integração PokéAPI | 2026-03-21 | Revogada — integração removida durante sanitização do template |
+| DA-019 | Integração externa com persistência em arquivo JSON | 2026-03-19 | Revogada — funcionalidades removidas durante sanitização do template |
+| DA-023 | Integração externa removida | 2026-03-21 | Revogada — integração removida durante sanitização do template |
 
 ---
 
