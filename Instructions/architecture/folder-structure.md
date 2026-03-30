@@ -34,11 +34,7 @@ A estrutura abaixo foi criada no bootstrap e não deve ser alterada sem instruç
 │   ├── Domain-Overview.md              # Domínio: visão geral da aplicação
 │   ├── Domain-Business-Rules.md        # Domínio: índice de regras de negócio
 │   ├── Feature-Health.md               # Feature: Health Check
-│   ├── Feature-UserLogin.md            # Feature: Login de Usuário
-│   ├── Feature-TestGet.md              # Feature: Test Get
-│   ├── Feature-WeatherConditionsGet.md # Feature: Condições Climáticas
-│   ├── Feature-GitHubRepoSearch.md     # Feature: Pesquisa de Repositórios GitHub
-│   ├── Feature-PokemonGet.md           # Feature: Consulta de Pokémon
+│   ├── Feature-<NomeDaFeature>.md      # Uma página por Feature implementada
 │   ├── Claude-Overview.md              # Claude: visão geral operacional
 │   ├── Claude-Skills.md                # Claude: catálogo de skills
 │   ├── Claude-Hooks.md                 # Claude: hooks configurados
@@ -119,8 +115,8 @@ Todos os projetos ficam contidos na pasta `src/` na raiz do repositório. A solu
 
 ```
 src/
-├── Albert.Playground.ECS.AOT.slnx          # Solution file
-├── Albert.Playground.ECS.AOT.UnitTest/      # Projeto de testes unitários
+├── Starter.Template.AOT.slnx                # Solution file
+├── Starter.Template.AOT.UnitTest/            # Projeto de testes unitários
 │   └── (espelha estrutura do projeto principal: Features/, Infra/, Shared/, TestHelpers/)
 │
 └── <NomeDoProjeto>/
@@ -252,16 +248,12 @@ Qualquer adição à estrutura de governança deve:
 | 2026-03-15 | Infra/ criada com subpastas Correlation/, ExceptionHandling/, Middlewares/; Shared/Middleware/ removida; GlobalExceptionHandler movido para Infra/ExceptionHandling/ | DA-011 |
 | 2026-03-15 | Infra/Security/ criada com ITokenService, AuthenticatedUser, TokenService, AuthenticateFilter, AuthenticateAttribute | DA-013 |
 | 2026-03-15 | wiki/ criada na raiz: 12 arquivos-fonte da GitHub Wiki; Instructions/wiki/ criada com wiki-governance.md | Instrução do usuário |
-| 2026-03-16 | Shared/ExternalApi/ documentada: padrão de integração HTTP externa com Refit + Polly (DA-017); primeira integração: Open-Meteo | Instrução do usuário |
-| 2026-03-17 | Infra/HealthChecks/ adicionada: DatadogAgentHealthCheck implementa RN-005 | Instrução do usuário |
-| 2026-03-17 | wiki/ atualizada: Feature-WeatherConditionsGet.md adicionada à lista | Revisão de governança |
+| 2026-03-16 | Shared/ExternalApi/ documentada: padrão de integração HTTP externa com Refit + Polly (DA-017) | Instrução do usuário |
+| 2026-03-17 | Infra/HealthChecks/ adicionada: DatadogAgentHealthCheck | Instrução do usuário |
 | 2026-03-18 | Infra/Json/, Infra/ModelBinding/, Infra/ModelValidation/ documentadas: presentes no código mas ausentes do registro estrutural | Revisão de governança |
 | 2026-03-18 | Reorganização: solution movida para `src/`; projeto de testes movido de `tests/` para `src/`; pasta `tests/` removida; todos os projetos agora em `src/` | Instrução do usuário |
-| 2026-03-19 | Shared/ExternalApi/GitHub/ criada (integração GitHub API); Shared/Repositories/ criada (modelo JSON compartilhado); Features RepositoriesGetAll e RepositoriesSyncAll adicionadas | DA-019, RN-006, RN-007 |
 | 2026-03-19 | Regra de residência de models adicionada: Input e Output de Features exclusivamente em `<Feature>Models/`, não em Shared | DA-020 |
-| 2026-03-20 | Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos; Features RepositoriesGetAll e RepositoriesSyncAll removidas | DA-019 revogada |
-| 2026-03-20 | Shared/ExternalApi/GitHub/ recriada (integração GitHub API); Feature GitHubRepoSearch adicionada em Features/Query/ | DA-021, RN-008 |
 | 2026-03-21 | Infra/Logging/ documentada: DatadogHttpSink.cs e DatadogLogEntry.cs adicionados à estrutura; lacuna de governança corrigida | Análise de causas-raiz |
-| 2026-03-21 | Shared/ExternalApi/Pokemon/ criada (integração PokéAPI); Feature PokemonGet adicionada em Features/Query/ | DA-023, RN-009 |
 | 2026-03-21 | .claude/skills/governance-behavior-tracking/ adicionada à estrutura de governança | Instrução do usuário |
 | 2026-03-22 | wiki/ reorganizada: estrutura por agrupamentos (Governance-*, Domain-*, Feature-*, Claude-*); páginas Infra-* e estruturais antigas substituídas por páginas com prefixo de grupo | Instrução do usuário |
+| 2026-03-30 | Template sanitizado: referências a features e integrações específicas removidas; projeto renomeado para Starter.Template.AOT | Sanitização de template |

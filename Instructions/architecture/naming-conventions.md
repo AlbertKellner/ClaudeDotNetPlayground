@@ -131,8 +131,8 @@ O namespace de todos os componentes de uma Slice (Endpoint, UseCase, Repository,
 
 ```
 Pasta física:   Features/Query/TestGet/TestGetUseCase/TestGetUseCase.cs
-Namespace:      Albert.Playground.ECS.AOT.Api.Features.Query.TestGet   ← para na Feature
-Proibido:       Albert.Playground.ECS.AOT.Api.Features.Query.TestGet.TestGetUseCase
+Namespace:      Starter.Template.AOT.Api.Features.Query.TestGet   ← para na Feature
+Proibido:       Starter.Template.AOT.Api.Features.Query.TestGet.TestGetUseCase
 ```
 
 **Motivação**: o sufixo da subpasta (ex: `TestGetUseCase`) coincide com o nome da classe, criando colisão `Namespace.Tipo`. A convenção de namespace parar na Feature elimina essa colisão estruturalmente.
@@ -196,11 +196,11 @@ Empresa.Produto.Funcionalidade.Subfuncionalidade.RecursoTecnologico
 
 | Artefato | Nome |
 |---|---|
-| Solution | `Albert.Playground.ECS.AOT` |
-| Projeto API | `Albert.Playground.ECS.AOT.Api` |
-| Projeto de testes unitários | `Albert.Playground.ECS.AOT.UnitTest` |
-| Namespace root (API) | `Albert.Playground.ECS.AOT.Api` |
-| Namespace root (testes) | `Albert.Playground.ECS.AOT.UnitTest` |
+| Solution | `Starter.Template.AOT` |
+| Projeto API | `Starter.Template.AOT.Api` |
+| Projeto de testes unitários | `Starter.Template.AOT.UnitTest` |
+| Namespace root (API) | `Starter.Template.AOT.Api` |
+| Namespace root (testes) | `Starter.Template.AOT.UnitTest` |
 
 ---
 

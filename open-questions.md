@@ -14,18 +14,8 @@ Este arquivo contém **apenas** dúvidas e ambiguidades **ainda abertas**.
 
 ## Dúvidas Ativas
 
-### DUV-002
-| Campo | Valor |
-|---|---|
-| **Id** | DUV-002 |
-| **Data** | 2026-03-20 |
-| **Origem** | Implementação da skill `pr-analysis` — passo 7 (resposta a solicitações não conformes) |
-| **Dúvida** | Para solicitações de mudança classificadas como NÃO CONFORMES, o revisor deve ser notificado apenas via resposta no comentário ou também deve haver um mecanismo de escalação (ex: tag no comentário, issue aberta, mention ao revisor)? |
-| **Por que importa** | Sem mecanismo claro de escalação, solicitações não conformes podem ficar sem resolução se o revisor não verificar os comentários de resposta. Com escalação excessiva, pode gerar ruído. |
-| **Artefatos impactados** | `.claude/skills/pr-analysis/SKILL.md` (passo 7b) |
-| **Bloqueante** | Não — a resposta no comentário já é suficiente como comportamento mínimo |
-| **Status** | Aberta |
-| **Premissas relacionadas** | PREM-006 em assumptions-log.md |
+> **Estado atual**: nenhuma dúvida ativa no momento.
+> Dúvidas serão registradas aqui ao longo das interações.
 
 ### Template de Dúvida
 

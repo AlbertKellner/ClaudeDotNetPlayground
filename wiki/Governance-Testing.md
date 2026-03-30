@@ -6,7 +6,7 @@ Documenta a estratégia e os padrões de testes utilizados neste projeto. Deve s
 
 ## Contexto
 
-O projeto possui um projeto dedicado de testes unitários que espelha a estrutura do projeto principal. Todos os testes devem passar antes de qualquer `docker compose up -d` (gate obrigatório do pipeline pré-commit, passo 3). Atualmente, o projeto conta com mais de 95 testes unitários passando.
+O projeto possui um projeto dedicado de testes unitários que espelha a estrutura do projeto principal. Todos os testes devem passar antes de qualquer `docker compose up -d` (gate obrigatório do pipeline pré-commit, passo 3).
 
 ---
 
@@ -14,10 +14,9 @@ O projeto possui um projeto dedicado de testes unitários que espelha a estrutur
 
 | Item | Valor |
 |---|---|
-| Nome do projeto | `Albert.Playground.ECS.AOT.UnitTest` |
-| Localização | `src/Albert.Playground.ECS.AOT.UnitTest/` |
+| Nome do projeto | `Starter.Template.AOT.UnitTest` |
+| Localização | `src/Starter.Template.AOT.UnitTest/` |
 | Estrutura | Espelha o projeto principal: `Features/`, `Infra/`, `Shared/`, `TestHelpers/` |
-| Cobertura atual | 95+ testes unitários passando |
 
 ---
 
@@ -43,7 +42,7 @@ Este padrão garante que:
 O passo 3 do pipeline de validação pré-commit é um **gate obrigatório**:
 
 ```bash
-dotnet test src/Albert.Playground.ECS.AOT.UnitTest/Albert.Playground.ECS.AOT.UnitTest.csproj
+dotnet test src/Starter.Template.AOT.UnitTest/Starter.Template.AOT.UnitTest.csproj
 ```
 
 - Falha em qualquer teste **bloqueia** o avanço para os passos seguintes
@@ -69,24 +68,16 @@ dotnet test src/Albert.Playground.ECS.AOT.UnitTest/Albert.Playground.ECS.AOT.Uni
 O projeto de testes espelha a organização do projeto principal:
 
 ```
-src/Albert.Playground.ECS.AOT.UnitTest/
+src/Starter.Template.AOT.UnitTest/
 ├── Features/
 │   ├── Query/
-│   │   ├── TestGet/
-│   │   ├── WeatherConditionsGet/
-│   │   ├── GitHubRepoSearch/
-│   │   └── PokemonGet/
 │   └── Command/
-│       └── UserLogin/
 ├── Infra/
 │   ├── Security/
 │   ├── Middlewares/
 │   └── ExceptionHandling/
 ├── Shared/
 │   └── ExternalApi/
-│       ├── OpenMeteo/   # OpenMeteoApiClientTests, CachedOpenMeteoApiClientTests
-│       ├── GitHub/      # GitHubApiClientTests, CachedGitHubApiClientTests
-│       └── Pokemon/     # PokemonApiClientTests, CachedPokemonApiClientTests
 └── TestHelpers/
 ```
 
@@ -94,7 +85,7 @@ src/Albert.Playground.ECS.AOT.UnitTest/
 
 ## Cenários BDD e Contratos OpenAPI
 
-Atualmente, o projeto não possui cenários BDD nem contratos OpenAPI formais (DA-022). O projeto está em fase de exploração funcional (playground), e estas formalizações serão adicionadas quando o domínio justificar.
+Cenários BDD e contratos OpenAPI formais serão adicionados quando o domínio justificar.
 
 A auditoria automatizada (`governance-audit.sh`) emite **avisos** (não falhas) para features sem BDD e contratos placeholder.
 

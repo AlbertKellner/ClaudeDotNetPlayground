@@ -11,27 +11,27 @@ Este documento apresenta o `Program.cs` real deste repositório como exemplo com
 ```csharp
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using Albert.Playground.ECS.AOT.Api.Features.Command.UserLogin;
-using Albert.Playground.ECS.AOT.Api.Features.Query.GitHubRepoSearch;
-using Albert.Playground.ECS.AOT.Api.Features.Query.PokemonGet;
-using Albert.Playground.ECS.AOT.Api.Features.Query.WeatherConditionsGet;
-using Albert.Playground.ECS.AOT.Api.Infra.ExceptionHandling;
-using Albert.Playground.ECS.AOT.Api.Infra.Json;
-using Albert.Playground.ECS.AOT.Api.Infra.ModelBinding;
-using Albert.Playground.ECS.AOT.Api.Infra.ModelValidation;
-using Albert.Playground.ECS.AOT.Api.Infra.Middlewares;
+using Starter.Template.AOT.Api.Features.Command.UserLogin;
+using Starter.Template.AOT.Api.Features.Query.SampleSearch;
+using Starter.Template.AOT.Api.Features.Query.ItemGetById;
+using Starter.Template.AOT.Api.Features.Query.SampleQueryGet;
+using Starter.Template.AOT.Api.Infra.ExceptionHandling;
+using Starter.Template.AOT.Api.Infra.Json;
+using Starter.Template.AOT.Api.Infra.ModelBinding;
+using Starter.Template.AOT.Api.Infra.ModelValidation;
+using Starter.Template.AOT.Api.Infra.Middlewares;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using Albert.Playground.ECS.AOT.Api.Infra.HealthChecks;
-using Albert.Playground.ECS.AOT.Api.Infra.Security;
-using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.GitHub;
-using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.OpenMeteo;
-using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.Pokemon;
-using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.Pokemon.Models;
+using Starter.Template.AOT.Api.Infra.HealthChecks;
+using Starter.Template.AOT.Api.Infra.Security;
+using Starter.Template.AOT.Api.Shared.ExternalApi.ExternalProvider;
+using Starter.Template.AOT.Api.Shared.ExternalApi.ExternalService;
+using Starter.Template.AOT.Api.Shared.ExternalApi.Item;
+using Starter.Template.AOT.Api.Shared.ExternalApi.Item.Models;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
 using Refit;
-using Albert.Playground.ECS.AOT.Api.Infra.Logging;
+using Starter.Template.AOT.Api.Infra.Logging;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -57,7 +57,7 @@ Log.Logger = new LoggerConfiguration()
 // LOG DE INÍCIO — primeiro log da aplicação
 // Segue o padrão [Program] (sem método, pois é top-level statements)
 // ─────────────────────────────────────────────────────────────────────
-Log.Information("[Program] Iniciar aplicação Albert.Playground.ECS.AOT.Api");
+Log.Information("[Program] Iniciar aplicação Starter.Template.AOT.Api");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,7 +87,7 @@ builder.Host.UseSerilog((ctx, services, config) =>
 
         config.WriteTo.Sink(new DatadogHttpSink(
             apiKey: ddApiKey,
-            service: "albert-playground-ecs-aot-api",
+            service: "starter-template-aot-api",
             host: ddHost,
             env: ddEnv));
 
@@ -155,26 +155,26 @@ Log.Information("[Program] Registrar integrações com APIs externas");
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
-// --- Open-Meteo API ---
+// --- External Service API ---
 builder.Services
-    .AddRefitClient<IOpenMeteoApi>(new RefitSettings
+    .AddRefitClient<IExternalServiceApi>(new RefitSettings
     {
         ContentSerializer = new SystemTextJsonContentSerializer(
             new JsonSerializerOptions
             {
-                TypeInfoResolver = OpenMeteoJsonContext.Default
+                TypeInfoResolver = ExternalServiceJsonContext.Default
             })
     })
     .ConfigureHttpClient(c =>
-        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:OpenMeteo:HttpRequest:BaseUrl"]!))
-    .AddResilienceHandler("open-meteo", resilienceBuilder =>
+        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:ExternalService:HttpRequest:BaseUrl"]!))
+    .AddResilienceHandler("external-service", resilienceBuilder =>
     {
         var maxRetryAttempts = builder.Configuration.GetValue<int>(
-            "ExternalApi:OpenMeteo:CircuitBreaker:MaxRetryAttempts", 3);
+            "ExternalApi:ExternalService:CircuitBreaker:MaxRetryAttempts", 3);
         var delaySeconds = builder.Configuration.GetValue<double>(
-            "ExternalApi:OpenMeteo:CircuitBreaker:DelaySeconds", 3);
+            "ExternalApi:ExternalService:CircuitBreaker:DelaySeconds", 3);
         var backoffType = builder.Configuration.GetValue<DelayBackoffType>(
-            "ExternalApi:OpenMeteo:CircuitBreaker:BackoffType", DelayBackoffType.Exponential);
+            "ExternalApi:ExternalService:CircuitBreaker:BackoffType", DelayBackoffType.Exponential);
 
         resilienceBuilder.AddRetry(new HttpRetryStrategyOptions
         {
@@ -187,31 +187,31 @@ builder.Services
         resilienceBuilder.AddTimeout(TimeSpan.FromSeconds(delaySeconds));
     });
 
-builder.Services.AddScoped<OpenMeteoApiClient>();
-builder.Services.AddScoped<IOpenMeteoApiClient, CachedOpenMeteoApiClient>();
+builder.Services.AddScoped<ExternalServiceApiClient>();
+builder.Services.AddScoped<IExternalServiceApiClient, CachedExternalServiceApiClient>();
 
-// --- GitHub API ---
-builder.Services.AddTransient<GitHubAuthenticationHandler>();
+// --- ExternalProvider API ---
+builder.Services.AddTransient<ExternalProviderAuthenticationHandler>();
 builder.Services
-    .AddRefitClient<IGitHubApi>(new RefitSettings
+    .AddRefitClient<IExternalProviderApi>(new RefitSettings
     {
         ContentSerializer = new SystemTextJsonContentSerializer(
             new JsonSerializerOptions
             {
-                TypeInfoResolver = GitHubJsonContext.Default
+                TypeInfoResolver = ExternalProviderJsonContext.Default
             })
     })
     .ConfigureHttpClient(c =>
-        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:GitHub:HttpRequest:BaseUrl"]!))
-    .AddHttpMessageHandler<GitHubAuthenticationHandler>()
-    .AddResilienceHandler("github", resilienceBuilder =>
+        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:ExternalProvider:HttpRequest:BaseUrl"]!))
+    .AddHttpMessageHandler<ExternalProviderAuthenticationHandler>()
+    .AddResilienceHandler("external-provider", resilienceBuilder =>
     {
         var maxRetryAttempts = builder.Configuration.GetValue<int>(
-            "ExternalApi:GitHub:CircuitBreaker:MaxRetryAttempts", 3);
+            "ExternalApi:ExternalProvider:CircuitBreaker:MaxRetryAttempts", 3);
         var delaySeconds = builder.Configuration.GetValue<double>(
-            "ExternalApi:GitHub:CircuitBreaker:DelaySeconds", 3);
+            "ExternalApi:ExternalProvider:CircuitBreaker:DelaySeconds", 3);
         var backoffType = builder.Configuration.GetValue<DelayBackoffType>(
-            "ExternalApi:GitHub:CircuitBreaker:BackoffType", DelayBackoffType.Exponential);
+            "ExternalApi:ExternalProvider:CircuitBreaker:BackoffType", DelayBackoffType.Exponential);
 
         resilienceBuilder.AddRetry(new HttpRetryStrategyOptions
         {
@@ -224,29 +224,29 @@ builder.Services
         resilienceBuilder.AddTimeout(TimeSpan.FromSeconds(delaySeconds));
     });
 
-builder.Services.AddScoped<GitHubApiClient>();
-builder.Services.AddScoped<IGitHubApiClient, CachedGitHubApiClient>();
+builder.Services.AddScoped<ExternalProviderApiClient>();
+builder.Services.AddScoped<IExternalProviderApiClient, CachedExternalProviderApiClient>();
 
-// --- PokéAPI ---
+// --- External API ---
 builder.Services
-    .AddRefitClient<IPokemonApi>(new RefitSettings
+    .AddRefitClient<IItemApi>(new RefitSettings
     {
         ContentSerializer = new SystemTextJsonContentSerializer(
             new JsonSerializerOptions
             {
-                TypeInfoResolver = PokemonJsonContext.Default
+                TypeInfoResolver = ItemJsonContext.Default
             })
     })
     .ConfigureHttpClient(c =>
-        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:Pokemon:HttpRequest:BaseUrl"]!))
-    .AddResilienceHandler("pokemon", resilienceBuilder =>
+        c.BaseAddress = new Uri(builder.Configuration["ExternalApi:Item:HttpRequest:BaseUrl"]!))
+    .AddResilienceHandler("items", resilienceBuilder =>
     {
         var maxRetryAttempts = builder.Configuration.GetValue<int>(
-            "ExternalApi:Pokemon:CircuitBreaker:MaxRetryAttempts", 3);
+            "ExternalApi:Item:CircuitBreaker:MaxRetryAttempts", 3);
         var delaySeconds = builder.Configuration.GetValue<double>(
-            "ExternalApi:Pokemon:CircuitBreaker:DelaySeconds", 3);
+            "ExternalApi:Item:CircuitBreaker:DelaySeconds", 3);
         var backoffType = builder.Configuration.GetValue<DelayBackoffType>(
-            "ExternalApi:Pokemon:CircuitBreaker:BackoffType", DelayBackoffType.Exponential);
+            "ExternalApi:Item:CircuitBreaker:BackoffType", DelayBackoffType.Exponential);
 
         resilienceBuilder.AddRetry(new HttpRetryStrategyOptions
         {
@@ -259,8 +259,8 @@ builder.Services
         resilienceBuilder.AddTimeout(TimeSpan.FromSeconds(delaySeconds));
     });
 
-builder.Services.AddScoped<PokemonApiClient>();
-builder.Services.AddScoped<IPokemonApiClient, CachedPokemonApiClient>();
+builder.Services.AddScoped<ItemApiClient>();
+builder.Services.AddScoped<IItemApiClient, CachedItemApiClient>();
 
 // ─────────────────────────────────────────────────────────────────────
 // 6. DEPENDÊNCIAS DAS FEATURES
@@ -269,9 +269,9 @@ builder.Services.AddScoped<IPokemonApiClient, CachedPokemonApiClient>();
 Log.Information("[Program] Registrar dependências das features");
 
 builder.Services.AddScoped<UserLoginUseCase>();
-builder.Services.AddScoped<WeatherConditionsGetUseCase>();
-builder.Services.AddScoped<GitHubRepoSearchUseCase>();
-builder.Services.AddScoped<PokemonGetUseCase>();
+builder.Services.AddScoped<SampleQueryGetUseCase>();
+builder.Services.AddScoped<SampleSearchUseCase>();
+builder.Services.AddScoped<ItemGetByIdUseCase>();
 
 // ─────────────────────────────────────────────────────────────────────
 // 7. SEGURANÇA E AUTENTICAÇÃO
@@ -332,7 +332,7 @@ app.Run();
 Ao iniciar a aplicação, os logs produzidos pelo `Program.cs` são:
 
 ```
-[23/03/2026 14:00:00.0000000] [] [] [Program] Iniciar aplicação Albert.Playground.ECS.AOT.Api
+[23/03/2026 14:00:00.0000000] [] [] [Program] Iniciar aplicação Starter.Template.AOT.Api
 [23/03/2026 14:00:00.1000000] [] [] [Program] Configurar Serilog com console colorido e enrichment por request
 [23/03/2026 14:00:00.2000000] [] [] [Program] Registrar dependências de infraestrutura
 [23/03/2026 14:00:00.3000000] [] [] [Program] Registrar integrações com APIs externas
@@ -366,4 +366,4 @@ Note que:
 - [02-enriquecimento-de-contexto.md](02-enriquecimento-de-contexto.md) — CorrelationId e UserName
 - [06-prompt-implementacao-logs.md](06-prompt-implementacao-logs.md) — prompt genérico para implementar em outros projetos
 - `Instructions/snippets/canonical-snippets.md` — SNP-001
-- `src/Albert.Playground.ECS.AOT.Api/Program.cs` — arquivo-fonte real
+- `src/Starter.Template.AOT.Api/Program.cs` — arquivo-fonte real

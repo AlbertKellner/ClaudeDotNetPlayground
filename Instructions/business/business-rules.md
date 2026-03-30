@@ -27,44 +27,7 @@ Cada regra segue a estrutura:
 
 ## Regras Ativas
 
-### RN-002 — Autenticação de usuário via login com credenciais
-**Enunciado**: A aplicação deve expor um endpoint de login que valida as credenciais do usuário e retorna um Bearer Token JWT quando as credenciais são válidas.
-**Condição**: Quando uma requisição POST é recebida no endpoint de login com `userName` e `password`.
-**Ação**: O sistema valida as credenciais contra a lista de usuários registrada. Se válidas, retorna HTTP 200 com um JWT contendo as propriedades `id` e `userName` do usuário. Se inválidas, retorna HTTP 401 com corpo em formato Problem Details.
-**Exceções**: O endpoint de login em si não exige autenticação.
-**Dependências**: Nenhuma.
-**BDD relacionado**: Nenhum no momento.
-**Contrato relacionado**: Nenhum no momento.
-**Workflows relacionados**: Nenhum.
-**Status**: Ativo
-
----
-
-### RN-003 — Proteção de endpoints por Bearer Token
-**Enunciado**: Toda requisição a endpoints da aplicação, exceto o endpoint de login, deve apresentar um Bearer Token JWT válido no header `Authorization`.
-**Condição**: Quando uma requisição é recebida em qualquer endpoint que não seja o de login.
-**Ação**: O sistema valida o Bearer Token. Se válido, a requisição prossegue normalmente e as propriedades `id` e `userName` do token são enriquecidas automaticamente nos logs da requisição. Se inválido ou ausente, o sistema retorna HTTP 401 com corpo em formato Problem Details.
-**Exceções**: Endpoint de login (`POST /login`). Endpoint de health check (`GET /health`).
-**Dependências**: RN-002.
-**BDD relacionado**: Nenhum no momento.
-**Contrato relacionado**: Nenhum no momento.
-**Workflows relacionados**: Nenhum.
-**Status**: Ativo
-
----
-
-### RN-004 — Consulta de condições climáticas por coordenadas geográficas
-**Enunciado**: A aplicação deve expor um endpoint autenticado para consultar as condições climáticas atuais de qualquer localização geográfica, recebendo latitude e longitude como parâmetros de query, retornando o payload completo retornado pela API Open-Meteo, sem filtragem, redução de campos ou mapeamento parcial. A resposta deve ser cacheada por usuário autenticado e por coordenadas com duração configurável.
-**Condição**: Quando uma requisição GET autenticada é recebida no endpoint de condições climáticas com parâmetros `latitude` e `longitude` na query string (`GET /weather-conditions?latitude={lat}&longitude={lng}`).
-**Ação**: O sistema verifica o Memory Cache usando o ID do usuário autenticado e as coordenadas como chave. Se houver cache válido, retorna a resposta cacheada sem consultar a API externa. Se não houver cache, consulta a API Open-Meteo (`GET /v1/forecast`) com as coordenadas recebidas e os campos de condição atual definidos, armazena o resultado no cache e retorna HTTP 200 com o payload JSON completo da resposta da Open-Meteo, preservando sua estrutura original.
-**Exceções**: Nenhuma.
-**Dependências**: RN-003 (autenticação obrigatória).
-**BDD relacionado**: Nenhum no momento.
-**Contrato relacionado**: Nenhum no momento.
-**Workflows relacionados**: Nenhum.
-**Status**: Ativo
-
----
+> **Estado atual**: nenhuma regra de negócio foi definida ainda. Regras serão registradas à medida que o domínio for definido.
 
 ### Template de Regra de Negócio
 
@@ -83,55 +46,9 @@ Cada regra segue a estrutura:
 
 ---
 
-### RN-005 — Health Check com verificação do Datadog Agent
-**Enunciado**: O endpoint de health check da aplicação deve verificar a disponibilidade do Datadog Agent além da própria aplicação.
-**Condição**: Quando uma requisição GET é recebida no endpoint `/health`.
-**Ação**: O sistema verifica se o Datadog Agent está acessível via HTTP. Se ambos (aplicação e Datadog Agent) estiverem disponíveis, retorna HTTP 200 com corpo `Healthy`. Se o Datadog Agent responder com status inesperado, retorna HTTP 200 com corpo `Degraded`. Se o Datadog Agent estiver inacessível, retorna HTTP 503 com corpo `Unhealthy`.
-**Exceções**: Nenhuma.
-**Dependências**: RN-003 (o endpoint `/health` é exceção à autenticação).
-**BDD relacionado**: Nenhum no momento.
-**Contrato relacionado**: Nenhum no momento.
-**Workflows relacionados**: Nenhum.
-**Status**: Ativo
-
----
-
-### RN-008 — Pesquisa de repositórios do GitHub por conta
-**Enunciado**: A aplicação deve expor um endpoint autenticado para pesquisar e exibir todos os repositórios da conta GitHub AlbertKellner, apresentando o nome de cada repositório e o respectivo endereço Git. A resposta deve ser cacheada por usuário autenticado com duração configurável.
-**Condição**: Quando uma requisição GET autenticada é recebida no endpoint de pesquisa de repositórios GitHub.
-**Ação**: O sistema verifica o Memory Cache usando o ID do usuário autenticado como chave. Se houver cache válido, retorna a resposta cacheada sem consultar a API externa. Se não houver cache, consulta a API do GitHub (`GET /users/AlbertKellner/repos`) com paginação automática, armazena o resultado no cache e retorna HTTP 200 com a lista de repositórios contendo nome e endereço Git de cada um.
-**Exceções**: Nenhuma.
-**Dependências**: RN-003 (autenticação obrigatória).
-**BDD relacionado**: Nenhum no momento.
-**Contrato relacionado**: Nenhum no momento.
-**Workflows relacionados**: Nenhum.
-**Status**: Ativo
-
----
-
-### RN-009 — Consulta de Pokémon por ID via PokéAPI
-**Enunciado**: A aplicação deve expor um endpoint autenticado para consultar dados de um Pokémon por ID via PokéAPI, retornando informações básicas (id, nome, altura, peso, experiência base, tipos, habilidades, stats e sprites). O ID do Pokémon é recebido como parâmetro de rota da requisição HTTP. A resposta deve ser cacheada por usuário autenticado com duração configurável.
-**Condição**: Quando uma requisição GET autenticada é recebida no endpoint de consulta de Pokémon com o ID do Pokémon na rota (`GET /pokemon/{id}`).
-**Ação**: O sistema verifica o Memory Cache usando o ID do usuário autenticado e o ID do Pokémon como chave. Se houver cache válido, retorna a resposta cacheada sem consultar a API externa. Se não houver cache, consulta a PokéAPI (`GET /api/v2/pokemon/{id}`), armazena o resultado no cache e retorna HTTP 200 com os dados do Pokémon mapeados para o model da Feature.
-**Exceções**: Nenhuma.
-**Dependências**: RN-003 (autenticação obrigatória).
-**BDD relacionado**: Nenhum no momento.
-**Contrato relacionado**: Nenhum no momento.
-**Workflows relacionados**: Nenhum.
-**Status**: Ativo
-
----
-
 ## Regras Substituídas ou Depreciadas
 
-### RN-001 — Endpoint de verificação de disponibilidade da aplicação
-**Status**: Removida (2026-03-23) — funcionalidade removida do sistema.
-
-### RN-006 — Busca de repositórios do team IntegrationRepos no GitHub
-**Status**: Removida (2026-03-20) — funcionalidade removida do sistema.
-
-### RN-007 — Sincronização local de repositórios
-**Status**: Removida (2026-03-20) — funcionalidade removida do sistema.
+> Nenhuma regra substituída ou depreciada no momento.
 
 ---
 
@@ -156,14 +73,3 @@ Cada regra segue a estrutura:
 | Data | Mudança | Referência |
 |---|---|---|
 | Bootstrap | Estrutura criada sem regras específicas | — |
-| 2026-03-15 | RN-001 criada: endpoint TestGet retorna "funcionando" | Instrução do usuário |
-| 2026-03-15 | RN-002 criada: endpoint de login com JWT retornando id e userName | Instrução do usuário |
-| 2026-03-15 | RN-003 criada: proteção de endpoints por Bearer Token com enriquecimento de logs | Instrução do usuário |
-| 2026-03-16 | RN-004 criada: consulta de condições climáticas de São Paulo via Open-Meteo, payload completo | Instrução do usuário |
-| 2026-03-17 | RN-005 criada: health check inclui verificação do Datadog Agent via HTTP | Instrução do usuário |
-| 2026-03-19 | RN-006 criada: busca de repositórios do team IntegrationRepos via API GitHub | Instrução do usuário |
-| 2026-03-19 | RN-007 criada: sincronização local de repositórios com clone/pull e registro de data | Instrução do usuário |
-| 2026-03-20 | RN-006 e RN-007 removidas: funcionalidades de busca e sincronização de repositórios removidas do sistema | Instrução do usuário |
-| 2026-03-20 | RN-008 criada: pesquisa de repositórios GitHub da conta AlbertKellner | Instrução do usuário |
-| 2026-03-21 | RN-009 criada: consulta de Pokémon por ID via PokéAPI (Pikachu hardcoded) | Instrução do usuário |
-| 2026-03-21 | RN-009 atualizada: ID do Pokémon recebido como parâmetro de rota em vez de hardcoded | Instrução do usuário |

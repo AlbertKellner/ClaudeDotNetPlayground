@@ -24,15 +24,15 @@ A autenticação é implementada via JWT HS256 usando `System.IdentityModel.Toke
 
 ## Geração de Token
 
-O token é gerado pelo endpoint [POST /login](Feature-UserLogin) quando credenciais válidas são fornecidas:
+O token é gerado pelo endpoint `POST /login` quando credenciais válidas são fornecidas:
 
 ```http
 POST /login
 Content-Type: application/json
 
 {
-  "userName": "Albert",
-  "password": "albert123"
+  "userName": "<usuario>",
+  "password": "<senha>"
 }
 ```
 
@@ -65,8 +65,8 @@ Para proteger um endpoint, basta decorar o Controller com o atributo `[Authentic
 ```csharp
 [Authenticate]
 [ApiController]
-[Route("weather-conditions")]
-public class WeatherConditionsGetEndpoint(...) : ControllerBase
+[Route("exemplo")]
+public class ExemploEndpoint(...) : ControllerBase
 {
     // Nenhuma lógica de auth aqui — AuthenticateFilter cuida de tudo
 }
@@ -89,7 +89,7 @@ public class WeatherConditionsGetEndpoint(...) : ControllerBase
 2. Incluir o token no header `Authorization` das requisições:
 
 ```http
-GET /weather-conditions
+GET /exemplo
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
@@ -145,6 +145,5 @@ Todos os componentes residem em `Infra/Security/`:
 
 ## Referências
 
-- [Feature UserLogin](Feature-UserLogin) — endpoint que gera o token
 - [Arquitetura](Governance-Architecture) — fluxo de requisição com AuthenticateFilter
 - [Testes](Governance-Testing) — testes de segurança e validação de token

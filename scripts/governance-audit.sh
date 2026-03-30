@@ -101,9 +101,9 @@ REQUIRED_VARS="$REPO_ROOT/scripts/required-vars.md"
 SETTINGS="$REPO_ROOT/.claude/settings.json"
 WIKI_DIR="$REPO_ROOT/wiki"
 WIKI_ARCH="$REPO_ROOT/wiki/Governance-Architecture.md"
-FEATURES_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Features"
-INFRA_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Infra"
-EXTERNAL_API_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Shared/ExternalApi"
+FEATURES_DIR="$REPO_ROOT/src/Starter.Template.AOT.Api/Features"
+INFRA_DIR="$REPO_ROOT/src/Starter.Template.AOT.Api/Infra"
+EXTERNAL_API_DIR="$REPO_ROOT/src/Starter.Template.AOT.Api/Shared/ExternalApi"
 RUNBOOK="$REPO_ROOT/scripts/operational-runbook.md"
 
 # ---------------------------------------------------------------------------
@@ -293,7 +293,7 @@ fi
 BUSINESS_RULES_FILE="$REPO_ROOT/Instructions/business/business-rules.md"
 if [ -f "$BUSINESS_RULES_FILE" ]; then
   # Extrair apenas IDs de seções header (### RN-NNN) e verificar campo **Status**
-  REMOVED_ARTIFACTS="$REMOVED_ARTIFACTS $(grep -oP '(?<=^### )RN-\d+' "$BUSINESS_RULES_FILE" | sort -u | while read rn_id; do
+  REMOVED_ARTIFACTS="$REMOVED_ARTIFACTS $({ grep -oP '(?<=^### )RN-\d+' "$BUSINESS_RULES_FILE" || true; } | sort -u | while read rn_id; do
     status_line=$(sed -n "/^### $rn_id /,/^### RN-/p" "$BUSINESS_RULES_FILE" 2>/dev/null | grep '^\*\*Status\*\*' | head -1)
     if echo "$status_line" | grep -qiP "$REMOVED_STATUS_PATTERN"; then
       echo "$rn_id"
@@ -301,7 +301,7 @@ if [ -f "$BUSINESS_RULES_FILE" ]; then
   done)"
 fi
 # Remover duplicatas e espaços em branco
-REMOVED_ARTIFACTS=$(echo "$REMOVED_ARTIFACTS" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' ' ' | xargs)
+REMOVED_ARTIFACTS=$(echo "$REMOVED_ARTIFACTS" | tr ' ' '\n' | { grep -v '^$' || true; } | sort -u | tr '\n' ' ' | xargs)
 
 STALE_REFS=""
 for artifact_id in $REMOVED_ARTIFACTS; do
@@ -536,7 +536,7 @@ if [ -f "$ADR_FILE" ]; then
   done
 fi
 # Adicionar IDs de artefatos removidos como termos de busca
-REMOVED_KEYWORDS=$(echo "$REMOVED_ARTIFACTS $REMOVED_FEATURE_NAMES" | tr ' ' '\n' | grep -v '^$' | sort -u | tr '\n' '|' | sed 's/|$//')
+REMOVED_KEYWORDS=$(echo "$REMOVED_ARTIFACTS $REMOVED_FEATURE_NAMES" | tr ' ' '\n' | { grep -v '^$' || true; } | sort -u | tr '\n' '|' | sed 's/|$//')
 
 README_ISSUES=""
 if [ -n "$REMOVED_KEYWORDS" ] && grep -qiP "$REMOVED_KEYWORDS" "$README" 2>/dev/null; then
@@ -560,11 +560,11 @@ echo "--- 12. ADRs revogadas com redirecionamento ---"
 
 if [ -f "$ADR_FILE" ]; then
   # Contar ADRs com status contendo "Revogad" (revogadas)
-  REVOKED_COUNT=$(grep -c 'Revogad' "$ADR_FILE" 2>/dev/null || echo "0")
+  REVOKED_COUNT=$(grep -c 'Revogad' "$ADR_FILE" 2>/dev/null) || REVOKED_COUNT=0
   # Uma ADR revogada é válida se:
   # (a) aponta para substituta (Substituíd.*DA-), OU
   # (b) contém justificativa na mesma linha (Revogad.*—) indicando remoção sem substituição
-  REVOKED_WITH_JUSTIFICATION=$(grep -cP 'Revogad.*(Substituíd|DA-\d|—)' "$ADR_FILE" 2>/dev/null || echo "0")
+  REVOKED_WITH_JUSTIFICATION=$(grep -cP 'Revogad.*(Substituíd|DA-\d|—)' "$ADR_FILE" 2>/dev/null) || REVOKED_WITH_JUSTIFICATION=0
 
   if [ "$REVOKED_COUNT" -le "$REVOKED_WITH_JUSTIFICATION" ] || [ "$REVOKED_COUNT" -eq 0 ]; then
     pass "Todas as ADRs revogadas possuem justificativa ou redirecionamento"
@@ -961,10 +961,10 @@ echo "--- 26. Alinhamento runbook ↔ endpoints reais ---"
 if [ -f "$RUNBOOK" ] && [ -d "$FEATURES_DIR" ]; then
   # Extrair rotas do runbook (coluna "Rota" da tabela de endpoints)
   # Padrão expandido: aceita rotas com letras, dígitos, hífens e parâmetros ({id})
-  RUNBOOK_ROUTES=$(grep -oP '`/[a-zA-Z][a-zA-Z0-9{}-]*`' "$RUNBOOK" 2>/dev/null | sed 's/`//g' | sort -u)
+  RUNBOOK_ROUTES=$({ grep -oP '`/[a-zA-Z][a-zA-Z0-9{}-]*`' "$RUNBOOK" 2>/dev/null || true; } | sed 's/`//g' | sort -u)
   # Extrair rotas dos Controllers (atributos [Route("...")] e [Http*("...")])
-  CODE_ROUTES=$(grep -rhoP '\[Route\("([^"]+)"\)\]|\[Http(Get|Post|Put|Delete|Patch)\("([^"]+)"\)\]' "$FEATURES_DIR" 2>/dev/null \
-    | grep -oP '"[^"]+"' | sed 's/"//g' | sort -u)
+  CODE_ROUTES=$({ grep -rhoP '\[Route\("([^"]+)"\)\]|\[Http(Get|Post|Put|Delete|Patch)\("([^"]+)"\)\]' "$FEATURES_DIR" 2>/dev/null || true; } \
+    | { grep -oP '"[^"]+"' || true; } | sed 's/"//g' | sort -u)
   # Adicionar rotas implícitas conhecidas (/health e /login são especiais)
   CODE_ROUTES=$(echo -e "$CODE_ROUTES\nhealth\nlogin" | sort -u)
 

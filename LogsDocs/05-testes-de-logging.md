@@ -128,17 +128,17 @@ public async Task InvokeAsync_DeveRegistrarLogInformationNoInicio()
 
 ### Teste de ApiClient — Prefixo Correto
 
-Valida que todos os logs do `OpenMeteoApiClient` contêm o prefixo da classe:
+Valida que todos os logs do `ExternalServiceApiClient` contêm o prefixo da classe:
 
 ```csharp
 [Fact]
 public async Task GetForecastAsync_DeveRegistrarLogsComPrefixoCorreto()
 {
     // Arrange
-    var fakeApi = new FakeOpenMeteoApi();
-    var fakeLogger = new FakeLogger<OpenMeteoApiClient>();
-    var client = new OpenMeteoApiClient(fakeApi, fakeLogger);
-    var input = new OpenMeteoInput
+    var fakeApi = new FakeExternalServiceApi();
+    var fakeLogger = new FakeLogger<ExternalServiceApiClient>();
+    var client = new ExternalServiceApiClient(fakeApi, fakeLogger);
+    var input = new ExternalServiceInput
     {
         Latitude = -23.5475,
         Longitude = -46.6361,
@@ -151,7 +151,7 @@ public async Task GetForecastAsync_DeveRegistrarLogsComPrefixoCorreto()
     // Assert
     var logs = fakeLogger.GetSnapshot();
 
-    Assert.All(logs, l => Assert.Contains("OpenMeteoApiClient", l.Message));
+    Assert.All(logs, l => Assert.Contains("ExternalServiceApiClient", l.Message));
 }
 ```
 
@@ -164,9 +164,9 @@ Valida que o UseCase emite logs de entrada, processamento e saída:
 public async Task ExecuteAsync_DeveRegistrarLogDeEntradaESaida()
 {
     // Arrange
-    var fakeApiClient = new FakeOpenMeteoApiClient();
-    var fakeLogger = new FakeLogger<WeatherConditionsGetUseCase>();
-    var useCase = new WeatherConditionsGetUseCase(fakeApiClient, fakeLogger);
+    var fakeApiClient = new FakeExternalServiceApiClient();
+    var fakeLogger = new FakeLogger<SampleQueryGetUseCase>();
+    var useCase = new SampleQueryGetUseCase(fakeApiClient, fakeLogger);
 
     // Act
     await useCase.ExecuteAsync();
@@ -250,5 +250,5 @@ public async Task OnActionExecutionAsync_TokenAusente_DeveRegistrarWarning()
 ## Referências
 
 - [01-padroes-de-logging.md](01-padroes-de-logging.md) — padrão SNP-001 que os testes validam
-- `src/Albert.Playground.ECS.AOT.UnitTest/TestHelpers/FakeLogger.cs` — implementação do FakeLogger
+- `src/Starter.Template.AOT.UnitTest/TestHelpers/FakeLogger.cs` — implementação do FakeLogger
 - `Instructions/snippets/canonical-snippets.md` — SNP-001, seção "Padrão de testes de log"

@@ -151,21 +151,18 @@ app.UseExceptionHandler();
 Endpoints GET que consomem APIs externas implementam Memory Cache usando `IMemoryCache` com o padrão Decorator:
 
 ```
-IOpenMeteoApiClient (interface)
-    ├── OpenMeteoApiClient (implementação real — chama API externa)
-    └── CachedOpenMeteoApiClient (decorator — verifica cache antes de delegar)
+I<Servico>ApiClient (interface)
+    ├── <Servico>ApiClient (implementação real — chama API externa)
+    └── Cached<Servico>ApiClient (decorator — verifica cache antes de delegar)
 ```
 
-Características:
+Caracteristicas:
 - Cache usa o ID do usuário autenticado como chave (definida no código, não configurável via JSON)
 - Duração e tipo de expiração configuráveis via `appsettings.json` seção `EndpointCache`
 - Cache por usuário garante isolamento e evita vazamento de dados entre usuários
 - `AuthenticateFilter` armazena `AuthenticatedUser` em `HttpContext.Items` para acesso pela camada de cache via `IHttpContextAccessor`
 
-O mesmo padrão é aplicado em todas as integrações externas:
-- `CachedOpenMeteoApiClient` (clima)
-- `CachedGitHubApiClient` (repositórios GitHub)
-- `CachedPokemonApiClient` (PokéAPI)
+O mesmo padrão deve ser aplicado em todas as integrações externas que implementem cache.
 
 ---
 

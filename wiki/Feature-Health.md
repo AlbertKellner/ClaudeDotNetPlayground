@@ -2,7 +2,7 @@
 
 ## Descrição
 
-Documenta o endpoint de verificação de disponibilidade da aplicação (`GET /health`). Esta página cobre o contrato de entrada e saída, o comportamento esperado incluindo verificação do Datadog Agent, e a regra de negócio associada (RN-005). Consulte quando precisar entender o mecanismo de health check ou diagnosticar problemas de disponibilidade. Relaciona-se com [Segurança](Governance-Security) (exceção à autenticação) e [Observabilidade](Governance-Observability) (Datadog Agent).
+Documenta o endpoint de verificação de disponibilidade da aplicação (`GET /health`). Esta página cobre o contrato de entrada e saída, o comportamento esperado incluindo verificação do Datadog Agent. Consulte quando precisar entender o mecanismo de health check ou diagnosticar problemas de disponibilidade. Relaciona-se com [Segurança](Governance-Security) (exceção à autenticação) e [Observabilidade](Governance-Observability) (Datadog Agent).
 
 ## Resumo
 
@@ -38,8 +38,6 @@ Endpoint de verificação de disponibilidade da aplicação. Retorna o status de
 - Retorna `HTTP 503 Unhealthy` quando o Datadog Agent está inacessível.
 - Não exige autenticação — é exceção explícita à regra de proteção por Bearer Token.
 
-Regras de negócio relacionadas: [RN-005](Domain-Business-Rules#rn-005--health-check-com-verificação-do-datadog-agent)
-
 ## Testes Automatizados
 
 Nenhum teste automatizado presente no repositório.
@@ -50,7 +48,6 @@ Nenhum cenário BDD definido para esta funcionalidade.
 
 ## Referências
 
-- [Regras de Negócio](Domain-Business-Rules) — RN-005
 - [Segurança](Governance-Security) — exceção à autenticação por Bearer Token
 - [Observabilidade](Governance-Observability) — integração com Datadog Agent
 - [Arquitetura](Governance-Architecture) — posição no fluxo de request

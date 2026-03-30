@@ -28,9 +28,15 @@ O projeto acumula decisões arquiteturais registradas como ADRs (Architecture De
 | DA-017 | Padrão de integração com API externa (Refit + Polly) | 2026-03-16 | Ativo |
 | DA-018 | Memory Cache com Decorator Pattern | 2026-03-19 | Ativo |
 | DA-020 | Isolamento de models de Feature (`Input`/`Output` em `<Feature>Models/`) | 2026-03-19 | Ativo |
-| DA-021 | Integração GitHub API | 2026-03-20 | Ativo |
-| DA-022 | Contratos OpenAPI e cenários BDD diferidos | 2026-03-21 | Ativo |
-| DA-023 | Integração PokéAPI | 2026-03-21 | Ativo |
+
+---
+
+## Decisões Revogadas
+
+| ID | Título | Data | Motivo |
+|---|---|---|---|
+| DA-019 | Integração externa com persistência em arquivo JSON | 2026-03-19 | Revogada — funcionalidades removidas durante sanitização do template |
+| DA-023 | Integração externa removida | 2026-03-21 | Revogada — integração removida durante sanitização do template |
 
 ---
 
@@ -86,14 +92,6 @@ O projeto é configurado para publicação com Native AOT, o que impõe restriç
 | `FallbackSimpleTypeModelBinderProvider` | `Infra/ModelBinding/` | Substitui `SimpleTypeModelBinderProvider` para compatibilidade AOT |
 | `EnhancedModelMetadataActivator` | `Infra/ModelBinding/` | Workaround AOT: ativa `IsEnhancedModelMetadataSupported` antes do primeiro request |
 | `NoOpObjectModelValidator` | `Infra/ModelValidation/` | Substitui `IObjectModelValidator` padrão (reflection-based) por implementação vazia |
-
----
-
-## Decisões Revogadas
-
-| ID | Título | Data | Motivo |
-|---|---|---|---|
-| DA-019 | Integração GitHub API com persistência em arquivo JSON | 2026-03-19 | Revogada — funcionalidades de busca e sincronização removidas do sistema |
 
 ---
 

@@ -239,7 +239,7 @@ CorrelationIdMiddleware
 Além do enriquecimento de logs, o `AuthenticatedUser` armazenado em `HttpContext.Items` é utilizado pelo `CachedApiClient` para criar chaves de cache por usuário:
 
 ```csharp
-// CachedOpenMeteoApiClient — acessa o usuário via IHttpContextAccessor
+// CachedExternalServiceApiClient — acessa o usuário via IHttpContextAccessor
 private int GetAuthenticatedUserId()
 {
     var httpContext = httpContextAccessor.HttpContext;
@@ -254,7 +254,7 @@ private int GetAuthenticatedUserId()
 }
 ```
 
-A chave de cache resultante inclui o ID do usuário: `OpenMeteo:WeatherConditionsGet:123`, garantindo isolamento de cache entre usuários.
+A chave de cache resultante inclui o ID do usuário: `ExternalService:SampleQueryGet:1`, garantindo isolamento de cache entre usuários.
 
 ---
 

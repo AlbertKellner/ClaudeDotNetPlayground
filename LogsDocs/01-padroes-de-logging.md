@@ -17,9 +17,9 @@ Todo log da aplicação deve seguir o formato:
 ### Exemplos
 
 ```csharp
-logger.LogInformation("[WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions");
+logger.LogInformation("[SampleQueryGetEndpoint][Get] Processar requisição GET /sample-query");
 
-logger.LogInformation("[OpenMeteoApiClient][GetForecastAsync] Executar requisição HTTP ao Open-Meteo. Latitude={Latitude}, Longitude={Longitude}", input.Latitude, input.Longitude);
+logger.LogInformation("[ExternalServiceApiClient][GetForecastAsync] Executar requisição HTTP ao External Service. Latitude={Latitude}, Longitude={Longitude}", input.Latitude, input.Longitude);
 
 logger.LogWarning("[AuthenticateFilter][OnActionExecutionAsync] Retornar 401 - token ausente na requisição");
 ```
@@ -43,10 +43,10 @@ A descrição após o prefixo deve ser breve, objetiva e no imperativo:
 Todo método deve ter um log informando **o que será executado** e registrando os **objetos/parâmetros recebidos**:
 
 ```csharp
-public async Task<PokemonGetOutput> ExecuteAsync(int id, CancellationToken cancellationToken = default)
+public async Task<ItemGetByIdOutput> ExecuteAsync(int id, CancellationToken cancellationToken = default)
 {
     logger.LogInformation(
-        "[PokemonGetUseCase][ExecuteAsync] Executar caso de uso de consulta de Pokemon. PokemonId={PokemonId}", id);
+        "[ItemGetByIdUseCase][ExecuteAsync] Executar caso de uso de consulta de Item. ItemId={ItemId}", id);
 
     // ... lógica do método
 }
@@ -58,7 +58,7 @@ Antes de cada `return`, deve haver um log informando **o que está sendo retorna
 
 ```csharp
     logger.LogInformation(
-        "[PokemonGetUseCase][ExecuteAsync] Retornar dados do Pokemon. PokemonId={PokemonId}, PokemonName={PokemonName}",
+        "[ItemGetByIdUseCase][ExecuteAsync] Retornar dados do Item. ItemId={ItemId}, ItemName={ItemName}",
         output.Id, output.Name);
 
     return output;
@@ -70,14 +70,14 @@ Estruturas de iteração (`for`, `foreach`, `while`) devem ter log antes de inic
 
 ```csharp
 logger.LogInformation(
-    "[PokemonGetUseCase][ExecuteAsync] Iterar tipos do Pokemon. Count={Count}", result.Types.Count);
+    "[ItemGetByIdUseCase][ExecuteAsync] Iterar tipos do Item. Count={Count}", result.Types.Count);
 
 foreach (var typeSlot in result.Types)
 {
-    types.Add(new PokemonGetTypeItem { Slot = typeSlot.Slot, Name = typeSlot.Type.Name });
+    types.Add(new ItemGetByIdTypeItem { Slot = typeSlot.Slot, Name = typeSlot.Type.Name });
 }
 
-logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Iteracao de tipos concluida");
+logger.LogInformation("[ItemGetByIdUseCase][ExecuteAsync] Iteracao de tipos concluida");
 ```
 
 ### 5. Isolamento Visual no Código
@@ -85,12 +85,12 @@ logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Iteracao de tipos concl
 Toda instrução `logger.Log*()` deve ter uma **linha em branco acima** e uma **linha em branco abaixo** no código-fonte, garantindo legibilidade:
 
 ```csharp
-var result = await openMeteoApiClient.GetForecastAsync(input, cancellationToken);
+var result = await externalServiceApiClient.GetForecastAsync(input, cancellationToken);
 
 logger.LogInformation(
-    "[WeatherConditionsGetUseCase][ExecuteAsync] Mapear resposta da Open-Meteo para model da Feature");
+    "[SampleQueryGetUseCase][ExecuteAsync] Mapear resposta da External Service para model da Feature");
 
-var output = new WeatherConditionsGetOutput { /* ... */ };
+var output = new SampleQueryGetOutput { /* ... */ };
 ```
 
 ### 6. Logs em Program.cs
@@ -126,11 +126,11 @@ O Endpoint é responsável por logar o início e o fim da requisição HTTP, inc
 
 ```csharp
 [ApiController]
-[Route("weather-conditions")]
+[Route("sample-query")]
 [Authenticate]
-public sealed class WeatherConditionsGetEndpoint(
-    WeatherConditionsGetUseCase useCase,
-    ILogger<WeatherConditionsGetEndpoint> logger) : ControllerBase
+public sealed class SampleQueryGetEndpoint(
+    SampleQueryGetUseCase useCase,
+    ILogger<SampleQueryGetEndpoint> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(
@@ -139,14 +139,14 @@ public sealed class WeatherConditionsGetEndpoint(
         CancellationToken cancellationToken)
     {
         logger.LogInformation(
-            "[WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions. Latitude={Latitude}, Longitude={Longitude}",
+            "[SampleQueryGetEndpoint][Get] Processar requisição GET /sample-query. Latitude={Latitude}, Longitude={Longitude}",
             latitude, longitude);
 
-        var input = new WeatherConditionsGetInput { Latitude = latitude, Longitude = longitude };
+        var input = new SampleQueryGetInput { Latitude = latitude, Longitude = longitude };
         var result = await useCase.ExecuteAsync(input, cancellationToken);
 
         logger.LogInformation(
-            "[WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas. Latitude={Latitude}, Longitude={Longitude}",
+            "[SampleQueryGetEndpoint][Get] Retornar resposta do endpoint com dados da consulta. Latitude={Latitude}, Longitude={Longitude}",
             latitude, longitude);
 
         return Ok(result);
@@ -163,21 +163,21 @@ public sealed class WeatherConditionsGetEndpoint(
 
 ```csharp
 [ApiController]
-[Route("pokemon")]
+[Route("items")]
 [Authenticate]
-public sealed class PokemonGetEndpoint(
-    PokemonGetUseCase useCase,
-    ILogger<PokemonGetEndpoint> logger) : ControllerBase
+public sealed class ItemGetByIdEndpoint(
+    ItemGetByIdUseCase useCase,
+    ILogger<ItemGetByIdEndpoint> logger) : ControllerBase
 {
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get([FromRoute] int id, CancellationToken cancellationToken)
     {
-        logger.LogInformation("[PokemonGetEndpoint][Get] Processar requisicao GET /pokemon/{PokemonId}", id);
+        logger.LogInformation("[ItemGetByIdEndpoint][Get] Processar requisicao GET /items/{ItemId}", id);
 
         var result = await useCase.ExecuteAsync(id, cancellationToken);
 
         logger.LogInformation(
-            "[PokemonGetEndpoint][Get] Retornar resposta do endpoint com dados do Pokemon. PokemonId={PokemonId}, PokemonName={PokemonName}",
+            "[ItemGetByIdEndpoint][Get] Retornar resposta do endpoint com dados do Item. ItemId={ItemId}, ItemName={ItemName}",
             id, result.Name);
 
         return Ok(result);
@@ -186,18 +186,18 @@ public sealed class PokemonGetEndpoint(
 ```
 
 **Observações**:
-- O parâmetro de rota `id` é logado na entrada como `{PokemonId}` (nome semântico, não técnico)
-- Na saída, dados-chave do resultado (`PokemonId`, `PokemonName`) são incluídos para rastreabilidade
+- O parâmetro de rota `id` é logado na entrada como `{ItemId}` (nome semântico, não técnico)
+- Na saída, dados-chave do resultado (`ItemId`, `ItemName`) são incluídos para rastreabilidade
 
 ### Endpoint com parâmetros de query
 
 ```csharp
 [ApiController]
-[Route("weather-conditions")]
+[Route("sample-query")]
 [Authenticate]
-public sealed class WeatherConditionsGetEndpoint(
-    WeatherConditionsGetUseCase useCase,
-    ILogger<WeatherConditionsGetEndpoint> logger) : ControllerBase
+public sealed class SampleQueryGetEndpoint(
+    SampleQueryGetUseCase useCase,
+    ILogger<SampleQueryGetEndpoint> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(
@@ -206,14 +206,14 @@ public sealed class WeatherConditionsGetEndpoint(
         CancellationToken cancellationToken)
     {
         logger.LogInformation(
-            "[WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions. Latitude={Latitude}, Longitude={Longitude}",
+            "[SampleQueryGetEndpoint][Get] Processar requisição GET /sample-query. Latitude={Latitude}, Longitude={Longitude}",
             latitude, longitude);
 
-        var input = new WeatherConditionsGetInput { Latitude = latitude, Longitude = longitude };
+        var input = new SampleQueryGetInput { Latitude = latitude, Longitude = longitude };
         var result = await useCase.ExecuteAsync(input, cancellationToken);
 
         logger.LogInformation(
-            "[WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas. Latitude={Latitude}, Longitude={Longitude}",
+            "[SampleQueryGetEndpoint][Get] Retornar resposta do endpoint com dados da consulta. Latitude={Latitude}, Longitude={Longitude}",
             latitude, longitude);
 
         return Ok(result);
@@ -230,20 +230,20 @@ O UseCase é responsável por logar a orquestração da lógica de negócio: in�
 ### UseCase simples (chamada a API externa + mapeamento)
 
 ```csharp
-public sealed class WeatherConditionsGetUseCase(
-    IOpenMeteoApiClient openMeteoApiClient,
-    ILogger<WeatherConditionsGetUseCase> logger)
+public sealed class SampleQueryGetUseCase(
+    IExternalServiceApiClient externalServiceApiClient,
+    ILogger<SampleQueryGetUseCase> logger)
 {
     private const string CurrentFields = "temperature_2m,relative_humidity_2m,apparent_temperature,...";
 
-    public async Task<WeatherConditionsGetOutput> ExecuteAsync(
-        WeatherConditionsGetInput input, CancellationToken cancellationToken = default)
+    public async Task<SampleQueryGetOutput> ExecuteAsync(
+        SampleQueryGetInput input, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
-            "[WeatherConditionsGetUseCase][ExecuteAsync] Executar caso de uso de condições climáticas. Latitude={Latitude}, Longitude={Longitude}",
+            "[SampleQueryGetUseCase][ExecuteAsync] Executar caso de uso de dados da consulta. Latitude={Latitude}, Longitude={Longitude}",
             input.Latitude, input.Longitude);
 
-        var openMeteoInput = new OpenMeteoInput
+        var externalServiceInput = new ExternalServiceInput
         {
             Latitude = input.Latitude,
             Longitude = input.Longitude,
@@ -251,15 +251,15 @@ public sealed class WeatherConditionsGetUseCase(
         };
 
         logger.LogInformation(
-            "[WeatherConditionsGetUseCase][ExecuteAsync] Consultar API Open-Meteo. Latitude={Latitude}, Longitude={Longitude}",
-            openMeteoInput.Latitude, openMeteoInput.Longitude);
+            "[SampleQueryGetUseCase][ExecuteAsync] Consultar API External Service. Latitude={Latitude}, Longitude={Longitude}",
+            externalServiceInput.Latitude, externalServiceInput.Longitude);
 
-        var result = await openMeteoApiClient.GetForecastAsync(openMeteoInput, cancellationToken);
+        var result = await externalServiceApiClient.GetForecastAsync(externalServiceInput, cancellationToken);
 
         logger.LogInformation(
-            "[WeatherConditionsGetUseCase][ExecuteAsync] Mapear resposta da Open-Meteo para model da Feature");
+            "[SampleQueryGetUseCase][ExecuteAsync] Mapear resposta da External Service para model da Feature");
 
-        var output = new WeatherConditionsGetOutput
+        var output = new SampleQueryGetOutput
         {
             Latitude = result.Latitude,
             Longitude = result.Longitude,
@@ -268,7 +268,7 @@ public sealed class WeatherConditionsGetUseCase(
         };
 
         logger.LogInformation(
-            "[WeatherConditionsGetUseCase][ExecuteAsync] Retornar condições climáticas obtidas da Open-Meteo. Timezone={Timezone}",
+            "[SampleQueryGetUseCase][ExecuteAsync] Retornar dados da consulta obtidas da External Service. Timezone={Timezone}",
             output.Timezone);
 
         return output;
@@ -285,63 +285,63 @@ public sealed class WeatherConditionsGetUseCase(
 ### UseCase com iterações (mapeamento de listas)
 
 ```csharp
-public sealed class PokemonGetUseCase(
-    IPokemonApiClient pokemonApiClient,
-    ILogger<PokemonGetUseCase> logger)
+public sealed class ItemGetByIdUseCase(
+    IItemApiClient itemsApiClient,
+    ILogger<ItemGetByIdUseCase> logger)
 {
-    public async Task<PokemonGetOutput> ExecuteAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<ItemGetByIdOutput> ExecuteAsync(int id, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
-            "[PokemonGetUseCase][ExecuteAsync] Executar caso de uso de consulta de Pokemon. PokemonId={PokemonId}", id);
+            "[ItemGetByIdUseCase][ExecuteAsync] Executar caso de uso de consulta de Item. ItemId={ItemId}", id);
 
         logger.LogInformation(
-            "[PokemonGetUseCase][ExecuteAsync] Consultar PokeAPI. PokemonId={PokemonId}", id);
+            "[ItemGetByIdUseCase][ExecuteAsync] Consultar External API. ItemId={ItemId}", id);
 
-        var result = await pokemonApiClient.GetByIdAsync(id, cancellationToken);
-
-        logger.LogInformation(
-            "[PokemonGetUseCase][ExecuteAsync] Mapear resposta da PokeAPI para model da Feature");
-
-        var types = new List<PokemonGetTypeItem>();
+        var result = await itemsApiClient.GetByIdAsync(id, cancellationToken);
 
         logger.LogInformation(
-            "[PokemonGetUseCase][ExecuteAsync] Iterar tipos do Pokemon. Count={Count}", result.Types.Count);
+            "[ItemGetByIdUseCase][ExecuteAsync] Mapear resposta da External API para model da Feature");
+
+        var types = new List<ItemGetByIdTypeItem>();
+
+        logger.LogInformation(
+            "[ItemGetByIdUseCase][ExecuteAsync] Iterar tipos do Item. Count={Count}", result.Types.Count);
 
         foreach (var typeSlot in result.Types)
         {
-            types.Add(new PokemonGetTypeItem
+            types.Add(new ItemGetByIdTypeItem
             {
                 Slot = typeSlot.Slot,
                 Name = typeSlot.Type.Name
             });
         }
 
-        logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Iteracao de tipos concluida");
+        logger.LogInformation("[ItemGetByIdUseCase][ExecuteAsync] Iteracao de tipos concluida");
 
-        var abilities = new List<PokemonGetAbilityItem>();
+        var abilities = new List<ItemGetByIdAbilityItem>();
 
         logger.LogInformation(
-            "[PokemonGetUseCase][ExecuteAsync] Iterar habilidades do Pokemon. Count={Count}", result.Abilities.Count);
+            "[ItemGetByIdUseCase][ExecuteAsync] Iterar habilidades do Item. Count={Count}", result.Abilities.Count);
 
         foreach (var abilitySlot in result.Abilities)
         {
-            abilities.Add(new PokemonGetAbilityItem
+            abilities.Add(new ItemGetByIdAbilityItem
             {
                 Name = abilitySlot.Ability.Name,
                 IsHidden = abilitySlot.IsHidden
             });
         }
 
-        logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Iteracao de habilidades concluida");
+        logger.LogInformation("[ItemGetByIdUseCase][ExecuteAsync] Iteracao de habilidades concluida");
 
-        var stats = new List<PokemonGetStatItem>();
+        var stats = new List<ItemGetByIdStatItem>();
 
         logger.LogInformation(
-            "[PokemonGetUseCase][ExecuteAsync] Iterar stats do Pokemon. Count={Count}", result.Stats.Count);
+            "[ItemGetByIdUseCase][ExecuteAsync] Iterar stats do Item. Count={Count}", result.Stats.Count);
 
         foreach (var statSlot in result.Stats)
         {
-            stats.Add(new PokemonGetStatItem
+            stats.Add(new ItemGetByIdStatItem
             {
                 Name = statSlot.Stat.Name,
                 BaseStat = statSlot.BaseStat,
@@ -349,9 +349,9 @@ public sealed class PokemonGetUseCase(
             });
         }
 
-        logger.LogInformation("[PokemonGetUseCase][ExecuteAsync] Iteracao de stats concluida");
+        logger.LogInformation("[ItemGetByIdUseCase][ExecuteAsync] Iteracao de stats concluida");
 
-        var output = new PokemonGetOutput
+        var output = new ItemGetByIdOutput
         {
             Id = result.Id,
             Name = result.Name,
@@ -366,7 +366,7 @@ public sealed class PokemonGetUseCase(
         };
 
         logger.LogInformation(
-            "[PokemonGetUseCase][ExecuteAsync] Retornar dados do Pokemon. PokemonId={PokemonId}, PokemonName={PokemonName}",
+            "[ItemGetByIdUseCase][ExecuteAsync] Retornar dados do Item. ItemId={ItemId}, ItemName={ItemName}",
             output.Id, output.Name);
 
         return output;
@@ -378,7 +378,7 @@ public sealed class PokemonGetUseCase(
 - Cada iteração (`foreach`) tem log **antes** (com `Count`) e **depois** (confirmação de conclusão)
 - O padrão se repete para cada lista mapeada (tipos, habilidades, stats)
 - A linha em branco acima e abaixo de cada `logger.Log*()` é respeitada (isolamento visual)
-- O log de saída inclui `PokemonId` e `PokemonName` para correlação com o log de entrada
+- O log de saída inclui `ItemId` e `ItemName` para correlação com o log de entrada
 
 ---
 
@@ -396,7 +396,7 @@ Erros em produção podem ser diagnosticados apenas pelos logs, sem necessidade 
 
 O formato padronizado permite filtros precisos em ferramentas de observabilidade:
 
-- `[WeatherConditionsGetEndpoint]` — todos os logs de um endpoint específico
+- `[SampleQueryGetEndpoint]` — todos os logs de um endpoint específico
 - `[GetForecastAsync]` — todos os logs de um método específico, em qualquer classe
 - `CorrelationId=abc-123` — todos os logs de uma requisição específica
 
@@ -433,16 +433,16 @@ O template de saída do console é normativo e usa tema ANSI colorido:
 ### Exemplo de Saída no Console
 
 ```
-[23/03/2026 14:32:01.1234567] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions
-[23/03/2026 14:32:01.1235000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [WeatherConditionsGetUseCase][ExecuteAsync] Executar caso de uso de condições climáticas de São Paulo
-[23/03/2026 14:32:01.1236000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [CachedOpenMeteoApiClient][GetForecastAsync] Verificar cache para condições climáticas
-[23/03/2026 14:32:01.1237000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [CachedOpenMeteoApiClient][GetForecastAsync] Cache miss. Consultar API externa. CacheKey=OpenMeteo:WeatherConditionsGet:123
-[23/03/2026 14:32:01.4500000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [OpenMeteoApiClient][GetForecastAsync] Executar requisição HTTP ao Open-Meteo. Latitude=-23.5475, Longitude=-46.6361
-[23/03/2026 14:32:01.8900000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [OpenMeteoApiClient][GetForecastAsync] Retornar resposta da API Open-Meteo. Timezone=America/Sao_Paulo
-[23/03/2026 14:32:01.8910000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [CachedOpenMeteoApiClient][GetForecastAsync] Armazenar resposta no cache. CacheKey=OpenMeteo:WeatherConditionsGet:123, DurationSeconds=10
-[23/03/2026 14:32:01.8920000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [WeatherConditionsGetUseCase][ExecuteAsync] Mapear resposta da Open-Meteo para model da Feature
-[23/03/2026 14:32:01.8930000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [WeatherConditionsGetUseCase][ExecuteAsync] Retornar condições climáticas obtidas da Open-Meteo. Timezone=America/Sao_Paulo
-[23/03/2026 14:32:01.8940000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas de São Paulo
+[23/03/2026 14:32:01.1234567] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [SampleQueryGetEndpoint][Get] Processar requisição GET /sample-query
+[23/03/2026 14:32:01.1235000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [SampleQueryGetUseCase][ExecuteAsync] Executar caso de uso de dados da consulta de São Paulo
+[23/03/2026 14:32:01.1236000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [CachedExternalServiceApiClient][GetForecastAsync] Verificar cache para dados da consulta
+[23/03/2026 14:32:01.1237000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [CachedExternalServiceApiClient][GetForecastAsync] Cache miss. Consultar API externa. CacheKey=ExternalService:SampleQueryGet:1
+[23/03/2026 14:32:01.4500000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [ExternalServiceApiClient][GetForecastAsync] Executar requisição HTTP ao External Service. Latitude=-23.5475, Longitude=-46.6361
+[23/03/2026 14:32:01.8900000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [ExternalServiceApiClient][GetForecastAsync] Retornar resposta da API External Service. Timezone=America/Sao_Paulo
+[23/03/2026 14:32:01.8910000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [CachedExternalServiceApiClient][GetForecastAsync] Armazenar resposta no cache. CacheKey=ExternalService:SampleQueryGet:1, DurationSeconds=10
+[23/03/2026 14:32:01.8920000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [SampleQueryGetUseCase][ExecuteAsync] Mapear resposta da External Service para model da Feature
+[23/03/2026 14:32:01.8930000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [SampleQueryGetUseCase][ExecuteAsync] Retornar dados da consulta obtidas da External Service. Timezone=America/Sao_Paulo
+[23/03/2026 14:32:01.8940000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [SampleQueryGetEndpoint][Get] Retornar resposta do endpoint com dados da consulta de São Paulo
 ```
 
 ---

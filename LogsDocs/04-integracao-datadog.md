@@ -24,17 +24,17 @@ services:
   app:
     build:
       context: src
-      dockerfile: Albert.Playground.ECS.AOT.Api/Dockerfile
+      dockerfile: Starter.Template.AOT.Api/Dockerfile
       args:
         EXTRA_CA_CERT: ${EXTRA_CA_CERT:-}
     ports:
       - "8080:8080"
     environment:
-      - ExternalApi__GitHub__HttpRequest__PersonalAccessToken=${GITHUB_PAT:-}
+      - ExternalApi__ExternalProvider__HttpRequest__PersonalAccessToken=${EXTERNAL_API_TOKEN:-}
     depends_on:
       - datadog-agent
     labels:
-      com.datadoghq.ad.logs: '[{"source": "dotnet", "service": "albert-playground-ecs-aot-api"}]'
+      com.datadoghq.ad.logs: '[{"source": "dotnet", "service": "starter-template-aot-api"}]'
 
   datadog-agent:
     image: registry.datadoghq.com/agent:7
@@ -51,7 +51,7 @@ services:
       - DD_ENV=${DD_ENV:-local}
       - DD_LOGS_ENABLED=true
       - DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL=true
-      - DD_HOSTNAME=albert-playground-ecs-aot-local
+      - DD_HOSTNAME=starter-template-aot-local
       - DD_CONVERT_DD_SITE_FQDN_ENABLED=false
       - DD_SYSTEM_PROBE_ENABLED=false
       - DD_PROCESS_AGENT_ENABLED=false
@@ -70,7 +70,7 @@ services:
 | `DD_API_KEY` | Secret do ambiente | Autenticação com Datadog |
 | `DD_SITE` | `datadoghq.com` | Região do Datadog |
 | `DD_ENV` | `${DD_ENV:-local}` | Tag de ambiente para filtragem (`local`, `ci`, `build`) |
-| `DD_HOSTNAME` | `albert-playground-ecs-aot-local` | Hostname fixo para evitar erro de detecção em sandbox |
+| `DD_HOSTNAME` | `starter-template-aot-local` | Hostname fixo para evitar erro de detecção em sandbox |
 | `DD_LOGS_ENABLED` | `true` | Ativa coleta de logs |
 | `DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL` | `true` | Coleta logs de todos os containers |
 | `DD_CONVERT_DD_SITE_FQDN_ENABLED` | `false` | Desabilita trailing dot no FQDN (compatibilidade com proxy) |
@@ -82,11 +82,11 @@ A label `com.datadoghq.ad.logs` na aplicação configura o Datadog Agent para cl
 
 ```yaml
 labels:
-  com.datadoghq.ad.logs: '[{"source": "dotnet", "service": "albert-playground-ecs-aot-api"}]'
+  com.datadoghq.ad.logs: '[{"source": "dotnet", "service": "starter-template-aot-api"}]'
 ```
 
 - `source: "dotnet"` — pipeline de processamento de logs .NET no Datadog
-- `service: "albert-playground-ecs-aot-api"` — nome do serviço para filtragem nos dashboards
+- `service: "starter-template-aot-api"` — nome do serviço para filtragem nos dashboards
 
 ### DD_ENV por Contexto de Execução
 
@@ -120,7 +120,7 @@ if (!string.IsNullOrEmpty(ddApiKey) && ddDirectLogs)
 
     config.WriteTo.Sink(new DatadogHttpSink(
         apiKey: ddApiKey,
-        service: "albert-playground-ecs-aot-api",
+        service: "starter-template-aot-api",
         host: ddHost,
         env: ddEnv));
 
@@ -282,19 +282,19 @@ Cada batch gera um POST para `https://http-intake.logs.datadoghq.com/api/v2/logs
 ```json
 [
   {
-    "message": "[PokemonGetEndpoint][Get] Processar requisicao GET /pokemon/25",
+    "message": "[ItemGetByIdEndpoint][Get] Processar requisicao GET /items/25",
     "timestamp": 1711198321123,
     "level": "information",
-    "service": "albert-playground-ecs-aot-api",
-    "host": "albert-playground-ecs-aot-local",
+    "service": "starter-template-aot-api",
+    "host": "starter-template-aot-local",
     "ddtags": "env:local"
   },
   {
-    "message": "[PokemonGetUseCase][ExecuteAsync] Executar caso de uso de consulta de Pokemon. PokemonId=25",
+    "message": "[ItemGetByIdUseCase][ExecuteAsync] Executar caso de uso de consulta de Item. ItemId=25",
     "timestamp": 1711198321124,
     "level": "information",
-    "service": "albert-playground-ecs-aot-api",
-    "host": "albert-playground-ecs-aot-local",
+    "service": "starter-template-aot-api",
+    "host": "starter-template-aot-local",
     "ddtags": "env:local"
   }
 ]
@@ -389,7 +389,7 @@ A implementação está em `Infra/HealthChecks/DatadogAgentHealthCheck.cs`.
 
 | Variável | Onde Definir | Obrigatória | Propósito |
 |----------|-------------|-------------|-----------|
-| `DD_API_KEY` | `.env` / GitHub Secrets | Sim (para Datadog) | Autenticação com Datadog |
+| `DD_API_KEY` | `.env` / ExternalProvider Secrets | Sim (para Datadog) | Autenticação com Datadog |
 | `DD_ENV` | `.env` / CI | Não (default: `local`) | Tag de ambiente |
 | `DD_HOSTNAME` | `docker-compose.yml` | Sim (em sandbox) | Hostname fixo |
 | `DD_APP_KEY` | Variável de ambiente | Para MCP apenas | Acesso ao Datadog MCP |
@@ -402,22 +402,22 @@ Com o padrão de logging adotado, as seguintes queries são eficientes no Datado
 
 ```
 # Todos os logs de um serviço
-service:albert-playground-ecs-aot-api
+service:starter-template-aot-api
 
 # Filtrar por environment
-service:albert-playground-ecs-aot-api env:ci
+service:starter-template-aot-api env:ci
 
 # Filtrar por classe específica
-service:albert-playground-ecs-aot-api *PokemonGetEndpoint*
+service:starter-template-aot-api *ItemGetByIdEndpoint*
 
 # Filtrar por método específico
-service:albert-playground-ecs-aot-api *ExecuteAsync*
+service:starter-template-aot-api *ExecuteAsync*
 
 # Filtrar por nível de log
-service:albert-playground-ecs-aot-api status:warn
+service:starter-template-aot-api status:warn
 
 # Combinação: erros em produção de um endpoint
-service:albert-playground-ecs-aot-api env:local status:error *WeatherConditions*
+service:starter-template-aot-api env:local status:error *SampleQuery*
 ```
 
 ---

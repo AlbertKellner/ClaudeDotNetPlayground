@@ -90,19 +90,7 @@ Requisição autenticada
 
 ## Estrutura de Configuração
 
-Cada integração em `appsettings.json` segue a estrutura `HttpRequest` + `CircuitBreaker` + `EndpointCache`, com valores que variam por serviço:
-
-### Valores reais por serviço
-
-| Serviço | `DelaySeconds` | `MaxRetryAttempts` | `BackoffType` | Cache Duration | Cache Type |
-|---|---|---|---|---|---|
-| **OpenMeteo** | 3 | 3 | Exponential | 10s | Absolute |
-| **GitHub** | 5 | 3 | Exponential | 60s | Absolute |
-| **PokéAPI** | 3 | 3 | Exponential | 60s | Absolute |
-
-> **Nota**: O GitHub utiliza delay de retry maior (5s vs 3s) devido ao rate limiting mais restritivo da API.
-
-### Estrutura do `appsettings.json`
+Cada integração em `appsettings.json` segue a estrutura `HttpRequest` + `CircuitBreaker` + `EndpointCache`:
 
 ```json
 {
@@ -131,36 +119,7 @@ Cada integração em `appsettings.json` segue a estrutura `HttpRequest` + `Circu
 
 ## Integrações Ativas
 
-### Open-Meteo
-
-| Propriedade | Valor |
-|---|---|
-| Serviço | Condições climáticas atuais de São Paulo |
-| Autenticação | Nenhuma (API pública) |
-| Rota | `GET /v1/forecast` |
-| Cache | Sim, por usuário autenticado |
-| Feature | [Condições Climáticas](Feature-WeatherConditionsGet) |
-
-### GitHub API
-
-| Propriedade | Valor |
-|---|---|
-| Serviço | Pesquisa de repositórios da conta AlbertKellner |
-| Autenticação | PAT (opcional, via `DelegatingHandler`) |
-| Rota | `GET /users/{username}/repos` |
-| Cache | Sim, por usuário autenticado |
-| Paginação | Automática |
-| Feature | [Pesquisa GitHub](Feature-GitHubRepoSearch) |
-
-### PokéAPI
-
-| Propriedade | Valor |
-|---|---|
-| Serviço | Consulta de Pokémon por ID |
-| Autenticação | Nenhuma (API pública) |
-| Rota | `GET /api/v2/pokemon/{id}` |
-| Cache | Sim, por usuário autenticado + ID do Pokémon |
-| Feature | [Pokémon](Feature-PokemonGet) |
+> **Estado atual**: nenhuma integração com API externa implementada. Integrações serão adicionadas aqui conforme features forem desenvolvidas.
 
 ---
 
@@ -168,6 +127,3 @@ Cada integração em `appsettings.json` segue a estrutura `HttpRequest` + `Circu
 
 - [Arquitetura](Governance-Architecture) — visão geral da arquitetura e componentes
 - [Padrões de Desenvolvimento](Governance-Development-Patterns) — padrões técnicos adotados
-- [Condições Climáticas](Feature-WeatherConditionsGet) — feature que utiliza integração Open-Meteo
-- [Pesquisa GitHub](Feature-GitHubRepoSearch) — feature que utiliza integração GitHub API
-- [Pokémon](Feature-PokemonGet) — feature que utiliza integração PokéAPI

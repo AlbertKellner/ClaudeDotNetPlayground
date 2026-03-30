@@ -1,4 +1,4 @@
-# Albert.Playground.ECS.AOT
+# Starter.Template.AOT
 
 ## Descrição
 
@@ -32,7 +32,7 @@ Regras de negócio, funcionalidades implementadas e conceitos de domínio.
 
 | Página | Descrição |
 |--------|-----------|
-| [Visão Geral do Domínio](Domain-Overview) | Propósito da aplicação, funcionalidades e APIs externas |
+| [Visão Geral do Domínio](Domain-Overview) | Propósito da aplicação e conceitos de domínio |
 | [Regras de Negócio](Domain-Business-Rules) | Índice das regras de negócio com links para as Features |
 
 ### Funcionalidades (Features)
@@ -40,10 +40,6 @@ Regras de negócio, funcionalidades implementadas e conceitos de domínio.
 | Página | Endpoint | Descrição |
 |--------|----------|-----------|
 | [Health Check](Feature-Health) | `GET /health` | Verificação de disponibilidade da aplicação |
-| [Login de Usuário](Feature-UserLogin) | `POST /login` | Autenticação com credenciais e geração de JWT |
-| [Condições Climáticas](Feature-WeatherConditionsGet) | `GET /weather-conditions?latitude={lat}&longitude={lng}` | Consulta de condições climáticas por coordenadas via Open-Meteo |
-| [Pesquisa de Repositórios GitHub](Feature-GitHubRepoSearch) | `GET /github-repo-search` | Pesquisa de repositórios da conta AlbertKellner |
-| [Consulta de Pokémon](Feature-PokemonGet) | `GET /pokemon/{id}` | Consulta de dados de Pokémon por ID via PokéAPI |
 
 ---
 

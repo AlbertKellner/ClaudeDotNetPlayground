@@ -59,7 +59,7 @@ O nome da Feature segue a estrutura:
 | `TodoItemsGetAll` | TodoItem | Get | Plural (coleção) |
 | `TodoItemGetById` | TodoItem | Get | Singular (por id) |
 | `TodoItemInsert` | TodoItem | Insert | Singular |
-| `PokemonGet` | Pokemon | Get | Singular |
+| `TodoItemDelete` | TodoItem | Delete | Singular |
 
 ### Nomes proibidos:
 
@@ -129,8 +129,8 @@ O namespace de todos os componentes de uma Slice para no nível da **Feature**, 
 
 ```
 Pasta física:   Features/Query/TestGet/TestGetUseCase/TestGetUseCase.cs
-Namespace:      Albert.Playground.ECS.AOT.Api.Features.Query.TestGet   ← para na Feature
-Proibido:       Albert.Playground.ECS.AOT.Api.Features.Query.TestGet.TestGetUseCase
+Namespace:      Starter.Template.AOT.Api.Features.Query.TestGet   ← para na Feature
+Proibido:       Starter.Template.AOT.Api.Features.Query.TestGet.TestGetUseCase
 ```
 
 Componentes da mesma Slice compartilham o namespace da Feature e se enxergam diretamente, sem necessidade de `using` adicional.
