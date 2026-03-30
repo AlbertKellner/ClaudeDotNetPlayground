@@ -1,5 +1,9 @@
 # Regra: Governança Arquitetural
 
+## Classificação
+
+Meta-governança (ponte entre domínio técnico e de negócio). Governa decisões técnicas, mas contém a regra crítica de que arquitetura não pode invalidar comportamento de negócio.
+
 ## Propósito
 
 Esta rule define como o assistente deve identificar, registrar, preservar e aplicar decisões e princípios arquiteturais neste repositório.

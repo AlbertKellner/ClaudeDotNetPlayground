@@ -113,38 +113,55 @@ Se `DD_API_KEY` não estiver disponível no host, o pipeline prosseguirá sem Da
 
 ## Imports de Governança
 
+### Modelo operacional
+
 @Instructions/operating-model.md
+
+### Governança técnica
+
 @Instructions/architecture/technical-overview.md
 @Instructions/architecture/engineering-principles.md
 @Instructions/architecture/patterns.md
 @Instructions/architecture/architecture-decisions.md
 @Instructions/architecture/folder-structure.md
 @Instructions/architecture/naming-conventions.md
+@Instructions/snippets/README.md
+@Instructions/snippets/canonical-snippets.md
+
+### Governança de negócio
+
 @Instructions/business/business-rules.md
 @Instructions/business/domain-model.md
 @Instructions/business/invariants.md
 @Instructions/business/workflows.md
 @Instructions/business/assumptions.md
+
+### Camadas-ponte (técnico + negócio)
+
 @Instructions/bdd/README.md
 @Instructions/bdd/conventions.md
 @Instructions/contracts/README.md
 @Instructions/decisions/README.md
 @Instructions/decisions/adr-template.md
 @Instructions/glossary/ubiquitous-language.md
-@Instructions/snippets/README.md
-@Instructions/snippets/canonical-snippets.md
 @Instructions/wiki/wiki-governance.md
+
+### Artefatos operacionais
+
 @scripts/operational-runbook.md
 @open-questions.md
 @assumptions-log.md
 @bash-errors-log.md
 
-### Rules operacionais ativas
+### Rules operacionais ativas — meta-governança (ponte técnico + negócio)
 
 @.claude/rules/governance-policies.md
 @.claude/rules/source-of-truth-priority.md
 @.claude/rules/architecture-governance.md
 @.claude/rules/naming-governance.md
+
+### Rules operacionais ativas — técnicas
+
 @.claude/rules/folder-governance.md
 @.claude/rules/bash-error-logging.md
 @.claude/rules/environment-readiness.md

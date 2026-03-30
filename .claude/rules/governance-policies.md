@@ -1,5 +1,9 @@
 # Regra: Políticas de Governança Consolidadas
 
+## Classificação
+
+Meta-governança (ponte entre domínio técnico e de negócio). Coordena normalização, contexto, propagação e ambiguidades transversalmente a ambos os domínios.
+
 ## Propósito
 
 Esta regra consolida as políticas (o quê, não como) de normalização de linguagem, contexto do repositório, propagação de mudanças, tratamento de ambiguidades e classificação de snippets. Os workflows procedurais correspondentes residem nas skills.
@@ -122,3 +126,4 @@ Na ausência de sinal claro → assumir **ilustrativo**.
 | 2026-03-18 | Criado: consolidação de natural-language-normalization, repository-context-evolution, change-propagation, ambiguity-handling e snippet-handling | Reestruturação de governança |
 | 2026-03-19 | Adicionado: ferramentas operacionais ao mapa de propagação e à lista de conhecimento durável | Lacuna de governança identificada |
 | 2026-03-19 | Adicionado: artefatos documentáveis (BDD, regras, contratos, testes) como gatilho de propagação para wiki | Instrução do usuário |
+| 2026-03-30 | Adicionado: seção Classificação — meta-governança (ponte entre domínio técnico e de negócio) | Separação tech/negócio |

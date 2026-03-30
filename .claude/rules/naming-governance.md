@@ -1,5 +1,9 @@
 # Regra: Governança de Nomenclatura
 
+## Classificação
+
+Meta-governança (ponte entre domínio técnico e de negócio). Unifica terminologia de domínio (linguagem ubíqua — negócio) com convenções de nomenclatura técnica (código, rotas, tabelas).
+
 ## Propósito
 
 Esta rule define como convenções de nomenclatura são introduzidas, registradas, aplicadas e propagadas neste repositório.
