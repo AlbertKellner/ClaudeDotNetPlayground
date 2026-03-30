@@ -25,30 +25,20 @@ A classificação é baseada na **intenção da operação**, não no verbo HTTP
 ## Estrutura de Pastas
 
 ```
-src/Albert.Playground.ECS.AOT.Api/
+src/Starter.Template.AOT.Api/
 ├── Features/
 │   ├── Query/
-│   │   ├── WeatherConditionsGet/
-│   │   │   ├── WeatherConditionsGetEndpoint/
-│   │   │   ├── WeatherConditionsGetUseCase/
-│   │   │   ├── WeatherConditionsGetInterfaces/
-│   │   │   └── WeatherConditionsGetModels/
-│   │   ├── GitHubRepoSearch/
-│   │   │   ├── GitHubRepoSearchEndpoint/
-│   │   │   ├── GitHubRepoSearchUseCase/
-│   │   │   ├── GitHubRepoSearchInterfaces/
-│   │   │   └── GitHubRepoSearchModels/
-│   │   └── PokemonGet/
-│   │       ├── PokemonGetEndpoint/
-│   │       ├── PokemonGetUseCase/
-│   │       ├── PokemonGetInterfaces/
-│   │       └── PokemonGetModels/
+│   │   └── <NomeDaFeature>/
+│   │       ├── <NomeDaFeature>Endpoint/
+│   │       ├── <NomeDaFeature>UseCase/
+│   │       ├── <NomeDaFeature>Interfaces/
+│   │       └── <NomeDaFeature>Models/
 │   └── Command/
-│       └── UserLogin/
-│           ├── UserLoginEndpoint/
-│           ├── UserLoginUseCase/
-│           ├── UserLoginInterfaces/
-│           └── UserLoginModels/
+│       └── <NomeDaFeature>/
+│           ├── <NomeDaFeature>Endpoint/
+│           ├── <NomeDaFeature>UseCase/
+│           ├── <NomeDaFeature>Interfaces/
+│           └── <NomeDaFeature>Models/
 │
 ├── Infra/
 │   ├── Correlation/          # GuidV7 — geração e validação de GUID v7
@@ -63,24 +53,11 @@ src/Albert.Playground.ECS.AOT.Api/
 │
 └── Shared/
     └── ExternalApi/
-        ├── OpenMeteo/        # Integração com API Open-Meteo (clima)
-        │   ├── IOpenMeteoApi.cs
-        │   ├── IOpenMeteoApiClient.cs
-        │   ├── OpenMeteoApiClient.cs
-        │   ├── CachedOpenMeteoApiClient.cs
-        │   └── Models/
-        ├── GitHub/           # Integração com API GitHub (repositórios)
-        │   ├── IGitHubApi.cs
-        │   ├── IGitHubApiClient.cs
-        │   ├── GitHubApiClient.cs
-        │   ├── CachedGitHubApiClient.cs
-        │   ├── GitHubAuthenticationHandler.cs
-        │   └── Models/
-        └── Pokemon/          # Integração com PokéAPI (pokémon)
-            ├── IPokemonApi.cs
-            ├── IPokemonApiClient.cs
-            ├── PokemonApiClient.cs
-            ├── CachedPokemonApiClient.cs
+        └── <Servico>/        # Integração com API HTTP externa (DA-017)
+            ├── I<Servico>Api.cs
+            ├── I<Servico>ApiClient.cs
+            ├── <Servico>ApiClient.cs
+            ├── Cached<Servico>ApiClient.cs
             └── Models/
 ```
 
@@ -109,7 +86,7 @@ Request HTTP
   └── CorrelationIdMiddleware (garante GUID v7; abre LogContext com CorrelationId)
         └── GlobalExceptionHandler (captura exceções não tratadas; retorna Problem Details RFC 7807)
               └── Controller / Action (pasta Endpoint)
-                    ├── [sem Authenticate] POST /login → UserLoginEndpoint → UserLoginUseCase → ITokenService
+                    ├── [sem Authenticate] endpoints públicos (ex: POST /login, GET /health)
                     └── [com Authenticate] demais endpoints → AuthenticateFilter (valida JWT; enriquece LogContext)
                           └── UseCase
                                 └── Repository / ApiClient (via Interface)
@@ -137,13 +114,11 @@ O enrichment do Serilog é transversal:
 
 ## Features Implementadas
 
-| Feature | Tipo | Endpoint | Autenticação | Regra de Negócio |
+| Feature | Tipo | Endpoint | Autenticação | Descrição |
 |---|---|---|---|---|
-| Health | Infra (com RN) | `GET /health` | Não | RN-005 |
-| UserLogin | Command | `POST /login` | Não | RN-002 |
-| WeatherConditionsGet | Query | `GET /weather-conditions?latitude={lat}&longitude={lng}` | Sim | RN-004 |
-| GitHubRepoSearch | Query | `GET /github-repo-search` | Sim | RN-008 |
-| PokemonGet | Query | `GET /pokemon/{id}` | Sim | RN-009 |
+| Health | Infra | `GET /health` | Não | Verificação de disponibilidade da aplicação e do Datadog Agent |
+
+> Features adicionais serão registradas aqui conforme forem implementadas.
 
 ---
 
@@ -156,7 +131,7 @@ Componentes transversais que suportam a aplicação sem conter lógica de negóc
 | `CorrelationIdMiddleware` | `Infra/Middlewares/` | Garante GUID v7 por request; enriquece Serilog LogContext; opaco para Features |
 | `GuidV7` | `Infra/Correlation/` | Geração (`Guid.CreateVersion7()`) e validação de GUID v7 (uso interno de Infra) |
 | `GlobalExceptionHandler` | `Infra/ExceptionHandling/` | Handler centralizado de exceções; retorna Problem Details (RFC 7807) |
-| `DatadogAgentHealthCheck` | `Infra/HealthChecks/` | Verifica disponibilidade do Datadog Agent via HTTP; determina Healthy/Degraded/Unhealthy (RN-005) |
+| `DatadogAgentHealthCheck` | `Infra/HealthChecks/` | Verifica disponibilidade do Datadog Agent via HTTP; determina Healthy/Degraded/Unhealthy |
 | `AppJsonContext` | `Infra/Json/` | `JsonSerializerContext` source-generated para serialização AOT-compatível |
 | `DatadogHttpSink` | `Infra/Logging/` | Serilog `ILogEventSink`: envia logs diretamente ao Datadog via HTTP; batching assíncrono via Channel |
 | `DatadogLogEntry` | `Infra/Logging/` | Modelo de entrada de log + `DatadogLogJsonContext` para serialização AOT |

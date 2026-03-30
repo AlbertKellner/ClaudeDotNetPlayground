@@ -1,4 +1,4 @@
-## Albert.Playground.ECS.AOT
+## Starter.Template.AOT
 
 **[Home](Home)**
 
@@ -23,10 +23,6 @@
 - [Visão Geral](Domain-Overview)
 - [Regras de Negócio](Domain-Business-Rules)
 - [Health Check](Feature-Health)
-- [Login de Usuário](Feature-UserLogin)
-- [Condições Climáticas](Feature-WeatherConditionsGet)
-- [Pesquisa GitHub](Feature-GitHubRepoSearch)
-- [Consulta de Pokémon](Feature-PokemonGet)
 
 ---
 

@@ -15,9 +15,7 @@ Este arquivo descreve a visão arquitetural de alto nível deste repositório. �
 | Logging estruturado | Serilog (com Enrich.FromLogContext) | DA-011 |
 | Integração HTTP externa | Refit (`Refit.HttpClientFactory`) — interfaces decoradas com atributos HTTP; implementação source-generated | DA-017 |
 | Resiliência HTTP | Polly v8 via `Microsoft.Extensions.Http.Resilience` — retry exponencial + timeout por tentativa | DA-017 |
-| Memory Cache | `IMemoryCache` (`Microsoft.Extensions.Caching.Memory`) — cache por usuário autenticado; duração e expiração configuráveis via `appsettings.json` seção `EndpointCache` | DA-018 |
-| Integração GitHub API | Refit (`Refit.HttpClientFactory`) + Polly v8 + DelegatingHandler para PAT | DA-021 |
-| Integração PokéAPI | Refit (`Refit.HttpClientFactory`) + Polly v8 + Memory Cache | DA-023 |
+| Memory Cache | `IMemoryCache` (`Microsoft.Extensions.Caching.Memory`) — duração e expiração configuráveis via `appsettings.json` seção `EndpointCache` | DA-018 |
 | Persistência | A definir por Feature | — |
 | Mensageria | A definir | — |
 | Containerização | Docker — Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent | DA-016 |
@@ -50,22 +48,6 @@ Não há camadas horizontais globais (ex.: pasta `Services/` ou `Repositories/` 
 | Models (Input/Output/Entity) | `Features/<tipo>/<Feature>/<Feature>Models/` | Contratos de entrada, saída e entidades de domínio por Slice |
 | Interfaces | `Features/<tipo>/<Feature>/<Feature>Interfaces/` | Contratos para repositórios e integrações externos ao UseCase |
 | Shared | `Shared/` | Abstrações, utilitários, clientes e helpers reutilizáveis entre Slices |
-| IOpenMeteoApi | `Shared/ExternalApi/OpenMeteo/IOpenMeteoApi.cs` | Interface Refit para a API Open-Meteo; contrato HTTP com rota `/v1/forecast` hardcoded |
-| IOpenMeteoApiClient | `Shared/ExternalApi/OpenMeteo/IOpenMeteoApiClient.cs` | Interface de serviço; contrato que Features injetam via DI |
-| OpenMeteoApiClient | `Shared/ExternalApi/OpenMeteo/OpenMeteoApiClient.cs` | Implementa IOpenMeteoApiClient; usa IOpenMeteoApi (Refit + Polly via HttpClient); aplica logging SNP-001 |
-| CachedOpenMeteoApiClient | `Shared/ExternalApi/OpenMeteo/CachedOpenMeteoApiClient.cs` | Decorator de IOpenMeteoApiClient; implementa Memory Cache por usuário autenticado com duração configurável; chave de cache definida no código |
-| OpenMeteoInput/Output | `Shared/ExternalApi/OpenMeteo/Models/` | Modelos de entrada (coordenadas + fields) e saída completa da Open-Meteo; inclui OpenMeteoJsonContext para AOT |
-| IGitHubApi | `Shared/ExternalApi/GitHub/IGitHubApi.cs` | Interface Refit para a API GitHub; contrato HTTP com rota `/users/{username}/repos` |
-| IGitHubApiClient | `Shared/ExternalApi/GitHub/IGitHubApiClient.cs` | Interface de serviço; contrato que Features injetam via DI |
-| GitHubApiClient | `Shared/ExternalApi/GitHub/GitHubApiClient.cs` | Implementa IGitHubApiClient; usa IGitHubApi (Refit + Polly via HttpClient); aplica logging SNP-001; paginação automática |
-| CachedGitHubApiClient | `Shared/ExternalApi/GitHub/CachedGitHubApiClient.cs` | Decorator de IGitHubApiClient; implementa Memory Cache por usuário autenticado com duração configurável |
-| GitHubAuthenticationHandler | `Shared/ExternalApi/GitHub/GitHubAuthenticationHandler.cs` | DelegatingHandler que adiciona PAT e User-Agent ao header das requisições GitHub |
-| GitHubRepositoryOutput | `Shared/ExternalApi/GitHub/Models/GitHubRepositoryOutput.cs` | Modelo de resposta da API GitHub; inclui GitHubJsonContext para AOT |
-| IPokemonApi | `Shared/ExternalApi/Pokemon/IPokemonApi.cs` | Interface Refit para a PokéAPI; contrato HTTP com rota `/api/v2/pokemon/{id}` |
-| IPokemonApiClient | `Shared/ExternalApi/Pokemon/IPokemonApiClient.cs` | Interface de serviço; contrato que Features injetam via DI |
-| PokemonApiClient | `Shared/ExternalApi/Pokemon/PokemonApiClient.cs` | Implementa IPokemonApiClient; usa IPokemonApi (Refit + Polly via HttpClient); aplica logging SNP-001 |
-| CachedPokemonApiClient | `Shared/ExternalApi/Pokemon/CachedPokemonApiClient.cs` | Decorator de IPokemonApiClient; implementa Memory Cache por usuário autenticado com duração configurável |
-| PokemonOutput | `Shared/ExternalApi/Pokemon/Models/PokemonOutput.cs` | Modelo de resposta da PokéAPI; inclui PokemonJsonContext para AOT |
 | Exception Handler | `Infra/ExceptionHandling/GlobalExceptionHandler.cs` | Handler centralizado de exceções; retorna Problem Details (RFC 7807) |
 | DatadogAgentHealthCheck | `Infra/HealthChecks/DatadogAgentHealthCheck.cs` | Verifica disponibilidade do Datadog Agent via HTTP; determina status Healthy/Degraded/Unhealthy (RN-005) |
 | Correlation ID Middleware | `Infra/Middlewares/CorrelationIdMiddleware.cs` | Garante GUID v7 por request; enriquece logs via Serilog LogContext; completamente opaco para Features |
@@ -104,7 +86,7 @@ Request HTTP
     └── CorrelationIdMiddleware (Infra/Middlewares — garante GUID v7; abre LogContext com CorrelationId)
             └── GlobalExceptionHandler (Infra/ExceptionHandling — captura exceções não tratadas)
                     └── Controller / Action (pasta Endpoint)
-                            ├── [sem Authenticate] POST /login → UserLoginEndpoint → UserLoginUseCase → ITokenService
+                            ├── [sem Authenticate] POST /login → LoginEndpoint → LoginUseCase → ITokenService
                             └── [com Authenticate] outros endpoints → AuthenticateFilter (valida JWT; enriquece LogContext)
                                     └── UseCase
                                             └── Repository (via Interface)
@@ -193,7 +175,7 @@ Quando o usuário disponibilizar um novo recurso operacional (MCP server, integr
 | 2026-03-15 | CI/CD expandido: workflow pr-language-check adicionado — valida título e corpo de PRs; template de PR em português criado | DA-014 |
 | 2026-03-15 | Padrões de logging definidos: formato `[Classe][Método]`, storytelling, console colorido ANSI, template com timestamp/correlationId/userName, isolamento visual, testes de log | DA-015, SNP-001 |
 | 2026-03-16 | Containerização adicionada: Dockerfile multi-stage (Native AOT) + docker-compose com Datadog Agent; GitHub Environment ClaudeCode; DD_ENV por contexto (build, ci, local) para filtragem no Datadog | DA-016 |
-| 2026-03-16 | Integração HTTP externa adicionada: Refit + Polly; Shared/ExternalApi/OpenMeteo/ criada; Feature WeatherConditionsGet implementada; RN-004 | DA-017, RN-004 |
+| 2026-03-16 | Padrão de integração HTTP externa definido: Refit + Polly em Shared/ExternalApi/ | DA-017 |
 | 2026-03-17 | Restrição adicionada: toda feature com endpoint deve ser validada via chamada HTTP real antes do commit; geração de token quando necessário | endpoint-validation rule |
 | 2026-03-17 | Workflows de CI/CD reorganizados: pr-language-check e docker-build removidos; CI renomeado para "Validar Execução"; jobs renomeados para Compilação, Execução e Validar Health Check; unit-tests inserido na cadeia sequencial entre Execução e Validar Health Check | — |
 | 2026-03-17 | Restrições adicionadas: validação em modo debug (dotnet run + dotnet test) como gate obrigatório antes do docker compose up -d (publish Release/AOT); health check pós-publish explicitamente separado da validação debug | Pipeline pré-commit |
@@ -201,12 +183,8 @@ Quando o usuário disponibilizar um novo recurso operacional (MCP server, integr
 | 2026-03-18 | AotControllerPreservation.PreserveControllers() tornado internal e chamado explicitamente em Program.cs; resolve trim de Controllers em Native AOT | Erro 8 |
 | 2026-03-18 | CI/CD: job `healthcheck` dividido em dois jobs paralelos — `healthcheck-debug` (dotnet run) e `healthcheck-publish` (binário AOT); ambos com `needs: unit-tests` | Instrução do usuário |
 | 2026-03-18 | Componentes Infra AOT adicionados à tabela: AppJsonContext, NullModelBinderProvider, FallbackSimpleTypeModelBinderProvider, EnhancedModelMetadataActivator, NoOpObjectModelValidator | Revisão de governança |
-| 2026-03-19 | Seção "Recursos Operacionais do Assistente" adicionada: Datadog MCP e GitHub API registrados como recursos disponíveis; protocolo de registro de novos recursos definido | Lacuna de governança identificada |
-| 2026-03-19 | Memory Cache adicionado à stack; CachedOpenMeteoApiClient adicionado aos componentes; AuthenticateFilter atualizado para armazenar AuthenticatedUser em HttpContext.Items; configuração ExternalApi reestruturada em HttpRequest/CircuitBreaker/EndpointCache | DA-018 |
-| 2026-03-19 | Integração GitHub API adicionada: Refit + Polly + DelegatingHandler para PAT; Shared/ExternalApi/GitHub/ criada; Shared/Repositories/ criada; Features RepositoriesGetAll e RepositoriesSyncAll implementadas; RN-006, RN-007 | DA-019, RN-006, RN-007 |
+| 2026-03-19 | Seção "Recursos Operacionais do Assistente" adicionada: Datadog MCP e GitHub MCP registrados como recursos disponíveis; protocolo de registro de novos recursos definido | Lacuna de governança identificada |
+| 2026-03-19 | Memory Cache adicionado à stack; configuração ExternalApi reestruturada em HttpRequest/CircuitBreaker/EndpointCache | DA-018 |
 | 2026-03-19 | Restrição adicionada: models de Input e Output de Features devem residir exclusivamente em `<Feature>Models/`, não em Shared | DA-020 |
-| 2026-03-20 | Features RepositoriesGetAll e RepositoriesSyncAll removidas; Shared/ExternalApi/GitHub/ e Shared/Repositories/ removidos; DA-019 revogada; integração GitHub API removida da stack | Instrução do usuário |
-| 2026-03-20 | Integração GitHub API adicionada: Refit + Polly + DelegatingHandler para PAT; Shared/ExternalApi/GitHub/ criada; Feature GitHubRepoSearch implementada; RN-008 | DA-021, RN-008 |
 | 2026-03-21 | Infra/Logging/ documentada: DatadogHttpSink e DatadogLogEntry adicionados à tabela de componentes; lacuna de governança corrigida | Análise de causas-raiz |
-| 2026-03-21 | Integração PokéAPI adicionada: Refit + Polly; Shared/ExternalApi/Pokemon/ criada; Feature PokemonGet implementada; RN-009 | DA-023, RN-009 |
-| 2026-03-21 | Migração GitHub API → MCP: recurso operacional alterado de CLI (`gh` + `GH_TOKEN`) para MCP Server HTTP (`github/github-mcp-server` + `GH_CLAUDE_CODE_MCP`); usuário dedicado ClaudeCode-Bot | Instrução do usuário |
+| 2026-03-30 | Template sanitizado: referências a features e integrações específicas removidas; projeto renomeado para Starter.Template.AOT | Sanitização de template |

@@ -11,27 +11,27 @@ Este documento apresenta o `Program.cs` real deste repositório como exemplo com
 ```csharp
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using Albert.Playground.ECS.AOT.Api.Features.Command.UserLogin;
-using Albert.Playground.ECS.AOT.Api.Features.Query.GitHubRepoSearch;
-using Albert.Playground.ECS.AOT.Api.Features.Query.PokemonGet;
-using Albert.Playground.ECS.AOT.Api.Features.Query.WeatherConditionsGet;
-using Albert.Playground.ECS.AOT.Api.Infra.ExceptionHandling;
-using Albert.Playground.ECS.AOT.Api.Infra.Json;
-using Albert.Playground.ECS.AOT.Api.Infra.ModelBinding;
-using Albert.Playground.ECS.AOT.Api.Infra.ModelValidation;
-using Albert.Playground.ECS.AOT.Api.Infra.Middlewares;
+using Starter.Template.AOT.Api.Features.Command.UserLogin;
+using Starter.Template.AOT.Api.Features.Query.GitHubRepoSearch;
+using Starter.Template.AOT.Api.Features.Query.PokemonGet;
+using Starter.Template.AOT.Api.Features.Query.WeatherConditionsGet;
+using Starter.Template.AOT.Api.Infra.ExceptionHandling;
+using Starter.Template.AOT.Api.Infra.Json;
+using Starter.Template.AOT.Api.Infra.ModelBinding;
+using Starter.Template.AOT.Api.Infra.ModelValidation;
+using Starter.Template.AOT.Api.Infra.Middlewares;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using Albert.Playground.ECS.AOT.Api.Infra.HealthChecks;
-using Albert.Playground.ECS.AOT.Api.Infra.Security;
-using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.GitHub;
-using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.OpenMeteo;
-using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.Pokemon;
-using Albert.Playground.ECS.AOT.Api.Shared.ExternalApi.Pokemon.Models;
+using Starter.Template.AOT.Api.Infra.HealthChecks;
+using Starter.Template.AOT.Api.Infra.Security;
+using Starter.Template.AOT.Api.Shared.ExternalApi.GitHub;
+using Starter.Template.AOT.Api.Shared.ExternalApi.OpenMeteo;
+using Starter.Template.AOT.Api.Shared.ExternalApi.Pokemon;
+using Starter.Template.AOT.Api.Shared.ExternalApi.Pokemon.Models;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;
 using Refit;
-using Albert.Playground.ECS.AOT.Api.Infra.Logging;
+using Starter.Template.AOT.Api.Infra.Logging;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 
@@ -57,7 +57,7 @@ Log.Logger = new LoggerConfiguration()
 // LOG DE INÍCIO — primeiro log da aplicação
 // Segue o padrão [Program] (sem método, pois é top-level statements)
 // ─────────────────────────────────────────────────────────────────────
-Log.Information("[Program] Iniciar aplicação Albert.Playground.ECS.AOT.Api");
+Log.Information("[Program] Iniciar aplicação Starter.Template.AOT.Api");
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,7 +87,7 @@ builder.Host.UseSerilog((ctx, services, config) =>
 
         config.WriteTo.Sink(new DatadogHttpSink(
             apiKey: ddApiKey,
-            service: "albert-playground-ecs-aot-api",
+            service: "starter-template-aot-api",
             host: ddHost,
             env: ddEnv));
 
@@ -332,7 +332,7 @@ app.Run();
 Ao iniciar a aplicação, os logs produzidos pelo `Program.cs` são:
 
 ```
-[23/03/2026 14:00:00.0000000] [] [] [Program] Iniciar aplicação Albert.Playground.ECS.AOT.Api
+[23/03/2026 14:00:00.0000000] [] [] [Program] Iniciar aplicação Starter.Template.AOT.Api
 [23/03/2026 14:00:00.1000000] [] [] [Program] Configurar Serilog com console colorido e enrichment por request
 [23/03/2026 14:00:00.2000000] [] [] [Program] Registrar dependências de infraestrutura
 [23/03/2026 14:00:00.3000000] [] [] [Program] Registrar integrações com APIs externas
@@ -366,4 +366,4 @@ Note que:
 - [02-enriquecimento-de-contexto.md](02-enriquecimento-de-contexto.md) — CorrelationId e UserName
 - [06-prompt-implementacao-logs.md](06-prompt-implementacao-logs.md) — prompt genérico para implementar em outros projetos
 - `Instructions/snippets/canonical-snippets.md` — SNP-001
-- `src/Albert.Playground.ECS.AOT.Api/Program.cs` — arquivo-fonte real
+- `src/Starter.Template.AOT.Api/Program.cs` — arquivo-fonte real

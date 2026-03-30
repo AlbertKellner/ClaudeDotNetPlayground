@@ -250,5 +250,5 @@ public async Task OnActionExecutionAsync_TokenAusente_DeveRegistrarWarning()
 ## Referências
 
 - [01-padroes-de-logging.md](01-padroes-de-logging.md) — padrão SNP-001 que os testes validam
-- `src/Albert.Playground.ECS.AOT.UnitTest/TestHelpers/FakeLogger.cs` — implementação do FakeLogger
+- `src/Starter.Template.AOT.UnitTest/TestHelpers/FakeLogger.cs` — implementação do FakeLogger
 - `Instructions/snippets/canonical-snippets.md` — SNP-001, seção "Padrão de testes de log"

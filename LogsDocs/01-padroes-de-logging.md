@@ -433,16 +433,16 @@ O template de saída do console é normativo e usa tema ANSI colorido:
 ### Exemplo de Saída no Console
 
 ```
-[23/03/2026 14:32:01.1234567] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions
-[23/03/2026 14:32:01.1235000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [WeatherConditionsGetUseCase][ExecuteAsync] Executar caso de uso de condições climáticas de São Paulo
-[23/03/2026 14:32:01.1236000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [CachedOpenMeteoApiClient][GetForecastAsync] Verificar cache para condições climáticas
-[23/03/2026 14:32:01.1237000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [CachedOpenMeteoApiClient][GetForecastAsync] Cache miss. Consultar API externa. CacheKey=OpenMeteo:WeatherConditionsGet:123
-[23/03/2026 14:32:01.4500000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [OpenMeteoApiClient][GetForecastAsync] Executar requisição HTTP ao Open-Meteo. Latitude=-23.5475, Longitude=-46.6361
-[23/03/2026 14:32:01.8900000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [OpenMeteoApiClient][GetForecastAsync] Retornar resposta da API Open-Meteo. Timezone=America/Sao_Paulo
-[23/03/2026 14:32:01.8910000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [CachedOpenMeteoApiClient][GetForecastAsync] Armazenar resposta no cache. CacheKey=OpenMeteo:WeatherConditionsGet:123, DurationSeconds=10
-[23/03/2026 14:32:01.8920000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [WeatherConditionsGetUseCase][ExecuteAsync] Mapear resposta da Open-Meteo para model da Feature
-[23/03/2026 14:32:01.8930000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [WeatherConditionsGetUseCase][ExecuteAsync] Retornar condições climáticas obtidas da Open-Meteo. Timezone=America/Sao_Paulo
-[23/03/2026 14:32:01.8940000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [Albert] [WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas de São Paulo
+[23/03/2026 14:32:01.1234567] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [WeatherConditionsGetEndpoint][Get] Processar requisição GET /weather-conditions
+[23/03/2026 14:32:01.1235000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [WeatherConditionsGetUseCase][ExecuteAsync] Executar caso de uso de condições climáticas de São Paulo
+[23/03/2026 14:32:01.1236000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [CachedOpenMeteoApiClient][GetForecastAsync] Verificar cache para condições climáticas
+[23/03/2026 14:32:01.1237000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [CachedOpenMeteoApiClient][GetForecastAsync] Cache miss. Consultar API externa. CacheKey=OpenMeteo:WeatherConditionsGet:1
+[23/03/2026 14:32:01.4500000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [OpenMeteoApiClient][GetForecastAsync] Executar requisição HTTP ao Open-Meteo. Latitude=-23.5475, Longitude=-46.6361
+[23/03/2026 14:32:01.8900000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [OpenMeteoApiClient][GetForecastAsync] Retornar resposta da API Open-Meteo. Timezone=America/Sao_Paulo
+[23/03/2026 14:32:01.8910000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [CachedOpenMeteoApiClient][GetForecastAsync] Armazenar resposta no cache. CacheKey=OpenMeteo:WeatherConditionsGet:1, DurationSeconds=10
+[23/03/2026 14:32:01.8920000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [WeatherConditionsGetUseCase][ExecuteAsync] Mapear resposta da Open-Meteo para model da Feature
+[23/03/2026 14:32:01.8930000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [WeatherConditionsGetUseCase][ExecuteAsync] Retornar condições climáticas obtidas da Open-Meteo. Timezone=America/Sao_Paulo
+[23/03/2026 14:32:01.8940000] [019580a1-b2c3-7d4e-8f5a-6b7c8d9e0f12] [User1] [WeatherConditionsGetEndpoint][Get] Retornar resposta do endpoint com condições climáticas de São Paulo
 ```
 
 ---

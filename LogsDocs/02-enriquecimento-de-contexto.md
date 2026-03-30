@@ -254,7 +254,7 @@ private int GetAuthenticatedUserId()
 }
 ```
 
-A chave de cache resultante inclui o ID do usuário: `OpenMeteo:WeatherConditionsGet:123`, garantindo isolamento de cache entre usuários.
+A chave de cache resultante inclui o ID do usuário: `OpenMeteo:WeatherConditionsGet:1`, garantindo isolamento de cache entre usuários.
 
 ---
 
