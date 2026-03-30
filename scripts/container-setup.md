@@ -126,10 +126,10 @@ Após o checklist acima passar, execute esta sequência para confirmar que o amb
 
 ```bash
 # 1. Build — deve compilar sem erros
-dotnet build src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
+dotnet build src/Starter.Template.AOT.Api/Starter.Template.AOT.Api.csproj
 
 # 2. Execução debug — deve iniciar e responder
-dotnet run --project src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj &
+dotnet run --project src/Starter.Template.AOT.Api/Starter.Template.AOT.Api.csproj &
 sleep 5
 curl -sf http://localhost:5000/health && echo " → OK" || echo " → FALHOU"
 kill %1 2>/dev/null

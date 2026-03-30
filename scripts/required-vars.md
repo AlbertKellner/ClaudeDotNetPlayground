@@ -13,7 +13,6 @@ O script `scripts/setup-env.sh` assume que essas entradas já existem no ambient
 | `DD_API_KEY` | **Sim** | Datadog → Organization Settings → API Keys | Datadog Agent não autentica. `/health` retorna `Unhealthy`. Build e run da aplicação funcionam, mas sem observabilidade. |
 | `DD_APP_KEY` | **Sim** | Datadog → Organization Settings → Application Keys | Conexão MCP do Datadog não autentica. O servidor MCP fica inacessível para o Claude Code. |
 | `GH_CLAUDE_CODE_MCP` | **Sim** | Gerado na conta GitHub do usuário ClaudeCode-Bot → Settings → Developer Settings → Personal Access Tokens (Fine-grained) | Servidor MCP do GitHub fica inacessível. Assistente não consegue criar, atualizar ou consultar Pull Requests via MCP. Pipeline pré-commit (passo 10) falha. |
-| `GITHUB_PAT` | Condicional² | GitHub → Settings → Developer Settings → Personal Access Tokens | Feature `/github-repo-search` retorna HTTP 500 ao consultar API do GitHub. Mapeada no `docker-compose.yml` para `ExternalApi__GitHub__HttpRequest__PersonalAccessToken`. |
 
 ---
 
@@ -27,7 +26,6 @@ O script `scripts/setup-env.sh` assume que essas entradas já existem no ambient
 | `NO_PROXY` | Condicional¹ | `localhost,127.0.0.1` | Conexões locais podem ser roteadas incorretamente pelo proxy. |
 
 > ¹ **Condicional**: obrigatório em ambientes com proxy de inspeção TLS (como este sandbox Claude Code). Em ambientes sem proxy intermediário, essas variáveis não são necessárias.
-> ² **Condicional**: obrigatório quando a feature `/github-repo-search` será usada. `GH_CLAUDE_CODE_MCP` é para o servidor MCP do GitHub (criar/atualizar PRs, monitorar Actions), `GITHUB_PAT` é para a aplicação .NET consultar a API GitHub via Refit. São tokens de usuários diferentes: `GH_CLAUDE_CODE_MCP` pertence ao usuário ClaudeCode-Bot; `GITHUB_PAT` pertence ao desenvolvedor.
 
 ---
 
@@ -75,7 +73,7 @@ Ou execute `scripts/setup-env.sh` — ele valida todas as entradas e emite erros
 |---|---|
 | **Usuário GitHub** | `ClaudeCode-Bot` — conta dedicada de serviço para operações automatizadas do assistente |
 | **Validade** | Fine-grained: validade configurável (30, 60, 90 dias ou customizada). Recomendado: 90 dias com renovação periódica. |
-| **Como obter** | Fazer login na conta GitHub `ClaudeCode-Bot` → Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens → Generate new token. Repository access: Only select repositories → `AlbertKellner/ClaudeDotNetPlayground`. Permissões: `Contents` (Read and write), `Pull requests` (Read and write), `Actions` (Read-only), `Metadata` (Read-only). |
+| **Como obter** | Fazer login na conta GitHub `ClaudeCode-Bot` → Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens → Generate new token. Repository access: Only select repositories → selecionar o repositório do projeto. Permissões: `Contents` (Read and write), `Pull requests` (Read and write), `Actions` (Read-only), `Metadata` (Read-only). |
 | **Sintoma quando ausente** | Servidor MCP do GitHub fica inacessível. Ferramentas MCP de GitHub não respondem. Pipeline pré-commit (passo 10) falha. |
 | **Sintoma quando inválido/expirado** | MCP retorna HTTP 401 do GitHub. Ferramentas de PR e Actions não funcionam. |
 | **Como renovar** | Login na conta `ClaudeCode-Bot` → Settings → Developer Settings → Personal Access Tokens → criar novo token com as mesmas permissões. Atualizar `GH_CLAUDE_CODE_MCP` nos secrets do Claude Code. |

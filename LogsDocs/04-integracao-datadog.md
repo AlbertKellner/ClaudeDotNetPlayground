@@ -30,7 +30,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - ExternalApi__GitHub__HttpRequest__PersonalAccessToken=${GITHUB_PAT:-}
+      - ExternalApi__ExternalProvider__HttpRequest__PersonalAccessToken=${EXTERNAL_API_TOKEN:-}
     depends_on:
       - datadog-agent
     labels:
@@ -282,7 +282,7 @@ Cada batch gera um POST para `https://http-intake.logs.datadoghq.com/api/v2/logs
 ```json
 [
   {
-    "message": "[PokemonGetEndpoint][Get] Processar requisicao GET /pokemon/25",
+    "message": "[ItemGetByIdEndpoint][Get] Processar requisicao GET /items/25",
     "timestamp": 1711198321123,
     "level": "information",
     "service": "starter-template-aot-api",
@@ -290,7 +290,7 @@ Cada batch gera um POST para `https://http-intake.logs.datadoghq.com/api/v2/logs
     "ddtags": "env:local"
   },
   {
-    "message": "[PokemonGetUseCase][ExecuteAsync] Executar caso de uso de consulta de Pokemon. PokemonId=25",
+    "message": "[ItemGetByIdUseCase][ExecuteAsync] Executar caso de uso de consulta de Item. ItemId=25",
     "timestamp": 1711198321124,
     "level": "information",
     "service": "starter-template-aot-api",
@@ -389,7 +389,7 @@ A implementação está em `Infra/HealthChecks/DatadogAgentHealthCheck.cs`.
 
 | Variável | Onde Definir | Obrigatória | Propósito |
 |----------|-------------|-------------|-----------|
-| `DD_API_KEY` | `.env` / GitHub Secrets | Sim (para Datadog) | Autenticação com Datadog |
+| `DD_API_KEY` | `.env` / ExternalProvider Secrets | Sim (para Datadog) | Autenticação com Datadog |
 | `DD_ENV` | `.env` / CI | Não (default: `local`) | Tag de ambiente |
 | `DD_HOSTNAME` | `docker-compose.yml` | Sim (em sandbox) | Hostname fixo |
 | `DD_APP_KEY` | Variável de ambiente | Para MCP apenas | Acesso ao Datadog MCP |
@@ -408,7 +408,7 @@ service:starter-template-aot-api
 service:starter-template-aot-api env:ci
 
 # Filtrar por classe específica
-service:starter-template-aot-api *PokemonGetEndpoint*
+service:starter-template-aot-api *ItemGetByIdEndpoint*
 
 # Filtrar por método específico
 service:starter-template-aot-api *ExecuteAsync*
@@ -417,7 +417,7 @@ service:starter-template-aot-api *ExecuteAsync*
 service:starter-template-aot-api status:warn
 
 # Combinação: erros em produção de um endpoint
-service:starter-template-aot-api env:local status:error *WeatherConditions*
+service:starter-template-aot-api env:local status:error *SampleQuery*
 ```
 
 ---

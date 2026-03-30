@@ -101,9 +101,9 @@ REQUIRED_VARS="$REPO_ROOT/scripts/required-vars.md"
 SETTINGS="$REPO_ROOT/.claude/settings.json"
 WIKI_DIR="$REPO_ROOT/wiki"
 WIKI_ARCH="$REPO_ROOT/wiki/Governance-Architecture.md"
-FEATURES_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Features"
-INFRA_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Infra"
-EXTERNAL_API_DIR="$REPO_ROOT/src/Albert.Playground.ECS.AOT.Api/Shared/ExternalApi"
+FEATURES_DIR="$REPO_ROOT/src/Starter.Template.AOT.Api/Features"
+INFRA_DIR="$REPO_ROOT/src/Starter.Template.AOT.Api/Infra"
+EXTERNAL_API_DIR="$REPO_ROOT/src/Starter.Template.AOT.Api/Shared/ExternalApi"
 RUNBOOK="$REPO_ROOT/scripts/operational-runbook.md"
 
 # ---------------------------------------------------------------------------
