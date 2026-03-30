@@ -24,7 +24,7 @@ Esta skill é ativada pelo passo 6 do pipeline de validação pré-commit (CLAUD
 ### Passo 1: Identificar endpoints afetados
 
 Listar todos os endpoints criados ou alterados na tarefa atual:
-- Rota (ex: `GET /weather-conditions`)
+- Rota (ex: `GET /items`)
 - Método HTTP
 - Se requer autenticação (verificar `[Authenticate]` no Controller ou equivalente)
 - Payload esperado (se POST/PUT/PATCH)
@@ -95,11 +95,11 @@ Os logs capturados devem ser filtrados para incluir apenas as linhas corresponde
 
 ### Passo 3.2: Validar cache via segunda requisição consecutiva (quando aplicável)
 
-**Quando se aplica**: sempre que o endpoint validado utilizar cache de requisição (Memory Cache). Endpoints com cache são identificados pela presença de um decorator `Cached*Client` na cadeia de dependências da Feature (ex: `CachedOpenMeteoApiClient`, `CachedGitHubApiClient`).
+**Quando se aplica**: sempre que o endpoint validado utilizar cache de requisição (Memory Cache). Endpoints com cache são identificados pela presença de um decorator `Cached*Client` na cadeia de dependências da Feature (ex: `Cached<Servico>ApiClient`, `Cached<Servico>ApiClient`).
 
 **Endpoints com cache conhecidos**:
-- `GET /weather-conditions` — cache via `CachedOpenMeteoApiClient`
-- `GET /github-repo-search` — cache via `CachedGitHubApiClient`
+- `GET /items` — cache via `Cached<Servico>ApiClient`
+- `GET /items/{id}` — cache via `Cached<Servico>ApiClient`
 
 **Workflow**:
 

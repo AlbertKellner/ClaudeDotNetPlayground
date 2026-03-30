@@ -89,7 +89,7 @@ public class ExemploEndpoint(...) : ControllerBase
 2. Incluir o token no header `Authorization` das requisições:
 
 ```http
-GET /weather-conditions
+GET /exemplo
 Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 ```
 
@@ -145,6 +145,5 @@ Todos os componentes residem em `Infra/Security/`:
 
 ## Referências
 
-- [Feature UserLogin](Feature-UserLogin) — endpoint que gera o token
 - [Arquitetura](Governance-Architecture) — fluxo de requisição com AuthenticateFilter
 - [Testes](Governance-Testing) — testes de segurança e validação de token

@@ -31,6 +31,15 @@ O projeto acumula decisões arquiteturais registradas como ADRs (Architecture De
 
 ---
 
+## Decisões Revogadas
+
+| ID | Título | Data | Motivo |
+|---|---|---|---|
+| DA-019 | Integração GitHub API com persistência em arquivo JSON | 2026-03-19 | Revogada — funcionalidades de busca e sincronização removidas do sistema |
+| DA-023 | Integração PokéAPI | 2026-03-21 | Revogada — integração removida durante sanitização do template |
+
+---
+
 ## Restrições Técnicas
 
 As seguintes restrições são obrigatórias e aplicam-se a todo código novo ou alterado:
@@ -83,14 +92,6 @@ O projeto é configurado para publicação com Native AOT, o que impõe restriç
 | `FallbackSimpleTypeModelBinderProvider` | `Infra/ModelBinding/` | Substitui `SimpleTypeModelBinderProvider` para compatibilidade AOT |
 | `EnhancedModelMetadataActivator` | `Infra/ModelBinding/` | Workaround AOT: ativa `IsEnhancedModelMetadataSupported` antes do primeiro request |
 | `NoOpObjectModelValidator` | `Infra/ModelValidation/` | Substitui `IObjectModelValidator` padrão (reflection-based) por implementação vazia |
-
----
-
-## Decisões Revogadas
-
-| ID | Título | Data | Motivo |
-|---|---|---|---|
-| DA-019 | Integração GitHub API com persistência em arquivo JSON | 2026-03-19 | Revogada — funcionalidades de busca e sincronização removidas do sistema |
 
 ---
 

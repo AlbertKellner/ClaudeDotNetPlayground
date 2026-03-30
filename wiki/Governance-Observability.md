@@ -60,7 +60,7 @@ O `CorrelationIdMiddleware` é registrado **antes** de `UseExceptionHandler()` n
 
 Exemplo de saída:
 ```
-[22/03/2026 14:30:45.1234567] [01960a1b-...] [Albert] [WeatherConditionsGetEndpoint][GetWeatherConditions] Processar requisição de condições climáticas
+[22/03/2026 14:30:45.1234567] [01960a1b-...] [User] [ExemploEndpoint][Get] Processar requisição
 ```
 
 ### Padrão SNP-001 — Storytelling por Classe e Método
@@ -111,7 +111,7 @@ O Datadog Agent é executado como container adjacente via `docker-compose`, cole
 | `DD_API_KEY` | Secret do ambiente | Autenticação com Datadog |
 | `DD_SITE` | `datadoghq.com` | Região do Datadog |
 | `DD_ENV` | `${DD_ENV:-local}` | Ambiente para filtragem nos dashboards |
-| `DD_HOSTNAME` | `albert-playground-ecs-aot-local` | Hostname fixo para evitar erro de detecção automática |
+| `DD_HOSTNAME` | Configurável por projeto | Hostname fixo para evitar erro de detecção automática |
 | `DD_LOGS_ENABLED` | `true` | Coleta de logs ativa |
 | `DD_LOGS_CONFIG_CONTAINER_COLLECT_ALL` | `true` | Coleta de logs de todos os containers |
 | `DD_CONVERT_DD_SITE_FQDN_ENABLED` | `false` | Desabilita FQDN com trailing dot (incompatível com proxy) |

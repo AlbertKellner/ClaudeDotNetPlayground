@@ -48,19 +48,7 @@ A aplicação pode ser executada de duas formas: em modo debug via `dotnet run` 
 
 ### Configurações de APIs externas
 
-| Chave | Descrição | Valor padrão |
-|---|---|---|
-| `ExternalApi:OpenMeteo:HttpRequest:BaseUrl` | URL base da API Open-Meteo | `https://api.open-meteo.com` |
-| `ExternalApi:OpenMeteo:CircuitBreaker:MaxRetryAttempts` | Tentativas de retry | `3` |
-| `ExternalApi:OpenMeteo:CircuitBreaker:DelaySeconds` | Delay base do retry exponencial | `3` |
-| `ExternalApi:OpenMeteo:EndpointCache:WeatherConditionsGet:DurationSeconds` | Duração do cache (segundos) | `10` |
-| `ExternalApi:GitHub:HttpRequest:BaseUrl` | URL base da API GitHub | `https://api.github.com` |
-| `ExternalApi:GitHub:HttpRequest:PersonalAccessToken` | PAT do GitHub (opcional) | vazio |
-| `ExternalApi:GitHub:CircuitBreaker:DelaySeconds` | Delay base do retry exponencial | `5` |
-| `ExternalApi:GitHub:EndpointCache:GitHubRepoSearch:DurationSeconds` | Duração do cache (segundos) | `60` |
-| `ExternalApi:Pokemon:HttpRequest:BaseUrl` | URL base da PokéAPI | `https://pokeapi.co` |
-| `ExternalApi:Pokemon:CircuitBreaker:DelaySeconds` | Delay base do retry exponencial | `3` |
-| `ExternalApi:Pokemon:EndpointCache:PokemonGet:DurationSeconds` | Duração do cache (segundos) | `60` |
+> **Estado atual**: nenhuma integração com API externa configurada. Configurações serão adicionadas aqui conforme integrações forem implementadas, seguindo o padrão `ExternalApi:<Servico>:HttpRequest/CircuitBreaker/EndpointCache`.
 
 ---
 
@@ -68,12 +56,12 @@ A aplicação pode ser executada de duas formas: em modo debug via `dotnet run` 
 
 ### Modo Debug
 ```bash
-dotnet build src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
+dotnet build src/Starter.Template.AOT.Api/Starter.Template.AOT.Api.csproj
 ```
 
 ### Publicação Native AOT
 ```bash
-dotnet publish src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj -c Release -r linux-x64
+dotnet publish src/Starter.Template.AOT.Api/Starter.Template.AOT.Api.csproj -c Release -r linux-x64
 ```
 
 ---
@@ -82,7 +70,7 @@ dotnet publish src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.c
 
 ### Modo Debug (porta 5000)
 ```bash
-dotnet run --project src/Albert.Playground.ECS.AOT.Api/Albert.Playground.ECS.AOT.Api.csproj
+dotnet run --project src/Starter.Template.AOT.Api/Starter.Template.AOT.Api.csproj
 ```
 
 Verificação:
@@ -92,7 +80,7 @@ curl http://localhost:5000/health
 
 ### Modo AOT (binário publicado)
 ```bash
-./src/Albert.Playground.ECS.AOT.Api/bin/Release/net10.0/linux-x64/publish/Albert.Playground.ECS.AOT.Api
+./src/Starter.Template.AOT.Api/bin/Release/net10.0/linux-x64/publish/Starter.Template.AOT.Api
 ```
 
 ---
@@ -143,9 +131,6 @@ docker compose down
 | `GET` | `/health` | Não | Verificação de disponibilidade (app + Datadog Agent) |
 | `POST` | `/login` | Não | Login com credenciais; retorna JWT Bearer Token |
 | `GET` | `/test` | Sim | Endpoint de teste; retorna `"funcionando"` |
-| `GET` | `/weather-conditions` | Sim | Condições climáticas atuais de São Paulo |
-| `GET` | `/github-repo-search` | Sim | Pesquisa de repositórios GitHub da conta AlbertKellner |
-| `GET` | `/pokemon/{id}` | Sim | Consulta de Pokémon por ID via PokéAPI |
 
 ---
 
@@ -153,9 +138,9 @@ docker compose down
 
 | Item | Valor |
 |---|---|
-| Usuário | `Albert` |
-| Senha | `albert123` |
-| ID do usuário | `123` |
+| Usuário | Definido no UseCase de login |
+| Senha | Definida no UseCase de login |
+| ID do usuário | Definido no UseCase de login |
 
 > **Aviso**: Estas credenciais são hardcoded no código para fins de desenvolvimento. Em produção, devem ser substituídas por mecanismo seguro de autenticação.
 
@@ -164,14 +149,14 @@ docker compose down
 ```bash
 TOKEN=$(curl -s -X POST http://localhost:8080/login \
   -H "Content-Type: application/json" \
-  -d '{"userName":"Albert","password":"albert123"}' \
+  -d '{"userName":"<usuario>","password":"<senha>"}' \
   | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
 ```
 
 ### Exemplo de Chamada Autenticada
 
 ```bash
-curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/weather-conditions
+curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/test
 ```
 
 ---
@@ -179,6 +164,5 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/weather-conditions
 ## Referências
 
 - [Health Check](Feature-Health) — detalhes do endpoint de verificação de disponibilidade
-- [Login](Feature-UserLogin) — detalhes do endpoint de autenticação
 - [CI/CD e Deploy](Governance-CI-CD) — pipelines de integração contínua
 - [Observabilidade](Governance-Observability) — Datadog Agent e configuração de métricas

@@ -53,12 +53,11 @@ Os dois últimos jobs são executados em paralelo após a aprovação no gate de
 
 - Executa a aplicação em modo debug via `dotnet run`
 - Valida o endpoint `/health`
-- Valida o endpoint `/weather-conditions` com autenticação (obtém token via `POST /login`)
 
 ### Job 5 — Validar Health Check Publish (`healthcheck-publish`)
 
 - Executa o binário AOT publicado
-- Valida os mesmos endpoints do job de debug (`/health` e `/weather-conditions` com autenticação)
+- Valida o endpoint `/health`
 - Confirma que a aplicação funciona corretamente em modo Native AOT
 
 ---
