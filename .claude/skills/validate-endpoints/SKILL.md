@@ -95,11 +95,9 @@ Os logs capturados devem ser filtrados para incluir apenas as linhas corresponde
 
 ### Passo 3.2: Validar cache via segunda requisição consecutiva (quando aplicável)
 
-**Quando se aplica**: sempre que o endpoint validado utilizar cache de requisição (Memory Cache). Endpoints com cache são identificados pela presença de um decorator `Cached*Client` na cadeia de dependências da Feature (ex: `Cached<Servico>ApiClient`, `Cached<Servico>ApiClient`).
+**Quando se aplica**: sempre que o endpoint validado utilizar cache de requisição (Memory Cache). Endpoints com cache são identificados pela presença de um decorator `Cached*Client` na cadeia de dependências da Feature (ex: `Cached<Servico>ApiClient`).
 
-**Endpoints com cache conhecidos**:
-- `GET /items` — cache via `Cached<Servico>ApiClient`
-- `GET /items/{id}` — cache via `Cached<Servico>ApiClient`
+**Como identificar**: verificar no código se a Feature utiliza um decorator `Cached*ApiClient` na cadeia de dependências. Se sim, o cache deve ser validado.
 
 **Workflow**:
 
@@ -166,3 +164,4 @@ No relatório final da tarefa, incluir obrigatoriamente:
 |---|---|---|
 | 2026-03-21 | Criado: workflow extraído de endpoint-validation.md (separação rules/skills) | Auditoria de governança |
 | 2026-03-21 | Passo 5 reforçado: exibição de logs na íntegra obrigatória; proibição de resumir; bloco independente por requisição; itens 5-6 para cache miss/hit | Instrução do usuário |
+| 2026-03-30 | Template sanitizado: referências a features e integrações específicas removidas; exemplos genericizados | Sanitização de template |

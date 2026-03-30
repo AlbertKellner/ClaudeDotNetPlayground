@@ -119,7 +119,7 @@ O Datadog Agent é executado como container adjacente via `docker-compose`, cole
 
 ### Health Check com Datadog Agent
 
-O endpoint `GET /health` verifica a disponibilidade do Datadog Agent além da própria aplicação (RN-005):
+O endpoint `GET /health` verifica a disponibilidade do Datadog Agent além da própria aplicação:
 
 | Estado do Datadog Agent | Resposta do Health Check |
 |---|---|
